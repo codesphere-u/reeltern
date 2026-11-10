@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.egg-info/
+renders/
+*.mp4
+*.wav
+.DS_Store

@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "input": "footage.mp4",
+  "steps": [{"op": "export"}]
+}
