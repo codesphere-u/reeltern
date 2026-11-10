@@ -27,7 +27,16 @@ COMMANDS = {"trim": "auto-editor", "stems": "demucs", "upscale": "realesrgan-ncn
 
 
 def binary(name):
-    return os.environ.get("REELTERN_" + name.upper().replace("-", "_")) or shutil.which(name)
+    value = os.environ.get("REELTERN_" + name.upper().replace("-", "_")) or shutil.which(name)
+    if value:
+        return value
+    if name == "ffmpeg":
+        try:
+            import imageio_ffmpeg
+            return imageio_ffmpeg.get_ffmpeg_exe()
+        except ImportError:
+            pass
+    return None
 
 
 def doctor():

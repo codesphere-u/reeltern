@@ -5,3 +5,7 @@ renders/
 *.mp4
 *.wav
 .DS_Store
+reeltern-workspace/
+build/
+dist/
+*.whl

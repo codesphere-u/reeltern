@@ -1,13 +1,20 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "reeltern"
-version = "0.1.0"
-description = "Local video workflow orchestrator for eleven open-source tools"
+version = "0.2.0"
+description = "Local video editing with reversible cut plans, verified renders and MCP"
+dependencies = ["av>=14,<17", "imageio-ffmpeg>=0.6,<0.9"]
+readme = "README.md"
 requires-python = ">=3.10"
 license = "GPL-3.0-or-later"
+[project.urls]
+Repository = "https://github.com/codesphere-u/reeltern"
+Issues = "https://github.com/codesphere-u/reeltern/issues"
+
 [project.optional-dependencies]
+mcp = ["mcp>=1.28,<2"]
 analysis = ["scenedetect>=0.6.4,<0.8", "librosa>=0.10,<0.12", "soundfile>=0.12"]
 frames = ["color-matcher>=0.5,<0.6", "Pillow>=10", "rembg[cpu]>=2,<3"]
 [project.scripts]
