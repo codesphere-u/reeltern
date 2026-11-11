@@ -10,3 +10,11 @@ build/
 dist/
 *.whl
 reeltern-demo/
+demo-project/
+diagnostic-demo/
+editing-project/
+example-project/
+my-project/
+.mcp.json
+.cursor/mcp.json
+.vscode/mcp.json

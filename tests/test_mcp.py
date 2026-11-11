@@ -16,12 +16,16 @@ class MCPIntegration(unittest.IsolatedAsyncioTestCase):
             media = root / 'media'
             media.mkdir()
             fixture(media)
-            params = StdioServerParameters(command=sys.executable, args=['-m', 'reeltern.cli', 'mcp', '--workspace', str(root / 'workspace'), '--media-root', str(media)])
+            from reeltern.client_config import configuration
+            config = json.loads(configuration('generic', root / 'workspace', media))['mcpServers']['reeltern']
+            params = StdioServerParameters(**config)
             async with stdio_client(params) as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     listing = await session.list_tools()
-                    self.assertEqual(len(listing.tools), 20)
+                    self.assertEqual(len(listing.tools), 21)
+                    reference = json.loads((Path(__file__).resolve().parents[1] / 'docs' / 'mcp-tools.json').read_text(encoding='utf-8'))
+                    self.assertEqual({t.name: t.inputSchema for t in listing.tools}, {t['name']: t['inputSchema'] for t in reference['tools']}, 'Regenerate the documented MCP schemas')
                     async def call(name, args):
                         result = await session.call_tool(name, args)
                         self.assertFalse(result.isError, result)
@@ -45,6 +49,12 @@ class MCPIntegration(unittest.IsolatedAsyncioTestCase):
                     invalid = await session.call_tool('create_plan', {'clips': [{'asset_id': asset['id'], 'shell': 'not allowed'}]})
                     self.assertTrue(invalid.isError)
                     registered = await call('register_transcript', {'asset_id': asset['id'], 'cues': [{'start': 0, 'end': 1, 'text': 'Introduction'}, {'start': 3, 'end': 4, 'text': 'Conclusion'}]})
+                    discovered = await call('list_transcripts', {'asset_id': asset['id'], 'limit': 1})
+                    self.assertEqual(discovered['transcripts'][0]['id'], registered['id'])
+                    self.assertNotIn('cues', discovered['transcripts'][0])
+                    self.assertEqual((await call('list_transcripts', {'offset': 1}))['transcripts'], [])
+                    bad_page = await session.call_tool('list_transcripts', {'limit': 0})
+                    self.assertTrue(bad_page.isError)
                     cues = await call('get_transcript', {'transcript_id': registered['id']})
                     self.assertEqual(cues['total'], 2)
                     selected = await call('plan_from_transcript', {'transcript_id': registered['id'], 'cue_ids': ['c00002', 'c00001']})
@@ -55,3 +65,7 @@ class MCPIntegration(unittest.IsolatedAsyncioTestCase):
                     self.assertIn('source snapshot hashes', receipt['verified'])
                     resources = await session.list_resources()
                     self.assertIn('reeltern://guide', [str(r.uri) for r in resources.resources])
+                    prompts = await session.list_prompts()
+                    self.assertEqual({p.name for p in prompts.prompts}, {'first_pass', 'editorial_draft'})
+                    prompt = await session.get_prompt('editorial_draft', {'transcript_id': registered['id'], 'brief': 'Keep the conclusion'})
+                    self.assertIn(registered['id'], prompt.messages[0].content.text)

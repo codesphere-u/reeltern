@@ -5,11 +5,11 @@
 [![Tests](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml/badge.svg)](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml)
 [![License: GPL v3 or later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
 
-[Quick start](#get-started) · [Editorial agent](docs/editorial-agent.md) · [MCP reference](docs/mcp.md) · [Validation](VALIDATION.md)
+[Quick start](#get-started) · [Connect your AI](docs/clients.md) · [Docs](docs/README.md) · [Implementation](docs/implementation.md) · [Roadmap](docs/roadmap.md)
 
 A local video editor for people and AI assistants. Turn footage into an inspectable cut plan, revise it without losing the original, preview the result, and export a verified video.
 
-**Version 0.3 · early preview.** Transcript-first editing, a bounded local editorial agent, and reversible video workflows. The core is tested on synthetic media; the local agent has also been exercised with an installed Ollama model. The eleven optional upstream adapters remain experimental. This is not a full multitrack editor or a finished consumer product.
+**Version 0.3.1 · early preview.** Transcript-first editing, a bounded local editorial agent, and reversible video workflows. The core is tested on synthetic media; the local agent has also been exercised with an installed Ollama model. The eleven optional upstream adapters remain experimental. This is not a full multitrack editor or a finished consumer product.
 
 ## Why this exists
 
@@ -25,7 +25,7 @@ An automated edit should be something you can examine and change. Reeltern keeps
 - **Three output shapes:** landscape, portrait and square. Preserve the image with padding or choose center cropping explicitly.
 - **Verified rendering:** completed exports pass dimension/duration checks, full video/audio decoding and source-integrity checks. Each has an edit plan and verification receipt.
 - **Faster revisions and recovery:** unchanged encoded segments are reused after a checksum check. Interrupted jobs can be explicitly retried; a workspace lock prevents competing renderers.
-- **MCP access:** twenty typed tools expose this same workflow to an MCP-compatible assistant. No arbitrary shell tool or network server is exposed.
+- **MCP access:** twenty-one typed tools expose this same workflow to an MCP-compatible assistant. No arbitrary shell tool or network server is exposed.
 
 ## Get started
 
@@ -89,6 +89,15 @@ reeltern edit footage.mp4 --workspace my-project --render
 The CLI prints the saved plan and job outcome. Quietness is a signal, not a judgment about what matters: review the plan before relying on it for a final edit.
 
 ## Connect an AI assistant
+
+**Claude Code, Codex, Cursor and VS Code:** follow the [client setup guide](docs/clients.md). Generate configuration using your installed Python environment:
+
+```sh
+python -m reeltern.cli mcp-config claude-code --workspace editing-project --media-root demo-project/demo-input
+```
+
+Replace `claude-code` with `codex`, `cursor`, `vscode` or `generic`. This prints settings without changing your client. The media folder must exist. Use [the agent workflow](docs/agent-workflow.md) for source-grounded editing, caption-preserving revisions and verified results. Your existing assistant can select cues without Ollama.
+
 
 Install the MCP extra above. Configure your MCP client with the full path to the environment's Python executable:
 

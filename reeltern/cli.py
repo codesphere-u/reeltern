@@ -15,6 +15,12 @@ def main():
     mcp.add_argument("--media-root", required=True)
     mcp.add_argument("--agent-model", help="Opt in to an installed local Ollama model")
     mcp.add_argument("--ollama-url", default="http://127.0.0.1:11434")
+    from .client_config import CLIENTS
+    config = sub.add_parser("mcp-config", help="Print client setup with absolute paths; does not modify settings")
+    config.add_argument("client", choices=CLIENTS)
+    config.add_argument("--workspace", required=True)
+    config.add_argument("--media-root", required=True)
+    config.add_argument("--agent-model")
     transcript = sub.add_parser("transcript", help="Import an SRT transcript for a video")
     transcript.add_argument("input", type=Path)
     transcript.add_argument("srt", type=Path)
@@ -48,6 +54,9 @@ def main():
         elif args.command == "toolkit":
             from .gui import launch
             launch()
+        elif args.command == "mcp-config":
+            from .client_config import configuration
+            print(configuration(args.client, args.workspace, args.media_root, args.agent_model), end='')
         elif args.command == "mcp":
             from .mcp_server import serve
             serve(args.workspace, args.media_root, args.agent_model, args.ollama_url)

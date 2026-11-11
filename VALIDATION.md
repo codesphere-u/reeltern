@@ -1,5 +1,13 @@
 # Validation — 11 November 2026
 
+## Version 0.3.1
+
+**38 automated tests passed locally** on macOS / Python 3.12 in approximately eight seconds. The new checks cover JSON/TOML configuration parsing, paths containing spaces, preservation of the environment's Python executable, invalid setup inputs, transcript metadata discovery/pagination, and an executable documented MCP client that renders selected cues and reads a verification receipt. The integration test launches the server using generated configuration; it also compares published input schemas with discovered tools and checks prompt discovery.
+
+Documentation checks validate 73 relative links, five client configuration templates, and the 21-tool reference. These checks run in CI as well. Setup formats were checked against official vendor documentation and the installed Codex/Claude Code CLI help. The installed Codex CLI also accepted generated settings through a read-only configuration override; no user settings were changed. This does not certify a full interactive session in every vendor client or every client release. Machine-specific configurations are generated for the user to merge; the generator does not change client settings.
+
+The previous 0.3 release passed the full 34-test suite on GitHub Actions for Linux, macOS and Windows. Consult Actions for the current commit's remote results. The previous core/media limitations below still apply.
+
 ## Version 0.3
 
 **34 automated tests passed locally** on macOS / Python 3.12, using PyAV 16.1.0, imageio-ffmpeg 0.8.1 and official MCP SDK 1.30.0. The final suite completed in approximately 6.1 seconds on this machine. This is a small synthetic-fixture test suite, not a production performance benchmark.

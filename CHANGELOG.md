@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1 — 11 November 2026
+
+- Added configuration generation for Claude Code, Codex, Cursor, VS Code and generic MCP clients without changing user settings.
+- Added paged transcript discovery for reconnected assistants; now 21 MCP tools.
+- Added an executable MCP editing example and generated machine-readable tool schemas.
+- Added client setup, agent workflows, troubleshooting, implementation contracts and a prioritized roadmap.
+- Added shared contributor instructions for coding assistants and a compact documentation index.
+
 ## 0.3.0 — 11 November 2026
 
 - Added SRT/timecoded transcript import, cue search and text-based cut plans.

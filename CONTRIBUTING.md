@@ -6,6 +6,8 @@ Install `.[mcp]` in a virtual environment and run `python -m unittest discover -
 
 A change should preserve original files, create reviewable decisions, validate inputs, expose errors and include a meaningful real-media test when it changes rendering. Keep MCP stdout clean. Document audio/timing/color behavior and whether a feature is tested, optional or experimental. Never include private footage, credentials, local workspaces or model weights in a pull request.
 
+Read the [implementation guide](docs/implementation.md) for the code map and extension contracts, [AGENTS.md](AGENTS.md) for coding-assistant guidance, and the [roadmap](docs/roadmap.md) for detailed acceptance criteria.
+
 Priority contributions:
 
 1. Tests with variable frame rates, rotated phone clips, offset audio and longer recordings.

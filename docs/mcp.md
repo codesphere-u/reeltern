@@ -1,5 +1,7 @@
 # MCP tools
 
+[Client setup](clients.md) · [Agent workflow](agent-workflow.md) · [Generated schemas](mcp-tools.json) · [Implementation](implementation.md)
+
 Reeltern uses the official Python MCP SDK's supported 1.x line (`mcp>=1.28,<2`), tested with 1.30.0. This explicit upper bound avoids implicitly migrating to the SDK's newer major API. The server uses stdio; stdout is reserved for protocol messages. SDK diagnostics go to stderr.
 
 | Tool | Purpose |
@@ -17,6 +19,7 @@ Reeltern uses the official Python MCP SDK's supported 1.x line (`mcp>=1.28,<2`),
 | `job_status` | Check progress, result paths or failure |
 | `cancel_job` | Request cancellation of a job owned by the current server |
 | `register_transcript` | Save supplied timecoded cues for an asset |
+| `list_transcripts` | Discover paged transcript metadata, optionally filtered by asset |
 | `get_transcript` | Read a bounded page of cue IDs and text |
 | `search_transcript` | Find source cues by words |
 | `plan_from_transcript` | Build a captioned plan from selected cue IDs |

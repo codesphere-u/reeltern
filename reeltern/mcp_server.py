@@ -35,14 +35,14 @@ def create_server(workspace, media_root, agent_model=None, ollama_url="http://12
         async with expensive:
             return await asyncio.to_thread(function, *args)
     renderer = Renderer(ws)
-    server = FastMCP('Reeltern', instructions='Local video editing with inspectable, immutable plans. Import only user-selected footage. Inspect proposed cuts with get_plan and compare_plans; quiet audio does not imply unwanted content. Preview before a final render when useful. Render returns a job ID; poll job_status. Do not claim completion until status is complete. Original files and earlier plans are preserved.')
+    server = FastMCP('Reeltern', instructions='Local video editing with inspectable, immutable plans. Start with capabilities and reeltern://guide. Recover IDs with list_assets, list_transcripts, list_plans and list_jobs. Import only user-selected footage. With a supplied transcript, read actual cues and use plan_from_transcript; your assistant can select cues without an Ollama model. Without a transcript, quiet audio does not identify unwanted words or meaning. Inspect proposed cuts with get_plan and compare_plans. Preserve transcript_ids when revising captioned plans. Render returns a job ID; poll job_status and read get_render_receipt on complete. Report failures honestly. Original files and earlier plans are preserved. No upload or publication tools are provided.')
     read = ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False)
     write = ToolAnnotations(readOnlyHint=False, destructiveHint=False, openWorldHint=False)
 
     @server.tool(annotations=read)
     def capabilities() -> dict:
         """Describe supported editing operations and explicit limitations."""
-        return {'version': '0.3.0', 'editorial_agent_enabled': agent is not None, 'transport': 'stdio', 'media_root': str(ws.media_root),
+        return {'version': '0.3.1', 'editorial_agent_enabled': agent is not None, 'transport': 'stdio', 'media_root': str(ws.media_root),
                 'editing': ['silence-assisted cut proposals', 'multi-source timeline', 'trim and reorder', '0.5–2x speed with audio', 'portrait/square/landscape', 'contain or center crop', 'immutable revisions', 'preview', 'verified asynchronous render', 'segment cache', 'transcript selection', 'retimed captions', 'optional bounded local editorial agent'],
                 'limits': ['No built-in speech recognition; transcripts must be supplied', 'AI suggestions require context review', 'No face tracking; cover is center crop', 'SDR 30 fps output', 'Legacy optional AI adapters are not exposed to MCP'],
                 'max_clips': 200, 'max_queued_jobs': 8}
@@ -107,6 +107,20 @@ def create_server(workspace, media_root, agent_model=None, ollama_url="http://12
         """Register user-supplied timecoded text. Cues must be chronological/non-overlapping. This does not transcribe or verify speech."""
         value = transcript.register(ws, asset_id, [c.model_dump() for c in cues])
         return {'id': value['id'], 'asset_id': asset_id, 'cue_count': len(value['cues']), 'provenance': value['provenance']}
+
+    @server.tool(annotations=read)
+    def list_transcripts(asset_id: str | None = None, offset: int = 0, limit: int = 20) -> dict:
+        """Discover saved transcript IDs after reconnecting. Returns paged metadata, without full cue text. Optionally filter by imported asset ID."""
+        if offset < 0 or not 1 <= limit <= 100:
+            raise ValueError('Offset must be non-negative and limit 1–100')
+        if asset_id is not None:
+            ws.asset(asset_id)
+        values = []
+        for path in sorted((ws.root / 'transcripts').glob('*.json')):
+            value = transcript.get(ws, path.stem)
+            if asset_id is None or value['asset_id'] == asset_id:
+                values.append({'id': value['id'], 'asset_id': value['asset_id'], 'cue_count': len(value['cues']), 'provenance': value['provenance']})
+        return {'total': len(values), 'offset': offset, 'transcripts': values[offset:offset+limit]}
 
     @server.tool(annotations=read)
     def get_transcript(transcript_id: str, offset: int = 0, limit: int = 50) -> dict:

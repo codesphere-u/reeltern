@@ -1,0 +1,770 @@
+{
+  "transport": "stdio",
+  "tools": [
+    {
+      "name": "capabilities",
+      "description": "Describe supported editing operations and explicit limitations.",
+      "inputSchema": {
+        "properties": {},
+        "title": "capabilitiesArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "import_media",
+      "description": "Snapshot a video inside the configured media root. Returns an asset ID.",
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "title": "import_mediaArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_assets",
+      "description": "List imported media, duration, dimensions and audio availability.",
+      "inputSchema": {
+        "properties": {},
+        "title": "list_assetsArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "list_assetsOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "analyze_audio",
+      "description": "Detect quiet intervals and proposed kept ranges. Analysis writes a cached report; does not edit media.",
+      "inputSchema": {
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "threshold_db": {
+            "default": -35,
+            "title": "Threshold Db",
+            "type": "number"
+          },
+          "minimum_silence": {
+            "default": 0.6,
+            "title": "Minimum Silence",
+            "type": "number"
+          },
+          "margin": {
+            "default": 0.15,
+            "title": "Margin",
+            "type": "number"
+          }
+        },
+        "required": [
+          "asset_id"
+        ],
+        "title": "analyze_audioArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "suggest_edit",
+      "description": "Create a reversible first-pass cut plan based on audio activity. Review before rendering.",
+      "inputSchema": {
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "preset": {
+            "default": "landscape",
+            "title": "Preset",
+            "type": "string"
+          },
+          "threshold_db": {
+            "default": -35,
+            "title": "Threshold Db",
+            "type": "number"
+          },
+          "minimum_silence": {
+            "default": 0.6,
+            "title": "Minimum Silence",
+            "type": "number"
+          },
+          "margin": {
+            "default": 0.15,
+            "title": "Margin",
+            "type": "number"
+          }
+        },
+        "required": [
+          "asset_id"
+        ],
+        "title": "suggest_editArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "create_plan",
+      "description": "Create an immutable timeline/revision. Each clip: asset_id, start/end in source seconds, optional speed 0.5–2 and reason. Array order is playback order. Parent identifies an earlier plan. fit=cover center-crops; contain preserves the whole image.",
+      "inputSchema": {
+        "$defs": {
+          "ClipInput": {
+            "additionalProperties": false,
+            "properties": {
+              "asset_id": {
+                "pattern": "^[a-f0-9]{64}$",
+                "title": "Asset Id",
+                "type": "string"
+              },
+              "start": {
+                "default": 0,
+                "minimum": 0,
+                "title": "Start",
+                "type": "number"
+              },
+              "end": {
+                "anyOf": [
+                  {
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "End"
+              },
+              "speed": {
+                "default": 1,
+                "maximum": 2,
+                "minimum": 0.5,
+                "title": "Speed",
+                "type": "number"
+              },
+              "reason": {
+                "default": "User selection",
+                "maxLength": 500,
+                "title": "Reason",
+                "type": "string"
+              }
+            },
+            "required": [
+              "asset_id"
+            ],
+            "title": "ClipInput",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "clips": {
+            "items": {
+              "$ref": "#/$defs/ClipInput"
+            },
+            "title": "Clips",
+            "type": "array"
+          },
+          "preset": {
+            "default": "landscape",
+            "enum": [
+              "landscape",
+              "portrait",
+              "square"
+            ],
+            "title": "Preset",
+            "type": "string"
+          },
+          "fit": {
+            "default": "contain",
+            "enum": [
+              "contain",
+              "cover"
+            ],
+            "title": "Fit",
+            "type": "string"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent"
+          },
+          "notes": {
+            "default": "Manual edit",
+            "title": "Notes",
+            "type": "string"
+          },
+          "transcript_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Transcript Ids"
+          }
+        },
+        "required": [
+          "clips"
+        ],
+        "title": "create_planArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_plan",
+      "description": "Inspect every source range, reason, playback speed and output time in a plan.",
+      "inputSchema": {
+        "properties": {
+          "plan_id": {
+            "title": "Plan Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_id"
+        ],
+        "title": "get_planArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_plans",
+      "description": "List saved plans and their parent revisions, including earlier edits.",
+      "inputSchema": {
+        "properties": {},
+        "title": "list_plansArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "list_plansOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "compare_plans",
+      "description": "Compare source ranges, order, duration and format between two saved plans.",
+      "inputSchema": {
+        "properties": {
+          "before": {
+            "title": "Before",
+            "type": "string"
+          },
+          "after": {
+            "title": "After",
+            "type": "string"
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "title": "compare_plansArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "render_plan",
+      "description": "Queue a render of this exact plan. Preview uses half-resolution. Poll job_status; output is local MP4, not automatically shared.",
+      "inputSchema": {
+        "properties": {
+          "plan_id": {
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "preview": {
+            "default": true,
+            "title": "Preview",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "plan_id"
+        ],
+        "title": "render_planArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "job_status",
+      "description": "Read persistent progress, cache hits, output and verification receipt or error.",
+      "inputSchema": {
+        "properties": {
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "title": "job_statusArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "cancel_job",
+      "description": "Request cancellation of a queued or running render owned by this server.",
+      "inputSchema": {
+        "properties": {
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "title": "cancel_jobArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "register_transcript",
+      "description": "Register user-supplied timecoded text. Cues must be chronological/non-overlapping. This does not transcribe or verify speech.",
+      "inputSchema": {
+        "$defs": {
+          "CueInput": {
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "minimum": 0,
+                "title": "Start",
+                "type": "number"
+              },
+              "end": {
+                "exclusiveMinimum": 0,
+                "title": "End",
+                "type": "number"
+              },
+              "text": {
+                "maxLength": 2000,
+                "minLength": 1,
+                "title": "Text",
+                "type": "string"
+              }
+            },
+            "required": [
+              "start",
+              "end",
+              "text"
+            ],
+            "title": "CueInput",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "cues": {
+            "items": {
+              "$ref": "#/$defs/CueInput"
+            },
+            "title": "Cues",
+            "type": "array"
+          }
+        },
+        "required": [
+          "asset_id",
+          "cues"
+        ],
+        "title": "register_transcriptArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_transcripts",
+      "description": "Discover saved transcript IDs after reconnecting. Returns paged metadata, without full cue text. Optionally filter by imported asset ID.",
+      "inputSchema": {
+        "properties": {
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Asset Id"
+          },
+          "offset": {
+            "default": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "limit": {
+            "default": 20,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "list_transcriptsArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_transcript",
+      "description": "Read a page of transcript cues with stable IDs and source timestamps.",
+      "inputSchema": {
+        "properties": {
+          "transcript_id": {
+            "title": "Transcript Id",
+            "type": "string"
+          },
+          "offset": {
+            "default": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "limit": {
+            "default": 50,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "transcript_id"
+        ],
+        "title": "get_transcriptArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "search_transcript",
+      "description": "Find cues containing all search words; returns real cue IDs, never invented timestamps.",
+      "inputSchema": {
+        "properties": {
+          "transcript_id": {
+            "title": "Transcript Id",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "limit": {
+            "default": 20,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "transcript_id",
+          "query"
+        ],
+        "title": "search_transcriptArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "plan_from_transcript",
+      "description": "Create a captioned draft by selecting actual transcript cue IDs in the requested order.",
+      "inputSchema": {
+        "properties": {
+          "transcript_id": {
+            "title": "Transcript Id",
+            "type": "string"
+          },
+          "cue_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Cue Ids",
+            "type": "array"
+          },
+          "preset": {
+            "default": "landscape",
+            "title": "Preset",
+            "type": "string"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent"
+          }
+        },
+        "required": [
+          "transcript_id",
+          "cue_ids"
+        ],
+        "title": "plan_from_transcriptArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "draft_edit",
+      "description": "Ask the configured local Ollama model to select evidence-backed cues. At most two model calls. Writes a draft/decision receipt, never renders or publishes. Transcript text is sent to the locally configured model service. Requires --agent-model at startup.",
+      "inputSchema": {
+        "properties": {
+          "transcript_id": {
+            "title": "Transcript Id",
+            "type": "string"
+          },
+          "brief": {
+            "title": "Brief",
+            "type": "string"
+          },
+          "target_seconds": {
+            "default": 60,
+            "title": "Target Seconds",
+            "type": "number"
+          },
+          "preset": {
+            "default": "portrait",
+            "title": "Preset",
+            "type": "string"
+          },
+          "start": {
+            "default": 0,
+            "title": "Start",
+            "type": "number"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End"
+          }
+        },
+        "required": [
+          "transcript_id",
+          "brief"
+        ],
+        "title": "draft_editArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_jobs",
+      "description": "Discover recent render jobs in this workspace, including earlier sessions.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 20,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "list_jobsArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "list_jobsOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_render_receipt",
+      "description": "Read technical verification evidence for a completed render.",
+      "inputSchema": {
+        "properties": {
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "title": "get_render_receiptArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "retry_job",
+      "description": "Retry a failed, cancelled or interrupted job as a new job; verified segments can be reused.",
+      "inputSchema": {
+        "properties": {
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "title": "retry_jobArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# Reeltern
+
+> Local, reversible video editing for people and MCP assistants. Early preview; original media is preserved. Stdio transport, 21 tools, optional local Ollama drafts, supplied transcripts, verified renders. No built-in speech recognition or public HTTP server.
+
+## Use
+- [README](README.md): Installation, demo and current capabilities.
+- [Client setup](docs/clients.md): Claude Code, Codex, Cursor, VS Code and generic stdio configuration.
+- [Agent operating guide](docs/agent-workflow.md): Actual tool sequence, source evidence, revisions, polling and errors.
+- [MCP tools](docs/mcp.md): Tool index and semantics.
+- [Machine-readable schemas](docs/mcp-tools.json): Generated input/output tool schemas.
+- [Editorial agent](docs/editorial-agent.md): Optional local inference and caption limitations.
+- [Troubleshooting](docs/troubleshooting.md): Installation, locks, errors and captions.
+
+## Build
+- [Contributor instructions](AGENTS.md): Shared coding-agent guidance.
+- [Implementation](docs/implementation.md): Code map, contracts, feature changes and release process.
+- [Architecture](docs/architecture.md): Storage, timing, rendering and integrity.
+- [Roadmap](docs/roadmap.md): Proposed features with acceptance criteria; not implemented promises.
+- [Validation](VALIDATION.md): Test evidence and known gaps.
+- [Security](SECURITY.md): Local trust boundaries and reporting.
+- [Upstream sources](SOURCES.md): Attribution and experimental integrations.
+
+Read capabilities and live schemas before acting. This file is a navigation aid, not a claim that every AI client automatically ingests it.
