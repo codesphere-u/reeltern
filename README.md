@@ -1,35 +1,58 @@
+<div align="center">
+
+![Reeltern — Your footage. In full flight. A local editing engine for people and AI assistants.](docs/assets/reeltern-banner.svg)
+
 # Reeltern
 
-**Your footage. In full flight.**
+### Turn footage into an edit you can understand.
+
+**Local video editing · Reversible decisions · AI through MCP**
 
 [![Tests](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml/badge.svg)](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml)
-[![License: GPL v3 or later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/preview-v0.3.1-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
+[![MCP](https://img.shields.io/badge/MCP-21_tools-2f665a?style=flat-square&labelColor=172333)](docs/mcp.md)
+[![License](https://img.shields.io/badge/license-GPL_3.0_or_later-365b79?style=flat-square&labelColor=172333)](LICENSE)
 
-[Quick start](#get-started) · [Connect your AI](docs/clients.md) · [Docs](docs/README.md) · [Implementation](docs/implementation.md) · [Roadmap](docs/roadmap.md)
+[**Get started**](#get-started) &nbsp;·&nbsp; [**Connect your AI**](#connect-your-ai) &nbsp;·&nbsp; [**Read the docs**](docs/README.md) &nbsp;·&nbsp; [**Build with us**](#build-with-us)
 
-A local video editor for people and AI assistants. Turn footage into an inspectable cut plan, revise it without losing the original, preview the result, and export a verified video.
+</div>
 
-**Version 0.3.1 · early preview.** Transcript-first editing, a bounded local editorial agent, and reversible video workflows. The core is tested on synthetic media; the local agent has also been exercised with an installed Ollama model. The eleven optional upstream adapters remain experimental. This is not a full multitrack editor or a finished consumer product.
+---
 
-## Why this exists
+Reeltern gives people and AI assistants the same editing engine. Select moments from a supplied transcript, arrange source clips, review every decision, and export a video with a verification receipt. Originals stay intact. Earlier edits stay available.
 
-An automated edit should be something you can examine and change. Reeltern keeps the source ranges, reasons, playback speeds and output timing behind every cut. An assistant and a person use the same saved plan, and every revision can be revisited.
+**The idea:** an AI edit should come with source evidence, a reversible plan, and a result you can check.
 
-- **Edit from text:** import an SRT transcript, search/select actual sentences, and create a captioned edit with source timestamps.
-- **Local editorial agent:** give an installed Ollama model a brief. It can select only real transcript cues, has a duration budget and at most one repair attempt, and produces a draft with quoted evidence.
-- **Captions that follow cuts:** source captions are retimed across trimming, reordering and speed changes, with SRT and selectable MP4 subtitle outputs.
-- **Reversible editing:** original media is copied into content-addressed snapshots; plans are immutable revisions with parent links.
-- **Conservative first pass:** propose cuts from quiet audio, with margins. No audio or entirely quiet audio retains the footage instead of deleting everything.
-- **A real timeline:** combine sources, trim, reorder, remove clips, and change speed from 0.5× to 2× while adjusting audio tempo.
-- **Review before export:** inspect exact ranges and reasons in the desktop editor; preview at half resolution; compare revisions through MCP or Python.
-- **Three output shapes:** landscape, portrait and square. Preserve the image with padding or choose center cropping explicitly.
-- **Verified rendering:** completed exports pass dimension/duration checks, full video/audio decoding and source-integrity checks. Each has an edit plan and verification receipt.
-- **Faster revisions and recovery:** unchanged encoded segments are reused after a checksum check. Interrupted jobs can be explicitly retried; a workspace lock prevents competing renderers.
-- **MCP access:** twenty-one typed tools expose this same workflow to an MCP-compatible assistant. No arbitrary shell tool or network server is exposed.
+> [!NOTE]
+> **Early preview, actively being built.** The core has 38 automated tests passing on Linux, macOS and Windows. Optional enhancement adapters remain experimental. [See exactly what is tested →](VALIDATION.md)
+
+## An edit is more than an output file
+
+| Start with meaning | Stay in control | Finish with evidence |
+| :--- | :--- | :--- |
+| **Edit from text.** Import an SRT transcript and select real source passages. | **Keep every revision.** Trim, reorder, change speed, and return to earlier plans. | **Verify the render.** Check dimensions, duration, decoding and source integrity. |
+| **Work with your assistant.** Use 21 MCP tools, or an optional local Ollama model. | **Carry captions forward.** Captions follow selected source ranges and playback speed. | **Reuse completed work.** Cache unchanged segments and retry interrupted jobs. |
+
+Desktop, command line and MCP all use the same core. No Reeltern account or API key is required. Your chosen assistant has its own access requirements and data policies.
+
+## The workflow
+
+```mermaid
+flowchart LR
+    A["Footage + supplied text"] --> B["Human or AI draft"]
+    B --> C["Review source ranges"]
+    C --> D["Captioned preview"]
+    D --> E["Verified export"]
+    C -->|"Save a revision"| B
+```
+
+Every plan records **what was selected, where it came from, how fast it plays, and why it was chosen**. Model explanations remain separate from actual source quotes. A valid plan still needs editorial judgment.
 
 ## Get started
 
-Python 3.10–3.12 is the intended range; this release was tested locally on Python 3.12/macOS. A Python installation with Tkinter is needed for the desktop interface. The CLI and MCP do not require Tkinter.
+**Try a complete edit before bringing your own footage.** Use Python 3.12 for parity with the test environment; the package supports Python 3.10+.
+
+### macOS / Linux
 
 ```sh
 git clone https://github.com/codesphere-u/reeltern.git
@@ -37,140 +60,182 @@ cd reeltern
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[mcp]'
-reeltern gui
-```
 
-Windows: activate with `.venv\Scripts\activate`. Linux desktop installations may need `python3-tk`. FFmpeg is supplied by `imageio-ffmpeg` on supported platforms, with an installed system FFmpeg preferred. Set `REELTERN_FFMPEG` to select a specific build. Some platforms may need a system FFmpeg installation.
-
-1. **Import footage.** Select one or more local videos.
-2. **Keep all / assemble** creates a timeline, or **Suggest quiet cuts** proposes a first pass for one selected video.
-3. Select a clip, change its source in/out points or speed, and choose **Apply revision**. Reorder/remove clips as needed.
-4. Choose **Preview edit**, wait for completion, then **Play completed video** in your default player.
-5. Choose **Export final MP4**. The results folder contains the video, plan, logs and receipt.
-
-The desktop uses a fixed, readable timeline table rather than a waveform/drag-and-drop timeline. **Undo to parent** and **Earlier plans** restore previous edits. `contain` preserves the whole image; `cover` crops the center. Neither tracks faces.
-
-You can also launch the installed desktop app with `Launch.command` on macOS or `Launch.bat` on Windows. These launchers assume the dependencies above are installed.
-
-## Try it before importing your footage
-
-```sh
+# Generate footage, make a captioned edit, and verify the result.
 reeltern demo --workspace demo-project
 ```
 
-This creates a small synthetic source, removes its middle section, exports a captioned preview, and demonstrates segment reuse. It needs no model download or user footage. Open the result path printed by the command.
+<details>
+<summary><strong>Windows / PowerShell</strong></summary>
 
-## Edit from a brief or transcript
+```powershell
+git clone https://github.com/codesphere-u/reeltern.git
+cd reeltern
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[mcp]"
+.\.venv\Scripts\python.exe -m reeltern.cli demo --workspace demo-project
+```
 
-Select one video in the desktop editor and choose **Transcript & AI**. Import an SRT, then either keep selected cues or enter a brief and an installed local Ollama model name. Every AI output remains a draft you can inspect and revise.
+Use `.\.venv\Scripts\python.exe -m reeltern.cli` in place of `reeltern` for the commands below. Activation is optional.
+
+</details>
+
+**What the demo produces:** six seconds of synthetic source footage become a four-second preview. The middle section is omitted, captions are retimed, and a second render demonstrates segment reuse. Open the video path printed by the command. No account, user footage, or model download is needed.
+
+FFmpeg is supplied by `imageio-ffmpeg` on supported platforms; an installed system FFmpeg is preferred. Desktop mode additionally needs Tkinter. [Installation help →](docs/troubleshooting.md)
+
+## Choose your way to edit
+
+### In the desktop
+
+```sh
+reeltern gui
+```
+
+**Import → assemble or suggest cuts → review → preview → export.**
+
+Select **Transcript & AI** to import an SRT and keep selected passages. Revise source ranges or speed in the timeline table, then use **Undo to parent** or **Earlier plans** to revisit decisions. Playback opens in your default video player.
+
+### From the command line
+
+```sh
+# Propose conservative cuts around audible activity.
+reeltern edit footage.mp4 --workspace my-project
+
+# Create and render a portrait preview.
+reeltern edit footage.mp4 --workspace my-project --preset portrait --preview
+```
+
+Quiet audio is a signal, not a judgment about meaning. Review the proposed cuts before relying on them for your final edit.
+
+### From a supplied transcript
 
 ```sh
 reeltern transcript interview.mp4 interview.srt --workspace my-project
-# Use the transcript ID printed above:
+
+# Optional: ask an already-installed local Ollama model for a draft.
 reeltern agent TRANSCRIPT_ID "Keep the explanation and conclusion, preserving qualifications" \
   --workspace my-project --model YOUR_INSTALLED_MODEL --seconds 45
 ```
 
-No speech-recognition engine is bundled. Bring a transcript from your preferred tool. An MCP assistant can also select transcript cues directly, without Ollama. [Full editorial workflow](docs/editorial-agent.md).
+Use the transcript ID printed by the first command. An MCP assistant can select transcript cues directly without Ollama. Reeltern does not yet transcribe speech. [Transcript workflow →](docs/editorial-agent.md)
 
-## One-command first pass
+## Connect your AI
 
-```sh
-# Propose a cut plan without rendering
-reeltern edit footage.mp4 --workspace my-project
+**Claude Code · Codex · Cursor · VS Code · other local MCP clients**
 
-# Propose and render a portrait preview
-reeltern edit footage.mp4 --workspace my-project --preset portrait --preview
-
-# Propose and render a final landscape video
-reeltern edit footage.mp4 --workspace my-project --render
-```
-
-The CLI prints the saved plan and job outcome. Quietness is a signal, not a judgment about what matters: review the plan before relying on it for a final edit.
-
-## Connect an AI assistant
-
-**Claude Code, Codex, Cursor and VS Code:** follow the [client setup guide](docs/clients.md). Generate configuration using your installed Python environment:
+Generate configuration from the Python environment where Reeltern is installed:
 
 ```sh
-python -m reeltern.cli mcp-config claude-code --workspace editing-project --media-root demo-project/demo-input
+reeltern mcp-config claude-code \
+  --workspace editing-project \
+  --media-root demo-project/demo-input
 ```
 
-Replace `claude-code` with `codex`, `cursor`, `vscode` or `generic`. This prints settings without changing your client. The media folder must exist. Use [the agent workflow](docs/agent-workflow.md) for source-grounded editing, caption-preserving revisions and verified results. Your existing assistant can select cues without Ollama.
+Replace `claude-code` with `codex`, `cursor`, `vscode` or `generic`. The command prints settings with absolute paths; merge the Reeltern entry into your client's configuration. It does not change settings automatically. Use an existing footage folder as `--media-root`.
 
+Then ask your connected assistant:
 
-Install the MCP extra above. Configure your MCP client with the full path to the environment's Python executable:
+> Import synthetic-source.mp4. Keep source seconds 0–2 and 4–6, in that order. Create a portrait preview, preserve the whole image, wait for completion, and show me the verified result.
 
-```json
-{
-  "mcpServers": {
-    "reeltern": {
-      "command": "/absolute/path/to/reeltern/.venv/bin/python",
-      "args": [
-        "-m", "reeltern.cli", "mcp",
-        "--workspace", "/absolute/path/to/my-project",
-        "--media-root", "/absolute/path/to/footage"
-      ]
-    }
-  }
-}
-```
+| Connection | Editing workflow | Tool contracts |
+| :--- | :--- | :--- |
+| [Client setup & configuration](docs/clients.md) | [Agent operating guide](docs/agent-workflow.md) | [21-tool reference](docs/mcp.md) |
+| [Ready-to-adapt templates](examples/clients/) | [Executable MCP example](examples/mcp_edit.py) | [Machine-readable schemas](docs/mcp-tools.json) |
 
-This is a generic client configuration example; each client may use a different configuration format. On Windows, use the environment's `Scripts/python.exe` and JSON-escaped paths. Only one renderer can own a workspace at a time; a second instance receives a clear error. No account credentials or API keys are required by Reeltern. Your chosen assistant may have its own pricing and data-handling policies.
+The server uses local **stdio**, with imports restricted to the configured media root. Give simultaneous clients separate workspaces. Cloud assistants may receive transcript text, prompts and tool results under their own policies; local rendering does not make every assistant interaction private.
 
-Example request to the connected assistant:
+## Built for inspectable automation
 
-> Import interview.mp4 from the footage folder. Propose conservative quiet-section cuts, explain the source ranges you would remove, and create a portrait preview. Keep the whole image rather than cropping it. Show me the result and keep the original plan so we can undo changes.
+<details>
+<summary><strong>Explore the engineering behind an edit</strong></summary>
 
-See [MCP tool reference](docs/mcp.md) for the workflow and [architecture](docs/architecture.md) for persistence and timing details.
+| Mechanism | What it provides |
+| :--- | :--- |
+| **Content-addressed source snapshots** | Imported media is copied; source hashes are checked during analysis and rendering. |
+| **Immutable cut plans** | Source ranges, clip order, speed and output timing are saved with revision links. |
+| **Bounded local agent** | Selects existing transcript cue IDs, checks the duration budget, and allows at most one repair attempt. |
+| **Typed MCP inputs** | Assistants discover tool contracts; nested clip/cue schemas reject unknown fields. |
+| **Segment cache** | Unchanged encoded segments are reused after checksum validation. |
+| **Persistent render jobs** | Progress, cancellation, errors, interrupted state and retry remain inspectable. |
+| **Verification receipts** | Completed output passes dimension/duration checks, full video/audio decoding and source-integrity checks. |
 
-## The eleven-tool ecosystem
+One engine serves all interfaces. No arbitrary shell command, HTML execution or public network endpoint is exposed through MCP. Technical verification does not establish aesthetic quality or perfect perceptual sync.
 
-The original optional integrations are retained under:
+[Architecture](docs/architecture.md) · [Implementation guide](docs/implementation.md) · [Security](SECURITY.md)
+
+</details>
+
+## An ecosystem worth building on
+
+Reeltern brings a shared workflow around established open-source media tools. **FFmpeg powers the tested core.** The optional toolkit preserves experimental adapters for the wider ecosystem:
+
+| Workflow | Upstream projects |
+| :--- | :--- |
+| Find and shape moments | PySceneDetect · Auto-Editor · librosa |
+| Refine the image | vid.stab · color-matcher · rembg |
+| Interpolate and enhance | RIFE · Real-ESRGAN |
+| Separate sound and create graphics | Demucs · HyperFrames |
+| Process and export | FFmpeg |
+
+Launch it with `reeltern toolkit`. These adapters need separate dependency/model setup and acceptance testing; they are not exposed through MCP. You can import a completed adapter output into the editor.
+
+[Upstream credits & source review](SOURCES.md) · [Adapter setup & limitations](docs/legacy-toolkit.md)
+
+## Build with us
+
+**Help make the first useful edit easier—and the next one better.** There is room for media engineers, Python developers, AI evaluators, designers and people who edit video every day.
+
+| If you care about… | A useful contribution |
+| :--- | :--- |
+| **Editing by meaning** | Optional transcription, word alignment, and evaluations that catch lost context. |
+| **A better editing experience** | In-app preview, waveform selection, keyboard access and clearer review flows. |
+| **Reliable exports** | Real-footage tests for phone rotation, variable frame rates, audio offsets and subtitles. |
+| **A smoother first run** | Installers, dependency diagnostics, reproducible examples and clearer documentation. |
+| **Advanced media workflows** | Promote an optional adapter through a tested, cancellable, documented integration. |
+
+These are contribution opportunities, not released features. The [roadmap](docs/roadmap.md) gives priorities and acceptance criteria.
 
 ```sh
-reeltern toolkit
-reeltern doctor
-reeltern run workflow.json --output renders
-```
-
-They cover PySceneDetect, Auto-Editor, vid.stab, color-matcher, rembg, RIFE, Real-ESRGAN, Demucs, librosa, HyperFrames and FFmpeg. See [adapter setup and limitations](docs/legacy-toolkit.md) and [upstream sources](SOURCES.md).
-
-The new cut-plan editor uses FFmpeg directly for its tested first-pass analysis and render path. Optional adapters are not silently substituted into that path or exposed through MCP. You can explicitly import an adapter's completed output into the editor. Their GPU/model setups still need separate acceptance testing.
-
-## Boundaries of this release
-
-- SDR, 30 fps, H.264/AAC MP4 output. Only the first video/audio streams are used. HDR, original metadata, subtitles, chapters and multitrack audio are not preserved.
-- No built-in transcription, face/motion tracking, transitions or generative video. The local agent can propose transcript-based selections, but its editorial judgment and explanations are not guaranteed. Review the returned source evidence. Captions come from supplied text; they are not speech-verified or burned in.
-- Faster/slower playback uses ordinary frame-rate conversion and audio tempo adjustment. It does not invoke RIFE interpolation.
-- Analysis and imports run locally and can take time on long videos. Render jobs are queued and cancellable; analysis/import cancellation is not implemented.
-- After a crash, the next renderer marks unfinished jobs as interrupted. MCP can retry them as new jobs and reuse verified segments. There is no automatic background restart or mid-encoder resume.
-- Snapshots and segment caches use disk space and are not automatically evicted. Start with short footage and monitor available storage. Input limit: 8 GiB per file; timeline limit: 200 clips/four hours; queue limit: eight outstanding renders per server.
-- The workspace is trusted local state, not a sandbox against malicious local processes. Import footage you trust. MCP restricts imports to the configured media directory and rejects traversal/symlink escapes. Paths and edit metadata may be visible to your MCP client; video is not automatically uploaded.
-- No one-click installer, package-registry release, or claim of production readiness. See [validation](VALIDATION.md) for exactly what was checked.
-
-## A shared workflow, not a black box
-
-```mermaid
-flowchart LR
-  A[Local footage + supplied transcript] --> B[Human or AI draft]
-  B --> C[Immutable plan + source evidence]
-  C --> D[Review and revise]
-  D --> E[Captioned preview]
-  E --> F[Verified final export]
-```
-
-The same engine serves desktop, CLI and MCP. An assistant's proposal does not become an irreversible edit, and a successful encoder exit is not the only export check.
-
-## Contribute
-
-```sh
-python -m pip install -e '.[mcp]'
 python -m unittest discover -s tests -v
+python scripts/check_docs.py
 ```
 
-Tests generate their own media and exercise the real encoder, decoder and MCP stdio transport. See [CONTRIBUTING.md](CONTRIBUTING.md) for the quality bar and near-term priorities.
+The suite generates its own media and exercises the real encoder, decoder and MCP transport. Documentation checks validate local links and configuration examples; protocol tests compare the published tool schemas with the running server.
 
-## License
+[**Contributor guide**](CONTRIBUTING.md) · [**Implementation guide**](docs/implementation.md) · [**Report a bug**](https://github.com/codesphere-u/reeltern/issues/new?template=bug_report.yml) · [**Propose a feature**](https://github.com/codesphere-u/reeltern/issues/new?template=feature_request.yml)
 
-Reeltern is GPL-3.0-or-later. See [LICENSE](LICENSE). Third-party engines and model weights retain their own licenses. Their inclusion in this ecosystem does not grant permission to redistribute arbitrary binaries or weights. No model weights are included here.
+Coding with an assistant? Start with [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md) and the [compact documentation index](llms.txt).
+
+## Know the current limits
+
+> [!IMPORTANT]
+> This is an early local editor, not a finished multitrack suite. There is no built-in speech recognition, face tracking, burned-in caption mode, one-click installer or hosted service. The desktop currently uses a timeline table and external playback.
+
+<details>
+<summary><strong>Formats, captions, resource limits and recovery</strong></summary>
+
+- **Output:** SDR, 30 fps, H.264/AAC MP4. Landscape 1280×720, portrait 720×1280, square 720×720; previews halve both dimensions. `contain` pads; `cover` center-crops.
+- **Streams:** only the first source video/audio streams are used. Original HDR, metadata, subtitle tracks, chapters and multitrack audio are not preserved.
+- **Captions:** supplied transcripts produce SRT sidecars and selectable MP4 subtitles. Enable them in your player. Mid-cue trims retain the full cue text because word alignment is not implemented.
+- **Speed:** 0.5×–2× uses ordinary frame-rate conversion and audio tempo adjustment; it does not invoke RIFE interpolation.
+- **Resources:** input limit 8 GiB/file, timeline limit 200 clips/four hours, queue limit eight unfinished renders. Snapshots and caches consume disk space; automatic eviction is not implemented.
+- **Recovery:** the next renderer marks unfinished jobs interrupted. Explicit retry creates a new job and can reuse verified segments; there is no automatic restart or mid-encoder resume.
+- **Cancellation:** render jobs are cancellable; import/analysis cancellation is not implemented. A client timeout does not prove background work stopped.
+- **Trust:** workspaces are trusted local state. Models can still make poor editorial choices. Core tests use small synthetic fixtures; broad real-footage and every-client UI acceptance remain open work.
+
+[Validation record](VALIDATION.md) · [Troubleshooting](docs/troubleshooting.md) · [Full documentation](docs/README.md)
+
+</details>
+
+---
+
+<div align="center">
+
+**Your footage. Your decisions. A workflow you can build on.**
+
+[GPL-3.0-or-later](LICENSE) · Built on open-source media software · No bundled model weights
+
+<sub>Third-party engines and model weights retain their own licenses. See <a href="SOURCES.md">upstream credits</a>.</sub>
+
+</div>

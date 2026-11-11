@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
+  <title id="title">Reeltern — Your footage. In full flight.</title>
+  <desc id="desc">A local editing engine for people and AI assistants. An illustrated timeline keeps the first and final source sections in a reversible draft.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#0b1221"/><stop offset="1" stop-color="#15293b"/></linearGradient>
+    <linearGradient id="mint" x2="1" y2="1"><stop stop-color="#b5ffe3"/><stop offset="1" stop-color="#50d7cd"/></linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#9ac3ce" stroke-opacity=".055"/></pattern>
+  </defs>
+  <rect width="1200" height="500" rx="24" fill="url(#background)"/>
+  <rect width="1200" height="500" rx="24" fill="url(#grid)"/>
+  <path d="M640 0C790 125 1050 45 1200 190M600 500C870 290 1060 420 1200 300" fill="none" stroke="#72ddcc" stroke-opacity=".1" stroke-width="2"/>
+  <circle cx="1080" cy="86" r="154" fill="#66d6c1" opacity=".035"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <path d="M57 52L84 68L118 45L90 82L82 72L67 86L72 67Z" fill="url(#mint)"/>
+    <text x="136" y="76" fill="#dcfff0" font-size="26" font-weight="700" letter-spacing="5">REELTERN</text>
+    <text x="60" y="170" fill="#f4f7fc" font-size="62" font-weight="700" letter-spacing="-2">Your footage.</text>
+    <text x="60" y="241" fill="url(#mint)" font-size="62" font-weight="700" letter-spacing="-2">In full flight.</text>
+    <text x="62" y="300" fill="#b1c0d1" font-size="22">A shared editing engine</text>
+    <text x="62" y="332" fill="#b1c0d1" font-size="22">for people and AI assistants.</text>
+    <rect x="61" y="361" width="110" height="27" rx="13.5" fill="#a1f5d8" fill-opacity=".1" stroke="#a1f5d8" stroke-opacity=".3"/>
+    <text x="116" y="379" text-anchor="middle" fill="#aff5dc" font-size="11" font-weight="700" letter-spacing="1.5">OPEN SOURCE</text>
+    <text x="187" y="379" fill="#9eafc4" font-size="13">Desktop · CLI · MCP</text>
+    <path d="M632 116V365" stroke="#94b5c5" stroke-opacity=".15"/>
+    <text x="685" y="132" fill="#b0c4d3" font-size="12" font-weight="700" letter-spacing="2">THE SOURCE</text>
+    <text x="1138" y="132" text-anchor="end" fill="#8599b0" font-size="12">00:00 — 00:06</text>
+    <rect x="684" y="153" width="142" height="80" rx="10" fill="#66ddbe" fill-opacity=".15" stroke="#7be7c7" stroke-opacity=".7"/>
+    <rect x="840" y="153" width="142" height="80" rx="10" fill="#1c2d42" stroke="#607084" stroke-dasharray="4 5"/>
+    <rect x="996" y="153" width="142" height="80" rx="10" fill="#66ddbe" fill-opacity=".15" stroke="#7be7c7" stroke-opacity=".7"/>
+    <text x="702" y="182" fill="#b4f9df" font-size="13" font-weight="700">01 / OPENING</text>
+    <text x="858" y="182" fill="#93a2b7" font-size="13">02 / MIDDLE</text>
+    <text x="1014" y="182" fill="#b4f9df" font-size="13" font-weight="700">03 / ENDING</text>
+    <path d="M703 211h8m5 0v-7m6 12v-17m6 21v-25m6 22v-17m6 13v-8m6 4h12m5-4v10m6-14v19m6-24v30m6-24v19m6-13v8m6-6h8" stroke="#8cf2d2" stroke-width="2" stroke-linecap="round"/>
+    <path d="M859 211h18m6 0h9m5 0h20m6 0h8m6 0h23" stroke="#6c7f94" stroke-width="2" stroke-linecap="round"/>
+    <path d="M1015 211h6m5 3v-6m6 11v-20m6 26v-32m6 29v-23m6 16v-10m6 8v-6m6 4h9m5-7v14m6-22v28m6-24v21m6-15v8m6-5h8" stroke="#8cf2d2" stroke-width="2" stroke-linecap="round"/>
+    <path d="M755 241v36M1067 241v13Q1067 277 1045 277H926" fill="none" stroke="#8ce9ca" stroke-opacity=".6" stroke-width="1.5"/>
+    <path d="M751 270l4 7 4-7M933 273l-7 4 7 4" fill="none" stroke="#8ce9ca" stroke-opacity=".6" stroke-width="1.5"/>
+    <rect x="684" y="291" width="298" height="66" rx="10" fill="url(#mint)"/>
+    <path d="M833 305v38" stroke="#123e39" stroke-opacity=".25"/>
+    <text x="704" y="318" fill="#123e39" font-size="13" font-weight="700">01 / OPENING</text>
+    <text x="853" y="318" fill="#123e39" font-size="13" font-weight="700">03 / ENDING</text>
+    <text x="704" y="339" fill="#236052" font-size="12">0–2 seconds</text>
+    <text x="853" y="339" fill="#236052" font-size="12">4–6 seconds</text>
+    <text x="1002" y="318" fill="#e7f2f6" font-size="22" font-weight="700">4s draft</text>
+    <text x="1002" y="341" fill="#9bb0c4" font-size="12">Source preserved.</text>
+    <text x="685" y="384" fill="#9fb2c7" font-size="12" letter-spacing="1.4">SELECT. REVIEW. REVISE. RENDER.</text>
+    <path d="M60 421H1140" stroke="#a7c4d5" stroke-opacity=".16"/>
+    <text x="62" y="459" fill="#b6c9d5" font-size="12" font-weight="700" letter-spacing="2">LOCAL MEDIA</text>
+    <circle cx="208" cy="455" r="2" fill="#77dabe"/>
+    <text x="230" y="459" fill="#b6c9d5" font-size="12" font-weight="700" letter-spacing="2">REVERSIBLE PLANS</text>
+    <circle cx="431" cy="455" r="2" fill="#77dabe"/>
+    <text x="453" y="459" fill="#b6c9d5" font-size="12" font-weight="700" letter-spacing="2">VERIFIED OUTPUT</text>
+    <text x="1138" y="459" text-anchor="end" fill="#839bb0" font-size="12">Built to be inspected. Built to be extended.</text>
+  </g>
+</svg>
