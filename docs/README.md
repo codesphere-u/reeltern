@@ -2,6 +2,7 @@
 
 | I want to… | Start here |
 |---|---|
+| Download an OS bundle or Python package | [Releases & installation](releases.md) |
 | Connect Claude Code, Codex, Cursor or VS Code | [Client setup](clients.md) |
 | Have an assistant edit my footage correctly | [Agent workflow](agent-workflow.md) |
 | Look up tool arguments | [MCP reference](mcp.md) · [Generated schemas](mcp-tools.json) |

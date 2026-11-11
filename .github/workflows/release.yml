@@ -1,0 +1,90 @@
+name: Release
+on:
+  push:
+    branches: [main]
+    paths: ['release/**', 'packaging/**', 'scripts/build_release.py', 'scripts/smoke_bundle.py', '.github/workflows/release.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: reeltern-release
+  cancel-in-progress: false
+jobs:
+  package:
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install build
+      - id: version
+        run: echo "value=$(cat release/version.txt)" >> "$GITHUB_OUTPUT"
+      - run: python -m build
+      - run: python scripts/build_release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: dist/*
+          if-no-files-found: error
+  verify:
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-2022, macos-15, macos-15-intel]
+        python: ['3.10', '3.11', '3.12']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: dist
+      - shell: bash
+        run: python -m pip install "dist/reeltern-${{ needs.package.outputs.version }}-py3-none-any.whl[mcp]"
+      - run: python -m unittest discover -s tests -v
+      - if: matrix.python == '3.12'
+        run: python scripts/check_docs.py
+      - name: Install and exercise OS bundle
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ needs.package.outputs.version }}
+        run: |
+          case "$RUNNER_OS" in
+            Windows) platform=windows ;;
+            macOS) platform=macos ;;
+            Linux) platform=linux ;;
+          esac
+          python scripts/smoke_bundle.py "dist/reeltern-${RELEASE_VERSION}-${platform}-python.zip"
+  publish:
+    needs: [package, verify]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: dist
+      - name: Publish verified preview release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ needs.package.outputs.version }}
+        run: |
+          cd dist
+          sha256sum --check SHA256SUMS.txt
+          cd ..
+          tag="v${RELEASE_VERSION}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release already exists; refusing to overwrite it."
+            exit 1
+          fi
+          gh release create "$tag" dist/* --target "$GITHUB_SHA" --draft --prerelease --title "Reeltern ${RELEASE_VERSION} · Local editing for people and AI" --notes-file "release/notes.md"
+          gh release edit "$tag" --draft=false

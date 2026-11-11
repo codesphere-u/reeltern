@@ -1,5 +1,11 @@
 # Validation — 11 November 2026
 
+## Version 0.3.2 packaging
+
+The 38-test core suite and documentation checks passed locally. A clean macOS installation from the release ZIP created an isolated environment, installed the included wheel and dependencies, rendered and verified the synthetic demo, reused both cached segments, and completed a real MCP handshake using its generated configuration. The launcher was exercised from an installation path containing spaces.
+
+The Release workflow gates publication on these package smoke checks and the core suite across Python 3.10, 3.11 and 3.12 on Ubuntu 22.04 x64, Windows Server 2022 x64, macOS 15 Apple Silicon and macOS 15 Intel. The Python 3.10 suite skips the TOML parser unit test because stdlib tomllib starts at Python 3.11. Check the release's workflow result for the actual remote outcome. The matrix does not certify desktop visual behavior, every consumer OS version, or optional GPU adapters. See [release compatibility](docs/releases.md).
+
 ## Version 0.3.1
 
 **38 automated tests passed locally** on macOS / Python 3.12 in approximately eight seconds. The new checks cover JSON/TOML configuration parsing, paths containing spaces, preservation of the environment's Python executable, invalid setup inputs, transcript metadata discovery/pagination, and an executable documented MCP client that renders selected cues and reads a verification receipt. The integration test launches the server using generated configuration; it also compares published input schemas with discovered tools and checks prompt discovery.

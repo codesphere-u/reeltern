@@ -3,6 +3,7 @@
 > Local, reversible video editing for people and MCP assistants. Early preview; original media is preserved. Stdio transport, 21 tools, optional local Ollama drafts, supplied transcripts, verified renders. No built-in speech recognition or public HTTP server.
 
 ## Use
+- [Release downloads](docs/releases.md): OS Python bundles, wheel/source packages and the tested environment matrix.
 - [README](README.md): Installation, demo and current capabilities.
 - [Client setup](docs/clients.md): Claude Code, Codex, Cursor, VS Code and generic stdio configuration.
 - [Agent operating guide](docs/agent-workflow.md): Actual tool sequence, source evidence, revisions, polling and errors.

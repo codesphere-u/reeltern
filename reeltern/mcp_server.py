@@ -42,7 +42,7 @@ def create_server(workspace, media_root, agent_model=None, ollama_url="http://12
     @server.tool(annotations=read)
     def capabilities() -> dict:
         """Describe supported editing operations and explicit limitations."""
-        return {'version': '0.3.1', 'editorial_agent_enabled': agent is not None, 'transport': 'stdio', 'media_root': str(ws.media_root),
+        return {'version': '0.3.2', 'editorial_agent_enabled': agent is not None, 'transport': 'stdio', 'media_root': str(ws.media_root),
                 'editing': ['silence-assisted cut proposals', 'multi-source timeline', 'trim and reorder', '0.5–2x speed with audio', 'portrait/square/landscape', 'contain or center crop', 'immutable revisions', 'preview', 'verified asynchronous render', 'segment cache', 'transcript selection', 'retimed captions', 'optional bounded local editorial agent'],
                 'limits': ['No built-in speech recognition; transcripts must be supplied', 'AI suggestions require context review', 'No face tracking; cover is center crop', 'SDR 30 fps output', 'Legacy optional AI adapters are not exposed to MCP'],
                 'max_clips': 200, 'max_queued_jobs': 8}

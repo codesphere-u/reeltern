@@ -1,0 +1,11 @@
+include LICENSE README.md CHANGELOG.md CONTRIBUTING.md SECURITY.md AGENTS.md CLAUDE.md SOURCES.md VALIDATION.md NAMING.md llms.txt Launch.command Launch.bat
+recursive-include docs *.md *.json *.svg
+recursive-include examples *.py *.json *.toml *.md
+recursive-include scripts *.py
+recursive-include tests *.py
+recursive-include packaging *.py
+recursive-include release *.md *.txt
+recursive-include .github *.yml
+prune build
+prune dist
+global-exclude __pycache__ *.py[cod]

@@ -9,7 +9,7 @@
 **Local video editing · Reversible decisions · AI through MCP**
 
 [![Tests](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml/badge.svg)](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/preview-v0.3.1-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/preview-v0.3.2-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
 [![MCP](https://img.shields.io/badge/MCP-21_tools-2f665a?style=flat-square&labelColor=172333)](docs/mcp.md)
 [![License](https://img.shields.io/badge/license-GPL_3.0_or_later-365b79?style=flat-square&labelColor=172333)](LICENSE)
 
@@ -49,6 +49,8 @@ flowchart LR
 Every plan records **what was selected, where it came from, how fast it plays, and why it was chosen**. Model explanations remain separate from actual source quotes. A valid plan still needs editorial judgment.
 
 ## Get started
+
+**Prefer a download?** [GitHub Releases](https://github.com/codesphere-u/reeltern/releases) provides Windows, macOS and Linux **Python installation bundles**, plus a wheel and source archive. Python and internet access are required; these are not standalone native apps. [Choose a package →](docs/releases.md)
 
 **Try a complete edit before bringing your own footage.** Use Python 3.12 for parity with the test environment; the package supports Python 3.10+.
 

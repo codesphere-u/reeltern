@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2 — 11 November 2026
+
+- Added a gated GitHub release workflow with wheel, source archive, OS-specific Python installation bundles and SHA-256 checksums.
+- Added local-environment installation and desktop/CLI launchers for Windows, macOS and Linux.
+- Added clean bundle installation, real-media demo and MCP smoke checks across Python 3.10–3.12 and four OS/architecture runner targets.
+- Added release installation/support documentation and explicit source-distribution contents.
+
 ## 0.3.1 — 11 November 2026
 
 - Added configuration generation for Claude Code, Codex, Cursor, VS Code and generic MCP clients without changing user settings.
