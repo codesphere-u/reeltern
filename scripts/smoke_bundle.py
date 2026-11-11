@@ -41,7 +41,12 @@ def main():
         assert report['edit_seconds'] == 4 and report['cache_hits'] == 2
         config = subprocess.check_output([str(python), '-m', 'reeltern.cli', 'mcp-config', 'generic', '--workspace', str(root/'mcp-project'), '--media-root', str(demo/'demo-input')], text=True)
         entry = json.loads(config)['mcpServers']['reeltern']
-        assert Path(entry['command']) == python
+        # macOS may spell the same temporary directory with /var or /private/var.
+        # Compare directories, not executable targets: resolving the executable
+        # itself could hide an accidental switch to the global interpreter.
+        assert Path(entry['command']).parent.samefile(python.parent), entry['command']
+        prefix = subprocess.check_output([entry['command'], '-c', 'import sys; print(sys.prefix)'], text=True).strip()
+        assert Path(prefix).samefile(folder/'.venv'), prefix
         asyncio.run(check_server(entry))
         print('PASS: clean bundle installation, launcher, verified render, cache reuse and MCP handshake')
 
