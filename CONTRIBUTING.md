@@ -10,9 +10,9 @@ Priority contributions:
 
 1. Tests with variable frame rates, rotated phone clips, offset audio and longer recordings.
 2. Preview playback and waveform selection inside the desktop UI.
-3. Transcript-based editing with explicit word/source timing and reversible changes.
+3. Word-level alignment, built-in transcription and evaluations of context-preserving editorial selections.
 4. Scene-aware interpolation and temporally consistent background processing.
-5. Cross-platform installers, cache quotas and interrupted-job recovery.
+5. Cross-platform installers, cache quotas and broader process-crash recovery tests.
 6. A reproducible benchmark corpus and measured comparisons before performance claims.
 
 Licensing: original contributions are GPL-3.0-or-later. Preserve upstream notices and check weight/binary redistribution terms separately. Report failures with sanitized logs, tool versions and a minimal reproducible sample that you have permission to share.

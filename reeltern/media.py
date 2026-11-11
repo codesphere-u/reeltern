@@ -60,7 +60,7 @@ def probe(path):
             raise ValueError('Cannot determine a positive video duration')
         return {'duration': duration, 'width': video.width, 'height': video.height,
                 'fps': float(video.average_rate or 0), 'audio': bool(container.streams.audio),
-                'video_codec': video.codec_context.name, 'format': container.format.name}
+                'subtitle_tracks': len(container.streams.subtitles), 'video_codec': video.codec_context.name, 'format': container.format.name}
 
 
 def execute(args, folder, cancel=None, timeout=3600):

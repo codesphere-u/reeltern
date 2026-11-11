@@ -3,7 +3,7 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "reeltern"
-version = "0.2.0"
+version = "0.3.0"
 description = "Local video editing with reversible cut plans, verified renders and MCP"
 dependencies = ["av>=14,<17", "imageio-ffmpeg>=0.6,<0.9"]
 readme = "README.md"

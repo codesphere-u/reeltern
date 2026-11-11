@@ -13,7 +13,7 @@ class Workspace:
     def __init__(self, root, media_root=None):
         self.root = Path(root).expanduser().resolve()
         self.media_root = Path(media_root).expanduser().resolve() if media_root else None
-        for name in ('assets', 'plans', 'jobs', 'cache', 'analysis'):
+        for name in ('assets', 'plans', 'jobs', 'cache', 'analysis', 'transcripts', 'agent_runs'):
             (self.root / name).mkdir(parents=True, exist_ok=True)
 
     def path(self, kind, identifier, suffix='.json'):
@@ -59,6 +59,8 @@ class Workspace:
 
     def asset(self, identifier, verify=False):
         asset = self.read('assets', identifier)
+        if asset.get('id') != identifier:
+            raise ValueError('Asset metadata identity mismatch')
         if verify and digest(self.path('assets', identifier, '.media')) != identifier:
             raise ValueError('Asset snapshot changed; re-import the original footage')
         return asset
@@ -91,7 +93,7 @@ class Workspace:
         atomic_json(saved, result)
         return result
 
-    def create_plan(self, clips, preset='landscape', fit='contain', parent=None, notes='Manual edit'):
+    def create_plan(self, clips, preset='landscape', fit='contain', parent=None, notes='Manual edit', transcript_ids=None):
         if preset not in PRESETS or fit not in ('contain', 'cover'):
             raise ValueError('Choose landscape/portrait/square and contain/cover')
         if not isinstance(clips, list) or not 1 <= len(clips) <= 200:
@@ -100,6 +102,13 @@ class Workspace:
             self.plan(parent)
         if not isinstance(notes, str) or len(notes) > 2000:
             raise ValueError('Notes must be text of at most 2000 characters')
+        from .transcript import get as get_transcript
+        transcript_ids = [] if transcript_ids is None else transcript_ids
+        if not isinstance(transcript_ids, list) or len(transcript_ids) > 200:
+            raise ValueError('Provide a list of at most 200 transcript IDs')
+        transcript_assets = [get_transcript(self, t)['asset_id'] for t in transcript_ids]
+        if len(set(transcript_assets)) != len(transcript_assets):
+            raise ValueError('Attach only one transcript per asset')
         normalized, cursor = [], 0
         for clip in clips:
             if not isinstance(clip, dict) or set(clip) - {'asset_id', 'start', 'end', 'speed', 'reason'}:
@@ -121,6 +130,8 @@ class Workspace:
             raise ValueError('Timeline limit is four hours')
         plan = {'version': 2, 'fps': 30, 'preset': preset, 'fit': fit, 'clips': normalized,
                 'duration': cursor / 30, 'frames': cursor, 'parent': parent, 'notes': notes}
+        if transcript_ids:
+            plan['transcript_ids'] = transcript_ids
         identifier = key(plan)
         plan['id'] = identifier
         atomic_json(self.path('plans', identifier), plan)
@@ -128,7 +139,7 @@ class Workspace:
 
     def plan(self, identifier):
         plan = self.read('plans', identifier)
-        if key({k: v for k, v in plan.items() if k != 'id'}) != identifier:
+        if plan.get('id') != identifier or key({k: v for k, v in plan.items() if k != 'id'}) != identifier:
             raise ValueError('Plan was modified outside Reeltern; create a new revision')
         return plan
 

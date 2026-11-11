@@ -13,6 +13,17 @@ from .workspace import PRESETS
 class Renderer:
     def __init__(self, workspace):
         self.ws = workspace
+        from .locking import WorkspaceLock
+        self.ownership = WorkspaceLock(self.ws.root / '.render.lock')
+        try:
+            for path in (self.ws.root / 'jobs').glob('*.json'):
+                previous = json.loads(path.read_text())
+                if previous.get('status') in ('queued', 'running', 'verifying'):
+                    previous.update(status='interrupted', error='Previous renderer ended before completion. Retry creates a new job and reuses verified cached segments.')
+                    atomic_json(path, previous)
+        except Exception:
+            self.ownership.close()
+            raise
         self.pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix='reeltern-render')
         self.lock = threading.RLock()
         self.events = {}
@@ -58,7 +69,10 @@ class Renderer:
             for event, future in self.events.values():
                 if not future.done():
                     event.set()
-        self.pool.shutdown(wait=True)
+        try:
+            self.pool.shutdown(wait=True)
+        finally:
+            self.ownership.close()
 
     def _render(self, plan, state, folder, cancel):
         started = time.monotonic()
@@ -122,13 +136,24 @@ class Renderer:
             listing = folder / 'concat.txt'
             listing.write_text(''.join(f"file 'segment-{i:04d}.mkv'\n" for i in range(len(segments))))
             output = folder / ('preview.mp4' if state['preview'] else 'final.mp4')
-            ff(['-f', 'concat', '-safe', '1', '-i', listing, '-map', '0:v:0', '-map', '0:a:0',
+            from .transcript import timeline_captions, srt
+            captions = timeline_captions(self.ws, plan)
+            subtitle_args = []
+            mapping = ['-map', '0:v:0', '-map', '0:a:0']
+            if captions:
+                subtitle = folder / 'captions.srt'
+                subtitle.write_text(srt(captions), encoding='utf-8')
+                subtitle_args = ['-i', subtitle]
+                mapping += ['-map', '1:0', '-c:s', 'mov_text']
+            ff(['-f', 'concat', '-safe', '1', '-i', listing, *subtitle_args, *mapping,
                 '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-t', str(plan['duration']), '-movflags', '+faststart', output], folder, cancel)
             state['status'] = 'verifying'
             save()
             info = probe(output)
             if info['width'] != w or info['height'] != h or not info['audio'] or abs(info['duration'] - plan['duration']) > 0.1:
                 raise RuntimeError('Output dimensions, audio or duration failed verification')
+            if captions and info['subtitle_tracks'] != 1:
+                raise RuntimeError('Caption stream missing from output')
             ff(['-v', 'error', '-xerror', '-i', output, '-map', '0:v:0', '-map', '0:a:0', '-f', 'null', '-'], folder, cancel)
             for asset_id in assets:
                 self.ws.asset(asset_id, verify=True)
@@ -136,11 +161,14 @@ class Renderer:
                 raise Cancelled('Render cancelled')
             receipt = {'plan': plan, 'media': list(assets.values()), 'output': info, 'sha256': digest(output),
                        'engine': engine_version, 'cache_hits': state['cache_hits'], 'elapsed_seconds': time.monotonic()-started,
+                       'caption_count': len(captions), 'transcript_ids': plan.get('transcript_ids', []),
                        'verified': ['dimensions', 'duration', 'video and audio decode', 'source snapshot hashes'],
                        'limitations': ['SDR output, 30 fps', 'first video/audio streams only', 'no semantic quality score']}
             atomic_json(folder / 'receipt.json', receipt)
             atomic_json(folder / 'edit-plan.json', plan)
             state.update(status='complete', output=str(output), receipt=str(folder / 'receipt.json'), elapsed_seconds=receipt['elapsed_seconds'])
+            if captions:
+                state['captions'] = str(folder / 'captions.srt')
             # Segment cache remains; job folders need only final artifacts and logs.
             for segment in folder.glob('segment-*.mkv'):
                 segment.unlink()

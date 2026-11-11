@@ -41,7 +41,7 @@ class Studio:
         controls = ttk.Frame(outer)
         controls.pack(fill='x')
         self.action_buttons = []
-        for label, fn in [('Import footage', self.import_files), ('Keep all / assemble', self.assemble), ('Suggest quiet cuts', self.suggest), ('Earlier plans', self.history)]:
+        for label, fn in [('Import footage', self.import_files), ('Keep all / assemble', self.assemble), ('Suggest quiet cuts', self.suggest), ('Earlier plans', self.history), ('Transcript & AI', self.transcript_editor)]:
             button = ttk.Button(controls, text=label, command=fn)
             button.pack(side='left', padx=(0, 8))
             self.action_buttons.append(button)
@@ -168,7 +168,7 @@ class Studio:
     def save_revision(self, clips, note):
         parent = self.plan['id']
         previous = self.plan['duration']
-        plan = self.ws.create_plan(clips, self.preset.get(), self.fit.get(), parent, note)
+        plan = self.ws.create_plan(clips, self.preset.get(), self.fit.get(), parent, note, self.plan.get('transcript_ids', []))
         self.show_plan(plan)
         self.status.set(f'{note} · {previous:.2f}s → {plan["duration"]:.2f}s. Earlier revision preserved.')
 
@@ -213,6 +213,73 @@ class Studio:
                 self.show_plan(self.ws.plan(table.selection()[0]))
                 window.destroy()
         ttk.Button(window, text='Open selected plan', command=restore).pack(pady=8)
+
+    def transcript_editor(self):
+        def open_editor():
+            ids = self.selected_assets()
+            if len(ids) != 1:
+                raise ValueError('Select one video for transcript editing')
+            from . import transcript
+            from .agent import EditorialAgent
+            asset_id = ids[0]
+            window = tk.Toplevel(self.root)
+            window.title('Edit from transcript · local AI drafts')
+            window.geometry('920x620')
+            frame = ttk.Frame(window, padding=18)
+            frame.pack(fill='both', expand=True)
+            ttk.Label(frame, text='Select the words to keep', font=('Helvetica', 18, 'bold')).pack(anchor='w')
+            ttk.Label(frame, text='Import a timecoded SRT transcript. Reeltern does not transcribe speech. Captions follow your cuts.', wraplength=850).pack(anchor='w', pady=8)
+            current = {'transcript': None}
+            table = ttk.Treeview(frame, columns=('range', 'text'), show='headings', selectmode='extended')
+            table.heading('range', text='Source time'); table.column('range', width=140)
+            table.heading('text', text='Transcript'); table.column('text', width=690)
+            table.pack(fill='both', expand=True, pady=10)
+            def display(value):
+                current['transcript'] = value
+                table.delete(*table.get_children())
+                for cue in value['cues']:
+                    table.insert('', 'end', iid=cue['id'], values=(f'{cue["start"]:.2f}–{cue["end"]:.2f}s', cue['text']))
+            def load_srt():
+                filename = filedialog.askopenfilename(parent=window, filetypes=[('SubRip transcript', '*.srt')])
+                if filename:
+                    self.guarded(lambda: display(transcript.register(self.ws, asset_id, transcript.parse_srt(Path(filename).read_text(encoding='utf-8-sig')))))
+            def chosen_plan():
+                if not current['transcript']:
+                    raise ValueError('Import an SRT transcript first')
+                plan = transcript.select(self.ws, current['transcript']['id'], list(table.selection()), self.preset.get())
+                self.show_plan(plan)
+                window.destroy()
+            buttons = ttk.Frame(frame); buttons.pack(fill='x')
+            ttk.Button(buttons, text='Import SRT', command=load_srt).pack(side='left', padx=(0,8))
+            ttk.Button(buttons, text='Keep selected cues', command=lambda: self.guarded(chosen_plan)).pack(side='left')
+            ttk.Label(frame, text='Or describe a draft for your local Ollama model', font=('Helvetica', 12, 'bold')).pack(anchor='w', pady=(18,6))
+            brief = tk.StringVar()
+            ttk.Entry(frame, textvariable=brief).pack(fill='x')
+            options = ttk.Frame(frame); options.pack(fill='x', pady=10)
+            model, seconds = tk.StringVar(), tk.StringVar(value='60')
+            ttk.Label(options, text='Installed model').pack(side='left')
+            ttk.Entry(options, textvariable=model, width=24).pack(side='left', padx=8)
+            ttk.Label(options, text='Maximum seconds').pack(side='left')
+            ttk.Entry(options, textvariable=seconds, width=8).pack(side='left', padx=8)
+            def ask_agent():
+                if not current['transcript']:
+                    raise ValueError('Import an SRT transcript first')
+                service = EditorialAgent(self.ws, model.get())
+                transcript_id, request, budget, preset = current['transcript']['id'], brief.get(), float(seconds.get()), self.preset.get()
+                def done(result):
+                    self.show_plan(result['plan'])
+                    if window.winfo_exists():
+                        window.destroy()
+                self.task(lambda: service.draft(transcript_id, request, budget, preset), done)
+            ttk.Button(options, text='Create AI draft', command=lambda: self.guarded(ask_agent)).pack(side='right')
+            ttk.Label(frame, text='Sends transcript text to your local Ollama service. Creates a draft only. Review context and captions before exporting.', wraplength=850).pack(anchor='w')
+            existing = sorted((self.ws.root / 'transcripts').glob('*.json'), key=lambda p: p.stat().st_mtime, reverse=True)
+            for path in existing:
+                value = transcript.get(self.ws, path.stem)
+                if value['asset_id'] == asset_id:
+                    display(value)
+                    break
+        self.guarded(open_editor)
 
     def start_render(self, preview):
         def action():

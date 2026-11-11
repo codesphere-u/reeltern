@@ -1,0 +1,27 @@
+name: Bug report
+description: Report a reproducible editing, rendering or MCP failure.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include the expected result and the actual result.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Prefer a synthetic fixture or the reeltern demo command. Do not upload private footage.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python/Reeltern/FFmpeg versions, MCP client and optional model name.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized error or receipt
+      description: Remove personal paths, transcript content, credentials and private media before sharing.

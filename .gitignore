@@ -9,3 +9,4 @@ reeltern-workspace/
 build/
 dist/
 *.whl
+reeltern-demo/

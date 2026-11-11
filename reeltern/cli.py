@@ -13,6 +13,21 @@ def main():
     mcp = sub.add_parser("mcp", help="Serve local editing tools over MCP stdio")
     mcp.add_argument("--workspace", required=True)
     mcp.add_argument("--media-root", required=True)
+    mcp.add_argument("--agent-model", help="Opt in to an installed local Ollama model")
+    mcp.add_argument("--ollama-url", default="http://127.0.0.1:11434")
+    transcript = sub.add_parser("transcript", help="Import an SRT transcript for a video")
+    transcript.add_argument("input", type=Path)
+    transcript.add_argument("srt", type=Path)
+    transcript.add_argument("--workspace", default="reeltern-workspace")
+    agent = sub.add_parser("agent", help="Draft an edit from a brief and supplied transcript")
+    agent.add_argument("transcript_id")
+    agent.add_argument("brief")
+    agent.add_argument("--model", required=True)
+    agent.add_argument("--workspace", default="reeltern-workspace")
+    agent.add_argument("--seconds", type=float, default=60)
+    agent.add_argument("--preset", choices=["landscape", "portrait", "square"], default="portrait")
+    demo = sub.add_parser("demo", help="Generate a small reproducible captioned edit")
+    demo.add_argument("--workspace", default="reeltern-demo")
     edit = sub.add_parser("edit", help="Create a silence-assisted plan, optionally preview/render")
     edit.add_argument("input", type=Path)
     edit.add_argument("--workspace", default="reeltern-workspace")
@@ -35,7 +50,22 @@ def main():
             launch()
         elif args.command == "mcp":
             from .mcp_server import serve
-            serve(args.workspace, args.media_root)
+            serve(args.workspace, args.media_root, args.agent_model, args.ollama_url)
+        elif args.command == "transcript":
+            from .workspace import Workspace
+            from .transcript import parse_srt, register
+            ws = Workspace(args.workspace)
+            asset = ws.import_media(args.input)
+            result = register(ws, asset['id'], parse_srt(args.srt.read_text(encoding='utf-8-sig')))
+            print(json.dumps({'transcript_id': result['id'], 'cue_count': len(result['cues']), 'asset_id': asset['id']}, indent=2))
+        elif args.command == "agent":
+            from .workspace import Workspace
+            from .agent import EditorialAgent
+            result = EditorialAgent(Workspace(args.workspace), args.model).draft(args.transcript_id, args.brief, args.seconds, args.preset)
+            print(json.dumps(result, indent=2))
+        elif args.command == "demo":
+            from .demo import run_demo
+            print(json.dumps(run_demo(args.workspace), indent=2))
         elif args.command == "edit":
             from .workspace import Workspace
             from .render import Renderer

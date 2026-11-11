@@ -1,8 +1,8 @@
 # Validation — 11 November 2026
 
-## Version 0.2
+## Version 0.3
 
-**22 automated tests passed locally** on macOS / Python 3.12, using PyAV 16.1.0, imageio-ffmpeg 0.8.1 and official MCP SDK 1.30.0. The final suite completed in approximately 5.3 seconds on this machine. This is a small synthetic-fixture test suite, not a production performance benchmark.
+**34 automated tests passed locally** on macOS / Python 3.12, using PyAV 16.1.0, imageio-ffmpeg 0.8.1 and official MCP SDK 1.30.0. The final suite completed in approximately 6.1 seconds on this machine. This is a small synthetic-fixture test suite, not a production performance benchmark.
 
 Coverage:
 
@@ -19,6 +19,18 @@ Coverage:
 
 **Desktop acceptance check passed:** the actual Tk application selected a plan, changed a source range, created a child revision, restored its parent, rendered a preview, enabled playback and kept key controls within the window. This check exercised widgets programmatically. The computer-use service could not attach to this Python window, so a screenshot review and physical click-through were not completed.
 
+New coverage in 0.3:
+
+- Supplied SRT parsing, chronological timing validation, transcript integrity, search and exact cue-based selections.
+- Captions retimed across source cuts, reordering and speed changes; real MP4 subtitle stream plus extracted SRT readback.
+- Agent grounding, duration budgets, unknown action/ID rejection, one-repair limit and authoritative source quotes. Unit tests inject model responses; they do not measure model quality.
+- Competing-renderer rejection and recovery of persisted unfinished jobs. This simulates interrupted state, not an OS power-loss test.
+- MCP transcript import/readback/selection, strict nested input schemas, disabled-agent behavior and render receipts.
+
+**New desktop acceptance passed:** the transcript panel loaded saved cues, selected the first and last source sections, created a four-second plan, preserved captions through a trim and undo, and rendered a playable preview. Key controls fit within the default window. This was a programmatic widget check, not a physical click-through or comprehensive accessibility audit.
+
+**Real local-model smoke test:** an already-installed Ollama `qwen3.5:0.8b` model selected the requested first and last cues of a six-second synthetic fixture. The resulting four-second portrait preview completed verification. Draft plus render took about 4.2 seconds in this run with cached video segments. The model's explanation misstated what the last cue said, despite choosing the correct ID. This motivated returning actual source quotes separately from unverified model explanations. One tiny fixture does not establish editorial quality, general accuracy or performance.
+
 **Packaging:** editable installation with the MCP extra succeeded. A distributable wheel is built separately during release preparation.
 
 A GitHub Actions workflow is included for Python 3.12 on Ubuntu, macOS and Windows. Check the repository's Actions page for actual remote results; the existence of that workflow is not proof that every platform has passed.
@@ -27,7 +39,7 @@ A GitHub Actions workflow is included for Python 3.12 on Ubuntu, macOS and Windo
 
 - The optional PySceneDetect, Auto-Editor, vid.stab, color-matcher, rembg, RIFE, Real-ESRGAN, Demucs, librosa and HyperFrames adapters have not had end-to-end acceptance tests here.
 - Variable-frame-rate edge cases, rotated phone video, offset/multiple audio tracks, HDR handling, long-video resource use, repeated failure recovery and large projects need broader coverage.
-- No semantic editing, speech recognition or aesthetic quality evaluation is implemented or claimed.
+- No built-in speech recognition or systematic aesthetic/editorial quality evaluation. Transcript-based selection is implemented, but broad real-footage and adversarial-model evaluation remains outstanding.
 - No cross-product benchmark establishes a speed/quality advantage over existing editors.
 
 ## Reproduce

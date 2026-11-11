@@ -1,0 +1,21 @@
+name: Workflow improvement
+description: Propose a concrete improvement to a real editing workflow.
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What are you trying to make?
+      description: Describe the footage, intended audience and desired result.
+    validations:
+      required: true
+  - type: textarea
+    id: friction
+    attributes:
+      label: Where does the current workflow fall short?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What would success look like?
+      description: Give an example we could use as an acceptance test.
