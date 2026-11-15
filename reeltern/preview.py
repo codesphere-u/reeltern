@@ -246,9 +246,7 @@ class PreviewEngine:
         if fade_out > 0 and (clip_duration - local_time) < fade_out:
             fade_gain = min(fade_gain, max(0.0, (clip_duration - local_time) / fade_out))
 
-        if sat <= 0.01:
-            cur = self._link(g, cur, 'format', 'gray')
-        elif abs(sat - 1.0) > 1e-3:
+        if sat > 0.01 and abs(sat - 1.0) > 1e-3:
             cur = self._link(g, cur, 'hue', f's={sat:.4f}:b=0')
 
         if abs(contrast - 1.0) > 1e-3 or abs(bright) > 1e-3 or fade_gain < 0.999:
@@ -256,11 +254,14 @@ class PreviewEngine:
             expr = f"clip(((val-128)*{contrast:.4f}+128+({b_off:.2f}))*{fade_gain:.4f},0,255)"
             cur = self._link(g, cur, 'lutrgb', f'r={expr}:g={expr}:b={expr}')
 
-        if meta.get('cb'):
+        if sat > 0.01 and meta.get('cb'):
             cur = self._link(g, cur, 'colorbalance', meta['cb'])
 
         if meta.get('vignette'):
             cur = self._link(g, cur, 'vignette', f"angle={meta['vignette']:.4f}")
+
+        if sat <= 0.01:
+            cur = self._link(g, cur, 'format', 'gray')
 
         cur = self._link(g, cur, 'format', 'rgb24')
         sink = g.add('buffersink')
