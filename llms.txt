@@ -3,9 +3,9 @@
 > Local, reversible video editing for people and MCP assistants. Early preview; original media is preserved. Stdio transport, 31 AgentFlight Grade-A tools, AI Director (`compose_video`), closed-loop `audit_render` QA, PNG visual resources (`reeltern://visual/...`), `blur_fill` vertical framing, Ken Burns motion, 10 color grades & transitions, `kinetic` burned-in captions, sidechain-ducked music bed, and verified renders. No built-in speech recognition or public HTTP server.
 
 ## Use
-- [Release downloads](docs/releases.md): OS Python bundles, wheel/source packages and the tested environment matrix.
+- [Release downloads](docs/releases.md): Standalone Desktop Studio apps (macOS, Windows, Linux), OS Python bundles, wheel/source packages and the tested environment matrix.
 - [README](README.md): Installation, demo and current capabilities.
-- [Client setup](docs/clients.md): Claude Code, Codex, Cursor, VS Code and generic stdio configuration.
+- [Client setup](docs/clients.md): Antigravity, Claude Code, Codex, Cursor, VS Code and generic stdio configuration.
 - [Agent operating guide](docs/agent-workflow.md): Actual tool sequence, source evidence, revisions, polling and errors.
 - [MCP tools](docs/mcp.md): Tool index and semantics.
 - [Machine-readable schemas](docs/mcp-tools.json): Generated input/output tool schemas.

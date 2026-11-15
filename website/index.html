@@ -11,7 +11,7 @@
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#09090b" />
     <link rel="canonical" href="https://codesphere-u.github.io/reeltern/" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.5.0" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.6.0" />
     <link rel="manifest" href="./manifest.webmanifest" />
 
     <meta property="og:type" content="website" />
@@ -36,7 +36,7 @@
         } catch (e) {}
       })();
     </script>
-    <link rel="stylesheet" href="./styles.css?v=0.5.0" />
+    <link rel="stylesheet" href="./styles.css?v=0.6.0" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -44,20 +44,20 @@
         "name": "Reeltern",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "macOS, Windows, Linux",
-        "softwareVersion": "0.5.0",
+        "softwareVersion": "0.6.0",
         "license": "https://www.gnu.org/licenses/gpl-3.0.html",
         "url": "https://codesphere-u.github.io/reeltern/",
         "downloadUrl": "https://github.com/codesphere-u/reeltern/releases",
-        "description": "Local reversible video editing toolkit with Desktop Studio, CLI, AI Director composition, closed-loop quality audit, and 31 MCP stdio tools."
+        "description": "Local reversible video editing desktop studio, CLI, AI Director composition, closed-loop quality audit, and 31 MCP stdio tools for Antigravity, Claude Code, Codex, Cursor, and VS Code."
       }
     </script>
   </head>
   <body>
     <div class="top-banner">
       <div class="top-banner-inner">
-        <span class="banner-pill" data-latest-badge>v0.5.0</span>
-        <span>AI Director compose, <code>blur_fill</code> vertical halo, Ken Burns motion &amp; EBU R128 audit QA.</span>
-        <a class="banner-link" href="#downloads">Download bundles →</a>
+        <span class="banner-pill" data-latest-badge>v0.6.0</span>
+        <span>Native Desktop Studio apps (macOS, Windows, Linux) + first-class Antigravity MCP support.</span>
+        <a class="banner-link" href="#downloads">Download Desktop Studio →</a>
       </div>
     </div>
 
@@ -96,7 +96,7 @@
 
           <a class="release-pill" href="#downloads" title="Latest GitHub release">
             <span class="pulse-dot" aria-hidden="true"></span>
-            <span data-latest-tag>v0.5.0</span>
+            <span data-latest-tag>v0.6.0</span>
           </a>
 
           <button class="icon-btn" type="button" id="theme-toggle" aria-label="Toggle light or dark theme" title="Switch light / dark theme">
@@ -136,19 +136,20 @@
             </p>
 
             <!-- Client / Install Selector (Plannotator + Stitch style) -->
-            <div class="agent-selector" id="hero-target-tabs" role="tablist" aria-label="Select MCP client or installation platform">
-              <button class="agent-btn active" type="button" data-target="claude"><span class="agent-dot"></span>Claude Code</button>
+            <div class="agent-selector" id="hero-target-tabs" role="tablist" aria-label="Select MCP client or Desktop Studio installer">
+              <button class="agent-btn active" type="button" data-target="antigravity"><span class="agent-dot"></span>Antigravity</button>
+              <button class="agent-btn" type="button" data-target="claude"><span class="agent-dot"></span>Claude Code</button>
               <button class="agent-btn" type="button" data-target="codex"><span class="agent-dot"></span>Codex</button>
               <button class="agent-btn" type="button" data-target="cursor"><span class="agent-dot"></span>Cursor</button>
               <button class="agent-btn" type="button" data-target="vscode"><span class="agent-dot"></span>VS Code</button>
               <button class="agent-btn" type="button" data-target="cli"><span class="agent-dot"></span>CLI / pip</button>
-              <button class="agent-btn" type="button" data-target="macos"><span class="agent-dot"></span>macOS Zip</button>
-              <button class="agent-btn" type="button" data-target="windows"><span class="agent-dot"></span>Windows Zip</button>
-              <button class="agent-btn" type="button" data-target="linux"><span class="agent-dot"></span>Linux Zip</button>
+              <button class="agent-btn" type="button" data-target="macos"><span class="agent-dot"></span>macOS App</button>
+              <button class="agent-btn" type="button" data-target="windows"><span class="agent-dot"></span>Windows App</button>
+              <button class="agent-btn" type="button" data-target="linux"><span class="agent-dot"></span>Linux App</button>
             </div>
 
             <div class="install-box">
-              <pre class="install-cmd"><span class="prompt">$</span><span id="hero-cmd-text">pip install -e '.[mcp]' &amp;&amp; reeltern mcp-config claude-code --workspace ./ws --media-root ./footage</span></pre>
+              <pre class="install-cmd"><span class="prompt">$</span><span id="hero-cmd-text">reeltern mcp-config antigravity --workspace ./ws --media-root ./footage</span></pre>
               <button class="copy-btn" type="button" id="hero-copy-cmd">Copy</button>
             </div>
 
@@ -269,8 +270,8 @@
       <section class="proof-bar" aria-label="Verified engineering metrics">
         <div class="container proof-grid">
           <div class="proof-item">
-            <div class="proof-val" id="proof-release-val">v0.5.0</div>
-            <div class="proof-desc">Multi-OS releases (macOS, Windows, Linux)</div>
+            <div class="proof-val" id="proof-release-val">v0.6.0</div>
+            <div class="proof-desc">Native Desktop Studio Apps (macOS, Windows, Linux)</div>
           </div>
           <div class="proof-item">
             <div class="proof-val">31 MCP Tools</div>
@@ -313,7 +314,11 @@
                 </div>
                 <div class="index-entry">
                   <h3><span class="cmd-accent">reeltern studio / gui</span></h3>
-                  <p>Open the native desktop NLE timeline with scrubbable waveform thumbnails and reversible revisions.</p>
+                  <p>Open the native desktop NLE timeline with Load Demo, Connect AI (Antigravity/MCP), waveform scrub &amp; revision diff.</p>
+                </div>
+                <div class="index-entry">
+                  <h3><span class="cmd-accent">reeltern card &amp; transcript</span></h3>
+                  <p>Generate chapter slates, align supplied SRT cues, or draft bounded edits with an optional local Ollama model.</p>
                 </div>
               </div>
             </div>
@@ -344,8 +349,12 @@
               <h3 class="index-col-title">AI Agent Harness</h3>
               <div class="index-list">
                 <div class="index-entry">
-                  <h3>31 Typed MCP Tools</h3>
-                  <p>Compact strict JSON Schemas exposed over stdio (~5,310 est. tokens/turn) with clear read-only vs mutating hints.</p>
+                  <h3>31 Tools · 2 Visuals · 4 Prompts</h3>
+                  <p>Typed stdio MCP server (~5,310 est. tokens/turn) for Antigravity, Claude Code, Codex, Cursor, and VS Code.</p>
+                </div>
+                <div class="index-entry">
+                  <h3>5 AI Director Production Styles</h3>
+                  <p>Calibrated <code>viral_reel</code>, <code>cinematic</code>, <code>tutorial</code>, <code>documentary</code>, and <code>noir_trailer</code> compositions.</p>
                 </div>
                 <div class="index-entry">
                   <h3>Visual PNG Inspection</h3>
@@ -476,7 +485,7 @@
               <div class="traffic-lights" aria-hidden="true">
                 <span class="tl-r"></span><span class="tl-y"></span><span class="tl-g"></span>
               </div>
-              <div class="window-label" id="how-window-title">MCP Workflow · Claude Code / Codex / Cursor</div>
+              <div class="window-label" id="how-window-title">MCP Workflow · Antigravity / Claude Code / Codex / Cursor</div>
               <a class="banner-link" href="./docs.html#mcp-setup" style="font-size: 0.75rem;">Full setup guide →</a>
             </div>
             <pre class="code-window window-code-body" id="how-code-view"></pre>
@@ -529,9 +538,9 @@
             <div class="vault-footer-install">
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
                 <div class="pill-selector" id="os-guide-tabs">
-                  <button class="chip-btn active" type="button" data-os-tab="macos">macOS Bundle</button>
-                  <button class="chip-btn" type="button" data-os-tab="windows">Windows Bundle</button>
-                  <button class="chip-btn" type="button" data-os-tab="linux">Linux Bundle</button>
+                  <button class="chip-btn active" type="button" data-os-tab="macos">macOS App / Bundle</button>
+                  <button class="chip-btn" type="button" data-os-tab="windows">Windows App / Bundle</button>
+                  <button class="chip-btn" type="button" data-os-tab="linux">Linux App / Bundle</button>
                   <button class="chip-btn" type="button" data-os-tab="wheel">pip / Wheel / Git</button>
                 </div>
                 <button class="copy-btn" type="button" id="os-copy-btn">Copy snippet</button>
@@ -599,6 +608,6 @@
       </div>
     </div>
 
-    <script src="./app.js?v=0.5.0"></script>
+    <script src="./app.js?v=0.6.0"></script>
   </body>
 </html>

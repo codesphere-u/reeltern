@@ -19,7 +19,8 @@ async def check_server(config):
             assert len(tools.tools) == 31
             result = await session.call_tool('capabilities', {})
             assert not result.isError, result
-            assert json.loads(result.content[0].text)['version'] == '0.5.0'
+            expected_version = (Path(__file__).resolve().parents[1] / 'release' / 'version.txt').read_text(encoding='utf-8').strip()
+            assert json.loads(result.content[0].text)['version'] == expected_version
 
 
 def main():

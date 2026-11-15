@@ -1,27 +1,31 @@
-## Reeltern 0.5.0 — AI Director, creator-grade polish, and closed-loop QA
+## Reeltern 0.6.0 — Native Desktop Studio Apps & First-Class Antigravity MCP
 
-Edit through Reeltern Studio (desktop), the command line, or **31 AgentFlight Grade-A MCP tools** for Claude Code, Codex, Cursor, VS Code, and other local clients.
+Edit directly in the **Reeltern Studio** standalone desktop app (macOS Apple Silicon & Intel, Windows x64, Linux x64), the CLI, or **31 AgentFlight Grade-A MCP tools** across **Antigravity, Claude Code, Codex, Cursor, VS Code**, and other local clients.
 
-### Downloads
+### Standalone Desktop Studio Apps (Zero Python Setup)
 
-- **Windows:** `reeltern-0.5.0-windows-python.zip`
-- **macOS (Apple Silicon or Intel):** `reeltern-0.5.0-macos-python.zip`
-- **Linux:** `reeltern-0.5.0-linux-python.zip`
-- **Existing Python environment:** `reeltern-0.5.0-py3-none-any.whl`
-- **Source:** `reeltern-0.5.0.tar.gz`
+- **macOS Apple Silicon (.dmg):** `Reeltern-Studio-0.6.0-macos-arm64.dmg`
+- **macOS Intel (.dmg):** `Reeltern-Studio-0.6.0-macos-x64.dmg`
+- **Windows x64 (.zip):** `Reeltern-Studio-0.6.0-windows-x64.zip` (`Reeltern Studio.exe`)
+- **Linux x64 (.tar.gz):** `Reeltern-Studio-0.6.0-linux-x64.tar.gz` (`reeltern-studio` + desktop entry)
+
+### Python CLI & MCP Installation Bundles
+
+- **Windows CLI Bundle:** `reeltern-0.6.0-windows-python.zip`
+- **macOS CLI Bundle:** `reeltern-0.6.0-macos-python.zip`
+- **Linux CLI Bundle:** `reeltern-0.6.0-linux-python.zip`
+- **Existing Python environment:** `reeltern-0.6.0-py3-none-any.whl`
+- **Source:** `reeltern-0.6.0.tar.gz`
 - **Download verification:** `SHA256SUMS.txt`
 
-**These are Python installation bundles, not standalone native apps.** Install Python first (3.12 recommended), extract the ZIP, and run `python3 install.py` on macOS/Linux or `py -3.12 install.py` on Windows. The installer creates a private `.venv` and installs dependencies locally without changing global packages. See the included `START-HERE.md`.
+### What is new in 0.6.0
 
-### What is new in 0.5.0
-
-- **AI Director (`compose_video` / `reeltern compose --style ...`):** One-call production presets (`cinematic`, `viral_reel`, `tutorial`, `documentary`, `noir_trailer`) pairing silence trimming, intro slates, aspect framing, motion, color grading, voice cleanup, music ducking, loudness normalization, and captions.
-- **Closed-loop render QA (`audit_render` / `reeltern audit JOB_ID`):** Measures EBU R128 integrated loudness (`-16 LUFS`), true peak, luminance, contrast, near-black frames, rendered contact sheet PNGs, and actionable repair fixes.
-- **Creator-grade video & audio:** `blur_fill` vertical halo framing, Ken Burns camera motion (`zoom_in`, `zoom_out`, `pan_left`, `pan_right`), **10 color grades**, **10 `xfade` transitions**, `kinetic` word-highlight burned ASS captions, sliding bottom `progress_bar`, `voice_cleanup` EQ/compressor, and `import_audio` + `sidechaincompress` music ducking.
-- **MCP visual inspection & ergonomics:** Expanded to **31 tools (`100/100 Grade A`, `0` errors, `0` warnings)**, binary PNG resource templates (`reeltern://visual/asset/{asset_id}`, `reeltern://visual/render/{job_id}`), `reeltern://cookbook`, and `viral_short` / `polish_edit` prompts.
+- **Native Cross-OS Desktop Studio Executables:** Built with bundled FFmpeg (`imageio-ffmpeg`), PyAV, Tkinter dark workstation UI, and headless CLI/MCP stdio support inside `packaging/desktop_entry.py` and `scripts/build_desktop_app.py`. Double-click to open Studio cleanly (`~/ReelternWorkspace` default writable directory), or pass `mcp --workspace ... --media-root ...` for headless MCP stdio.
+- **First-Class Antigravity MCP Support:** Added `antigravity` to `mcp-config` (`~/.gemini/config/mcp_config.json`), `examples/clients/antigravity.json`, documentation, and the website hero/docs configurators.
+- **One-Click Studio Onboarding:** Added **Load Demo** (loads synthetic footage, storyboard, waveform, and timeline immediately), **Workspace…** folder switcher, and **Connect AI** live configuration copy modal inside **Reeltern Studio**, plus `reeltern studio` CLI alias.
 
 ### Release checks & limits
 
-Publication is gated on core unit tests (`53` checks locally, including pixel, audio, CLI, Studio Tk, and live stdio MCP checks) plus clean bundle installation, real demo render, cache-reuse checks, and 31-tool MCP handshake across Python 3.10–3.12 on Ubuntu, Windows, and macOS. Python and internet access are required for bundle dependency setup; GUI requires Tkinter. Bundles remain unsigned; there is still no built-in speech recognition or face tracking.
+Publication is gated on core unit tests across Ubuntu, Windows, and macOS (Python 3.10–3.12), documentation validation, OS bundle smoke tests, plus standalone Desktop Studio binary builds and MCP stdio handshake smoke tests across all four runners (`macos-15`, `macos-15-intel`, `windows-2022`, `ubuntu-22.04`). Bundles and `.dmg`/`.exe` builds remain unsigned (ad-hoc signed on macOS).
 
-[Showcase & Downloads](https://codesphere-u.github.io/reeltern/) · [Install guide](https://github.com/codesphere-u/reeltern/blob/v0.5.0/docs/releases.md) · [AI setup](https://github.com/codesphere-u/reeltern/blob/v0.5.0/docs/clients.md) · [Validation](https://github.com/codesphere-u/reeltern/blob/v0.5.0/VALIDATION.md)
+[Showcase & Downloads](https://codesphere-u.github.io/reeltern/) · [Install guide](https://github.com/codesphere-u/reeltern/blob/v0.6.0/docs/releases.md) · [AI setup](https://github.com/codesphere-u/reeltern/blob/v0.6.0/docs/clients.md) · [Validation](https://github.com/codesphere-u/reeltern/blob/v0.6.0/VALIDATION.md)

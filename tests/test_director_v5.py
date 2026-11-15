@@ -326,9 +326,22 @@ class DirectorV5Tests(unittest.TestCase):
             composed = compose_plan(app.ws, [vid['id']], director_style='documentary', music_asset_id=aud['id'])
             app.show_plan(composed['plan'])
             self.assertEqual(app.plan['music_asset_id'], aud['id'])
+
+            self.assertTrue(callable(app.load_demo))
+            self.assertTrue(callable(app.switch_workspace))
+            self.assertTrue(callable(app.connect_ai_dialog))
         finally:
             app.renderer.close()
             root.destroy()
+
+    def test_studio_default_workspace_and_cli_alias(self):
+        from unittest.mock import patch
+        from reeltern.studio import resolve_default_workspace
+        with patch.object(sys, 'frozen', True, create=True):
+            self.assertEqual(resolve_default_workspace(None), Path.home() / 'ReelternWorkspace')
+            self.assertEqual(resolve_default_workspace('/tmp/custom-ws'), Path('/tmp/custom-ws'))
+        res = subprocess.run([sys.executable, '-m', 'reeltern.cli', 'studio', '--help'], capture_output=True, text=True, check=True)
+        self.assertIn('--workspace', res.stdout)
 
     def test_mcp_reference_sync_and_v5_schema_bounds(self):
         ref = json.loads((Path(__file__).resolve().parents[1] / 'docs' / 'mcp-tools.json').read_text(encoding='utf-8'))

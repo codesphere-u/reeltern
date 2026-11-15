@@ -1,6 +1,6 @@
 # Reeltern
 
-> Local, reversible video editing for creators, engineers, and MCP assistants. Powered by FFmpeg & PyAV with 31 AgentFlight Grade-A tools, AI Director style presets, `blur_fill` halo framing, Ken Burns camera motion, `kinetic` word-highlight captions, sidechain-ducked background music, and EBU R128 closed-loop QA.
+> Local, reversible video editing for creators, engineers, and MCP assistants (Antigravity, Claude Code, Codex, Cursor, VS Code). Standalone Desktop Studio apps for macOS, Windows, and Linux plus CLI and Python packages powered by FFmpeg & PyAV with 31 AgentFlight Grade-A tools, 2 binary PNG visual resources, 4 prompts, AI Director style presets, `blur_fill` halo framing, Ken Burns camera motion, `kinetic` word-highlight captions, sidechain-ducked background music, and EBU R128 closed-loop QA.
 
 - Showcase: https://codesphere-u.github.io/reeltern/
 - Director Studio Simulator: https://codesphere-u.github.io/reeltern/studio.html

@@ -3,6 +3,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from reeltern.client_config import configuration
 
 
@@ -11,13 +12,24 @@ class ClientConfiguration(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='reeltern config ') as temp:
             root = Path(temp)
             workspace = root / 'new project'
-            for client in ('claude-code', 'cursor', 'vscode', 'generic'):
+            for client in ('antigravity', 'claude-code', 'cursor', 'vscode', 'generic'):
                 value = json.loads(configuration(client, workspace, root))
                 entry = value['servers' if client == 'vscode' else 'mcpServers']['reeltern']
                 self.assertEqual(entry['command'], str(Path(sys.executable).absolute()))
                 self.assertEqual(entry['args'][3:5], ['--workspace', str(workspace.resolve())])
                 self.assertEqual(entry['args'][-1], str(root.resolve()))
             self.assertFalse(workspace.exists(), 'Printing configuration must not create a workspace')
+
+    def test_frozen_app_configuration_omits_python_module_flag(self):
+        with tempfile.TemporaryDirectory(prefix='reeltern frozen ') as temp:
+            root = Path(temp)
+            workspace = root / 'project'
+            with patch.object(sys, 'frozen', True, create=True), patch.object(sys, 'executable', '/Applications/Reeltern Studio.app/Contents/MacOS/Reeltern Studio'):
+                value = json.loads(configuration('antigravity', workspace, root))
+            entry = value['mcpServers']['reeltern']
+            self.assertEqual(entry['args'][0], 'mcp')
+            self.assertNotIn('-m', entry['args'])
+            self.assertEqual(entry['args'][1:3], ['--workspace', str(workspace.resolve())])
 
     @unittest.skipIf(sys.version_info < (3, 11), 'TOML parser included in Python 3.11+')
     def test_codex_toml_roundtrip(self):

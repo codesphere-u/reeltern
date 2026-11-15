@@ -1,6 +1,6 @@
 # Implementation guide
 
-This guide is for contributors building features on Reeltern 0.5.0. Use [client setup](clients.md) to connect an assistant, [the operating workflow](agent-workflow.md) to edit footage, and [architecture](architecture.md) for storage and timing details.
+This guide is for contributors building features on Reeltern 0.6.0. Use [client setup](clients.md) to connect an assistant, [the operating workflow](agent-workflow.md) to edit footage, and [architecture](architecture.md) for storage and timing details.
 
 ## Development environment
 

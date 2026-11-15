@@ -10,8 +10,8 @@ from .workspace import PRESETS
 def main():
     parser = argparse.ArgumentParser(description="Reeltern — local video & AI director workflows")
     sub = parser.add_subparsers(dest="command", required=True)
-    gui = sub.add_parser("gui", help="Open the reversible timeline editor")
-    gui.add_argument("--workspace", default="reeltern-workspace")
+    gui = sub.add_parser("gui", aliases=["studio"], help="Open the Reeltern Studio desktop workstation")
+    gui.add_argument("--workspace", default=None)
     sub.add_parser("toolkit", help="Open the legacy optional-engine launcher")
     mcp = sub.add_parser("mcp", help="Serve local editing tools over MCP stdio")
     mcp.add_argument("--workspace", required=True)
@@ -98,7 +98,7 @@ def main():
             p.add_argument("--output", default="renders")
     args = parser.parse_args()
     try:
-        if args.command == "gui":
+        if args.command in ("gui", "studio"):
             from .studio import launch
             launch(args.workspace)
         elif args.command == "toolkit":

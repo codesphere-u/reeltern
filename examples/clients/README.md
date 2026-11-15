@@ -4,6 +4,7 @@ These files contain placeholder paths. Prefer `python -m reeltern.cli mcp-config
 
 | Template | Destination |
 |---|---|
+| `antigravity.json` | Global `~/.gemini/config/mcp_config.json` |
 | `claude-code.json` | Project `.mcp.json` |
 | `codex.toml` | Merge into `~/.codex/config.toml` |
 | `cursor.json` | Project `.cursor/mcp.json` |

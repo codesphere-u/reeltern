@@ -6,10 +6,10 @@
     <title>Reeltern Documentation — MCP Setup, AI Director &amp; CLI</title>
     <meta
       name="description"
-      content="Documentation for Reeltern 0.5.0: Stitch-style MCP client setup, AI Director production profiles, CLI reference, architecture contracts, and verified test evidence."
+      content="Documentation for Reeltern 0.6.0: Antigravity, Claude Code, Codex, Cursor & VS Code MCP setup, Desktop Studio apps, AI Director profiles, CLI reference, and verified test evidence."
     />
     <link rel="canonical" href="https://codesphere-u.github.io/reeltern/docs.html" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.5.0" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.6.0" />
     <script>
       (function () {
         try {
@@ -18,7 +18,7 @@
         } catch (e) {}
       })();
     </script>
-    <link rel="stylesheet" href="./styles.css?v=0.5.0" />
+    <link rel="stylesheet" href="./styles.css?v=0.6.0" />
   </head>
   <body>
     <header class="site-header">
@@ -49,7 +49,7 @@
             <span class="cmd-k-text">Search…</span>
             <kbd>⌘K</kbd>
           </button>
-          <a class="release-pill" href="./releases.html"><span class="pulse-dot"></span><span data-latest-tag>v0.5.0</span></a>
+          <a class="release-pill" href="./releases.html"><span class="pulse-dot"></span><span data-latest-tag>v0.6.0</span></a>
           <button class="icon-btn" type="button" id="theme-toggle" aria-label="Toggle theme" title="Switch light / dark theme">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
@@ -117,19 +117,20 @@
             <div class="vault-card" style="margin-top: 1.25rem;">
               <div class="vault-toolbar" style="padding: 0.9rem 1.1rem;">
                 <div class="pill-selector" id="mcp-client-tabs">
-                  <button class="chip-btn active" type="button" data-client="claude-code">Claude Code</button>
+                  <button class="chip-btn active" type="button" data-client="antigravity">Antigravity</button>
+                  <button class="chip-btn" type="button" data-client="claude-code">Claude Code</button>
                   <button class="chip-btn" type="button" data-client="codex">Codex (TOML)</button>
                   <button class="chip-btn" type="button" data-client="cursor">Cursor</button>
                   <button class="chip-btn" type="button" data-client="vscode">VS Code</button>
                   <button class="chip-btn" type="button" data-client="generic">Generic JSON</button>
                 </div>
-                <span class="mono" style="font-size: 0.74rem; color: var(--accent);" id="cfg-filename">.mcp.json</span>
+                <span class="mono" style="font-size: 0.74rem; color: var(--accent);" id="cfg-filename">~/.gemini/config/mcp_config.json</span>
               </div>
 
               <div style="padding: 1.1rem; display: flex; flex-direction: column; gap: 0.85rem;">
                 <div class="control-grid-3">
                   <label class="control-group">
-                    <span class="control-label">Python Executable</span>
+                    <span class="control-label">Python or Studio App Binary</span>
                     <input class="input-box" id="cfg-python" type="text" value="/path/to/reeltern/.venv/bin/python" />
                   </label>
                   <label class="control-group">
@@ -223,15 +224,17 @@
 
           <section id="cli-reference">
             <h2>CLI Reference</h2>
-            <p>Every workflow is mirrored across desktop, CLI, Python, and MCP:</p>
-            <pre class="code-window" style="border-radius: 8px; border: 1px solid var(--border);">reeltern gui
+            <p>Every workflow is mirrored across the standalone Desktop Studio app, CLI, Python, and MCP:</p>
+            <pre class="code-window" style="border-radius: 8px; border: 1px solid var(--border);">reeltern studio
 reeltern demo --workspace demo-project
 reeltern compose clip.mp4 --style viral_reel --music bgm.wav --preview --audit
 reeltern audit JOB_ID --workspace reeltern-workspace
 reeltern import-audio soundtrack.mp3 --workspace reeltern-workspace
 reeltern inspect clip.mp4 --thumbs 6 --samples 32
 reeltern card "Chapter One" --subtitle "Intro" --duration 2.0
-reeltern mcp-config claude-code --workspace ws --media-root footage</pre>
+reeltern transcript clip.mp4 captions.srt --workspace reeltern-workspace
+reeltern agent TRANSCRIPT_ID "Keep key highlights" --model qwen2.5:3b --style documentary
+reeltern mcp-config antigravity --workspace ws --media-root footage</pre>
           </section>
 
           <section id="validation">
@@ -298,6 +301,6 @@ reeltern mcp-config claude-code --workspace ws --media-root footage</pre>
       </div>
     </div>
 
-    <script src="./app.js?v=0.5.0"></script>
+    <script src="./app.js?v=0.6.0"></script>
   </body>
 </html>

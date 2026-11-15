@@ -1,5 +1,6 @@
 """Official MCP SDK, stdio only. No shell tools or arbitrary output paths."""
 import asyncio
+from importlib import metadata as _metadata
 import json
 from pathlib import Path
 from typing import Annotated, Literal
@@ -128,8 +129,12 @@ def create_server(workspace, media_root, agent_model=None, ollama_url="http://12
     @server.tool(annotations=read, structured_output=False)
     def capabilities() -> dict:
         """List supported editing tools, presets, effects, director profiles, and limits."""
+        try:
+            ver = _metadata.version('reeltern')
+        except _metadata.PackageNotFoundError:
+            ver = '0.6.0'
         return {
-            'version': '0.5.0',
+            'version': ver,
             'editorial_agent_enabled': agent is not None,
             'transport': 'stdio',
             'media_root': str(ws.media_root),

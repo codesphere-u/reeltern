@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "reeltern": {
+      "command": "/absolute/reeltern/.venv/bin/python",
+      "args": [
+        "-m",
+        "reeltern.cli",
+        "mcp",
+        "--workspace",
+        "/absolute/editing-project",
+        "--media-root",
+        "/absolute/footage"
+      ]
+    }
+  }
+}

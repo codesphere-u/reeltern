@@ -3,7 +3,16 @@ import json
 from pathlib import Path
 import sys
 
-CLIENTS = ('claude-code', 'codex', 'cursor', 'vscode', 'generic')
+CLIENTS = ('antigravity', 'claude-code', 'codex', 'cursor', 'vscode', 'generic')
+
+CLIENT_DESTINATIONS = {
+    'antigravity': '~/.gemini/config/mcp_config.json',
+    'claude-code': 'Project .mcp.json',
+    'codex': '~/.codex/config.toml',
+    'cursor': 'Project .cursor/mcp.json',
+    'vscode': 'Project .vscode/mcp.json',
+    'generic': 'Local stdio MCP client settings',
+}
 
 
 def configuration(client, workspace, media_root, agent_model=None):
@@ -15,10 +24,11 @@ def configuration(client, workspace, media_root, agent_model=None):
     project = Path(workspace).expanduser().resolve()
     if project.exists() and not project.is_dir():
         raise ValueError('Workspace must be a directory')
-    # Preserve the virtual environment executable; resolving its symlink can
-    # select the system interpreter and lose installed dependencies.
+    # Preserve the virtual environment executable or frozen desktop bundle; resolving
+    # its symlink can select the system interpreter and lose installed dependencies.
     command = str(Path(sys.executable).absolute())
-    args = ['-m', 'reeltern.cli', 'mcp', '--workspace', str(project), '--media-root', str(media)]
+    prefix = [] if getattr(sys, 'frozen', False) else ['-m', 'reeltern.cli']
+    args = [*prefix, 'mcp', '--workspace', str(project), '--media-root', str(media)]
     if agent_model is not None:
         if not isinstance(agent_model, str) or not agent_model.strip() or len(agent_model) > 200 or 'cloud' in agent_model.casefold():
             raise ValueError('Choose an installed local model, not a cloud model')

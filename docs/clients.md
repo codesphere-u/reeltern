@@ -1,8 +1,10 @@
 # Use Reeltern with an AI assistant
 
-Reeltern is a local **stdio MCP server**. Claude Code, Codex, Cursor, and VS Code can launch it as a child process. Your assistant supplies the reasoning; Reeltern supplies the editing tools. **Ollama is optional**: you do not need a second model to let your existing assistant select transcript cues.
+Reeltern is a local **stdio MCP server**. Antigravity, Claude Code, Codex, Cursor, and VS Code can launch it as a child process. Your assistant supplies the reasoning; Reeltern supplies the editing tools. **Ollama is optional**: you do not need a second model to let your existing assistant select transcript cues.
 
 ## Install and generate your configuration
+
+> **Using the standalone Desktop Studio app?** Open **Reeltern Studio**, click **Connect AI**, pick **Antigravity** (or another client), and copy the generated configuration pointing directly to your installed app executable. Or follow the Python CLI steps below.
 
 From a clone of this repository, create a Python environment and install the MCP extra:
 
@@ -18,6 +20,7 @@ Windows PowerShell: use `py -3.12 -m venv .venv`, then run `.\.venv\Scripts\pyth
 Choose an existing footage folder and a separate folder for working files. Run one of:
 
 ```sh
+python -m reeltern.cli mcp-config antigravity --workspace ./editing-project --media-root ./demo-project/demo-input
 python -m reeltern.cli mcp-config claude-code --workspace ./editing-project --media-root ./demo-project/demo-input
 python -m reeltern.cli mcp-config codex --workspace ./editing-project --media-root ./demo-project/demo-input
 python -m reeltern.cli mcp-config cursor --workspace ./editing-project --media-root ./demo-project/demo-input
@@ -28,6 +31,7 @@ The command prints a configuration with your environment's Python executable and
 
 | Client | Where to merge the result | Format |
 |---|---|---|
+| Antigravity | `~/.gemini/config/mcp_config.json` | `mcpServers.reeltern` |
 | Claude Code | Project `.mcp.json` | `mcpServers.reeltern` |
 | Codex | `~/.codex/config.toml` | `[mcp_servers.reeltern]` |
 | Cursor | Project `.cursor/mcp.json` | `mcpServers.reeltern` |
@@ -35,6 +39,23 @@ The command prints a configuration with your environment's Python executable and
 | Another local MCP client | Run `mcp-config generic`; follow its settings format | Command + argument array |
 
 Example files with placeholder paths are in [examples/clients](../examples/clients/). Prefer generated configuration for actual use. Absolute paths are machine-specific: keep your personal configuration out of shared commits. Use different workspace folders if two clients will run at the same time. One renderer owns a workspace at a time; close Studio before connecting MCP to that same workspace.
+
+### Antigravity
+
+Merge the printed `mcpServers.reeltern` entry into `~/.gemini/config/mcp_config.json` (or click **Connect AI → Copy Configuration** inside **Reeltern Studio**):
+
+```json
+{
+  "mcpServers": {
+    "reeltern": {
+      "command": "/absolute/reeltern/.venv/bin/python",
+      "args": ["-m", "reeltern.cli", "mcp", "--workspace", "/absolute/editing-project", "--media-root", "/absolute/footage"]
+    }
+  }
+}
+```
+
+Reload MCP servers in Antigravity's Plugins / MCP manager to verify `reeltern` connects over stdio.
 
 ### Claude Code
 
@@ -69,7 +90,7 @@ Ask your assistant:
 
 > Use Reeltern's capabilities tool and list_assets. Tell me which media root it can access and whether the local editorial agent is enabled. Do not import or render anything yet.
 
-You should see 26 tools, stdio transport, the configured media root, and the current version. Tool names may gain a client-specific prefix. This checks the real connection rather than relying on a config file's existence.
+You should see 31 tools, 2 visual resources, 4 prompts, stdio transport, the configured media root, and the current version. Tool names may gain a client-specific prefix. This checks the real connection rather than relying on a config file's existence.
 
 Then try the generated demo footage:
 

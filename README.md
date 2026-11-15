@@ -9,7 +9,7 @@
 **Local video editing · Reversible decisions · AI through MCP**
 
 [![Tests](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml/badge.svg)](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/preview-v0.5.0-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/preview-v0.6.0-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
 [![MCP](https://img.shields.io/badge/MCP-31_tools_Grade_A-2f665a?style=flat-square&labelColor=172333)](docs/mcp.md)
 [![License](https://img.shields.io/badge/license-GPL_3.0_or_later-365b79?style=flat-square&labelColor=172333)](LICENSE)
 
@@ -50,7 +50,7 @@ Every plan records **what was selected, where it came from, how fast it plays, a
 
 ## Get started
 
-**Prefer a download?** [GitHub Releases](https://github.com/codesphere-u/reeltern/releases) provides Windows, macOS and Linux **Python installation bundles**, plus a wheel and source archive. Python and internet access are required; these are not standalone native apps. [Choose a package →](docs/releases.md)
+**Prefer a download?** [GitHub Releases](https://github.com/codesphere-u/reeltern/releases) provides **standalone Desktop Studio GUI apps** for macOS (Apple Silicon & Intel), Windows, and Linux — plus Python installation bundles, wheel, and source archives. [Choose a package →](docs/releases.md)
 
 **Try a complete edit before bringing your own footage.** Use Python 3.12 for parity with the test environment; the package supports Python 3.10+.
 
@@ -91,12 +91,12 @@ FFmpeg is supplied by `imageio-ffmpeg` on supported platforms; an installed syst
 ### In the desktop
 
 ```sh
-reeltern gui
+reeltern studio
 ```
 
-**Import → assemble or suggest cuts → review → preview → export.**
+**Import or Load Demo → AI Director or Trim → Review Timeline → Audit QA → Export.**
 
-Select **Transcript & AI** to import an SRT and keep selected passages. Revise source ranges or speed in the timeline table, then use **Undo to parent** or **Earlier plans** to revisit decisions. Playback opens in your default video player.
+Use **Load Demo** to generate sample footage and inspect a multi-clip timeline immediately, **Connect AI** to copy Antigravity / Claude Code / Codex / Cursor / VS Code MCP settings, **AI Director** for one-click composition, or **Transcript & AI** to import an SRT. Playback opens in your default video player.
 
 ### From the command line
 
@@ -124,17 +124,17 @@ Use the transcript ID printed by the first command. An MCP assistant can select 
 
 ## Connect your AI
 
-**Claude Code · Codex · Cursor · VS Code · other local MCP clients**
+**Antigravity · Claude Code · Codex · Cursor · VS Code · other local MCP clients**
 
-Generate configuration from the Python environment where Reeltern is installed:
+Generate configuration from the Python environment where Reeltern is installed (or click **Connect AI** inside **Reeltern Studio**):
 
 ```sh
-reeltern mcp-config claude-code \
+reeltern mcp-config antigravity \
   --workspace editing-project \
   --media-root demo-project/demo-input
 ```
 
-Replace `claude-code` with `codex`, `cursor`, `vscode` or `generic`. The command prints settings with absolute paths; merge the Reeltern entry into your client's configuration. It does not change settings automatically. Use an existing footage folder as `--media-root`.
+Replace `antigravity` with `claude-code`, `codex`, `cursor`, `vscode` or `generic`. The command prints settings with absolute paths; merge the Reeltern entry into your client's configuration. It does not change settings automatically. Use an existing footage folder as `--media-root`.
 
 Then ask your connected assistant:
 

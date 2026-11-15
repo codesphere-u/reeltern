@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 — 15 November 2026
+
+- **Standalone Cross-OS Desktop Studio Apps (`packaging/desktop_entry.py`, `scripts/build_desktop_app.py`):**
+  - Added PyInstaller `--onedir` desktop packaging pipeline for **macOS Apple Silicon (`.dmg`)**, **macOS Intel (`.dmg`)**, **Windows x64 (`.zip`)**, and **Linux x64 (`.tar.gz` + `.desktop`)** bundling FFmpeg, PyAV, Tkinter, and the 31-tool MCP server with generated app icons.
+  - Added safe default writable workspace selection (`~/ReelternWorkspace`) when double-clicked from Finder/Explorer or read-only working directories, `-psn_*` LaunchServices argument filtering, and frozen-executable `mcp-config` detection in `reeltern/client_config.py`.
+- **First-Class Antigravity Support & Studio Onboarding (`client_config.py`, `studio.py`, `cli.py`):**
+  - Added `antigravity` to `reeltern mcp-config` (`~/.gemini/config/mcp_config.json`), `examples/clients/antigravity.json`, client tests, docs, and website selectors.
+  - Added **Load Demo**, **Workspace…**, and **Connect AI** configuration generator modal directly inside **Reeltern Studio**, plus the `reeltern studio` CLI alias.
+
 ## 0.5.0 — 15 November 2026
 
 - **AI Director & Self-Critique Closed Loop (`reeltern/director.py`):**

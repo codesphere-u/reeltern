@@ -1,10 +1,14 @@
 """Reeltern Studio — modern local desktop workstation over the core editing engine."""
+import os
 from pathlib import Path
 import queue
+import sys
 import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import webbrowser
+from .client_config import CLIENTS, CLIENT_DESTINATIONS, configuration
+from .demo import run_demo
 from .director import DIRECTOR_STYLES, audit_job_render, compose_plan
 from .effects import CAPTION_MODES, CAPTION_STYLES, COLOR_GRADES, FIT_MODES, FLIPS, MOTIONS, ROTATIONS, TRANSITIONS
 from .workspace import PRESETS, Workspace
@@ -27,10 +31,23 @@ COLORS = {
 CLIP_PALETTE = ['#1e3a5f', '#273059', '#194542', '#3f2e56', '#4a3520', '#1e4263']
 
 
+def resolve_default_workspace(workspace=None):
+    """Choose a writable workspace folder when launched without an explicit writable directory."""
+    if workspace is not None and workspace != 'reeltern-workspace':
+        return Path(workspace)
+    if not getattr(sys, 'frozen', False):
+        try:
+            if os.access(Path.cwd(), os.W_OK):
+                return Path(workspace or 'reeltern-workspace')
+        except OSError:
+            pass
+    return Path.home() / 'ReelternWorkspace'
+
+
 class Studio:
-    def __init__(self, root, workspace='reeltern-workspace'):
+    def __init__(self, root, workspace=None):
         self.root = root
-        self.ws = Workspace(workspace)
+        self.ws = Workspace(resolve_default_workspace(workspace))
         self.renderer = Renderer(self.ws)
         self.plan = None
         self.job = None
@@ -43,15 +60,15 @@ class Studio:
         self.current_visuals = None
 
         self.root.title('Reeltern Studio — Advanced Local Video Workflow Toolkit')
-        self.root.geometry('1280x880')
+        self.root.geometry('1320x900')
         self.root.minsize(1040, 720)
         self.root.configure(bg=COLORS['bg'])
         self._configure_styles()
 
         self.preset = tk.StringVar(value='landscape')
         self.fit = tk.StringVar(value='contain')
-        self.summary = tk.StringVar(value='Import footage or generate a title card to begin.')
-        self.status = tk.StringVar(value='Ready · Local workspace: ' + str(self.ws.root.name))
+        self.summary = tk.StringVar(value='Import footage, generate a title card, or click Load Demo to begin.')
+        self.status = tk.StringVar(value='Ready · Workspace: ' + str(self.ws.root))
         self.playhead_text = tk.StringVar(value='Playhead: 0.00s')
 
         self.fields = {
@@ -129,19 +146,22 @@ class Studio:
         bar = tk.Frame(top, bg=COLORS['bg'])
         bar.pack(side='right')
         ttk.Button(bar, text='Import Video', style='Accent.TButton', command=self.import_file).pack(side='left', padx=3)
+        ttk.Button(bar, text='Load Demo', command=lambda: self.guarded(self.load_demo)).pack(side='left', padx=3)
         ttk.Button(bar, text='+ Audio', command=self.import_audio_file).pack(side='left', padx=3)
         ttk.Button(bar, text='+ Title Card', command=self.title_card_dialog).pack(side='left', padx=3)
         ttk.Button(bar, text='AI Director', command=self.director_dialog).pack(side='left', padx=3)
         ttk.Button(bar, text='Silence Trim', command=self.suggest).pack(side='left', padx=3)
         ttk.Button(bar, text='Transcript & AI', command=self.transcript_editor).pack(side='left', padx=3)
-        ttk.Button(bar, text='Plans & Diff', command=self.history).pack(side='left', padx=3)
-        ttk.Button(bar, text='Render Folder', command=self.open_results).pack(side='left', padx=3)
+        ttk.Button(bar, text='Connect AI', command=self.connect_ai_dialog).pack(side='left', padx=3)
 
         fmt_bar = tk.Frame(self.root, bg=COLORS['card'], padx=14, pady=6)
         fmt_bar.pack(fill='x', padx=14, pady=(0, 8))
         tk.Label(fmt_bar, textvariable=self.summary, bg=COLORS['card'], fg=COLORS['text'], font=('Helvetica', 11, 'bold')).pack(side='left')
         fmt_right = tk.Frame(fmt_bar, bg=COLORS['card'])
         fmt_right.pack(side='right')
+        ttk.Button(fmt_right, text='Workspace…', command=lambda: self.guarded(self.switch_workspace)).pack(side='left', padx=3)
+        ttk.Button(fmt_right, text='Plans & Diff', command=self.history).pack(side='left', padx=3)
+        ttk.Button(fmt_right, text='Render Folder', command=self.open_results).pack(side='left', padx=(3, 10))
         tk.Label(fmt_right, text='Output:', bg=COLORS['card'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
         ttk.Combobox(fmt_right, textvariable=self.preset, values=list(PRESETS), state='readonly', width=10).pack(side='left', padx=3)
         ttk.Combobox(fmt_right, textvariable=self.fit, values=FIT_MODES, state='readonly', width=10).pack(side='left', padx=3)
@@ -974,6 +994,120 @@ class Studio:
                 self.status.set(state.get('error', state['status']))
         self.root.after(180, self.poll)
 
+    def load_demo(self):
+        def _demo_work():
+            report = run_demo(self.ws.root)
+            plan = self.ws.plan(report['plan_id'])
+            vid_id = plan['clips'][0]['asset_id']
+            visuals = self.ws.inspect_visuals(vid_id, thumbs=6, samples=60)
+            return report, plan, vid_id, visuals
+
+        def _after(payload):
+            report, plan, vid_id, visuals = payload
+            self.refresh_assets()
+            self.assets.selection_set(vid_id)
+            self.display_visuals(visuals)
+            self.show_plan(plan)
+            self.status.set(f'Demo loaded ({report["edit_seconds"]:.2f}s edit, {report["cache_hits"]} cached segments)')
+
+        self.task(_demo_work, _after)
+
+    def switch_workspace(self):
+        if self.busy or (self.job and self.renderer.status(self.job)['status'] in ('queued', 'running', 'verifying')):
+            raise ValueError('Wait for the active operation or render to finish first')
+        folder = filedialog.askdirectory(title='Choose Reeltern Workspace Folder', initialdir=str(self.ws.root.parent))
+        if not folder:
+            return
+        self.renderer.close()
+        self.ws = Workspace(folder)
+        self.renderer = Renderer(self.ws)
+        self.plan = None
+        self.job = None
+        self.reported_job = None
+        self.current_visuals = None
+        self.timeline.delete(*self.timeline.get_children())
+        self.storyboard_canvas.delete('all')
+        self.waveform_canvas.delete('all')
+        self._draw_timeline_canvas()
+        self.refresh_assets()
+        self.summary.set('Import footage, generate a title card, or click Load Demo to begin.')
+        self.status.set('Switched workspace · ' + str(self.ws.root))
+
+    def connect_ai_dialog(self):
+        win = tk.Toplevel(self.root)
+        win.title('Connect AI Assistant (MCP) — Antigravity, Claude Code, Codex, Cursor, VS Code')
+        win.geometry('760x560')
+        win.configure(bg=COLORS['panel'])
+        frm = tk.Frame(win, bg=COLORS['panel'], padx=18, pady=16)
+        frm.pack(fill='both', expand=True)
+
+        tk.Label(frm, text='Local stdio MCP Configuration', bg=COLORS['panel'], fg=COLORS['accent'], font=('Helvetica', 14, 'bold')).pack(anchor='w')
+        tk.Label(
+            frm,
+            text='Reeltern runs locally via stdio MCP (31 tools, 2 visual PNG resources, 4 prompts). Close Studio before launching a write-enabled MCP session against the same workspace.',
+            bg=COLORS['panel'],
+            fg=COLORS['muted'],
+            wraplength=700,
+            justify='left',
+        ).pack(anchor='w', pady=(4, 12))
+
+        client_var = tk.StringVar(value='antigravity')
+        default_media = self.ws.root / 'demo-input'
+        media_var = tk.StringVar(value=str(default_media if default_media.is_dir() else self.ws.root))
+        model_var = tk.StringVar(value='')
+        dest_var = tk.StringVar(value=CLIENT_DESTINATIONS['antigravity'])
+
+        row_c = tk.Frame(frm, bg=COLORS['panel']); row_c.pack(fill='x', pady=4)
+        tk.Label(row_c, text='AI Client', bg=COLORS['panel'], fg=COLORS['muted'], width=14, anchor='w').pack(side='left')
+        client_box = ttk.Combobox(row_c, textvariable=client_var, values=list(CLIENTS), state='readonly', width=20)
+        client_box.pack(side='left')
+        tk.Label(row_c, textvariable=dest_var, bg=COLORS['panel'], fg=COLORS['mint'], font=('Helvetica', 10)).pack(side='left', padx=12)
+
+        row_m = tk.Frame(frm, bg=COLORS['panel']); row_m.pack(fill='x', pady=4)
+        tk.Label(row_m, text='Media Root', bg=COLORS['panel'], fg=COLORS['muted'], width=14, anchor='w').pack(side='left')
+        ttk.Entry(row_m, textvariable=media_var).pack(side='left', fill='x', expand=True, padx=(0, 6))
+        def browse_media():
+            picked = filedialog.askdirectory(parent=win, title='Select Existing Footage Folder', initialdir=media_var.get())
+            if picked:
+                media_var.set(picked)
+                refresh_preview()
+        ttk.Button(row_m, text='Browse…', command=browse_media).pack(side='right')
+
+        row_o = tk.Frame(frm, bg=COLORS['panel']); row_o.pack(fill='x', pady=4)
+        tk.Label(row_o, text='Ollama (opt)', bg=COLORS['panel'], fg=COLORS['muted'], width=14, anchor='w').pack(side='left')
+        ttk.Entry(row_o, textvariable=model_var).pack(side='left', fill='x', expand=True)
+
+        text = tk.Text(frm, bg=COLORS['bg'], fg=COLORS['text'], insertbackground=COLORS['accent'], font=('Courier', 11), relief='flat', padx=10, pady=10)
+        text.pack(fill='both', expand=True, pady=(10, 10))
+
+        def refresh_preview(*_):
+            client = client_var.get()
+            dest_var.set('Destination: ' + CLIENT_DESTINATIONS.get(client, ''))
+            model = model_var.get().strip() or None
+            try:
+                output = configuration(client, self.ws.root, media_var.get(), model)
+            except Exception as exc:
+                output = f'Configuration error: {exc}'
+            text.configure(state='normal')
+            text.delete('1.0', 'end')
+            text.insert('1.0', output)
+            text.configure(state='disabled')
+
+        client_box.bind('<<ComboboxSelected>>', refresh_preview)
+        media_var.trace_add('write', refresh_preview)
+        model_var.trace_add('write', refresh_preview)
+        refresh_preview()
+
+        btns = tk.Frame(frm, bg=COLORS['panel'])
+        btns.pack(fill='x')
+        def copy_cfg():
+            content = text.get('1.0', 'end-1c')
+            self.root.clipboard_clear()
+            self.root.clipboard_append(content)
+            self.status.set(f'Copied {client_var.get()} MCP configuration to clipboard')
+        ttk.Button(btns, text='Copy Configuration', style='Accent.TButton', command=copy_cfg).pack(side='left')
+        ttk.Button(btns, text='Close', command=win.destroy).pack(side='right')
+
     def close(self):
         if self.busy:
             self.status.set('Wait for import or analysis to finish before closing.')
@@ -982,7 +1116,10 @@ class Studio:
         self.root.destroy()
 
 
-def launch(workspace='reeltern-workspace'):
+def launch(workspace=None):
     root = tk.Tk()
-    Studio(root, workspace)
+    app = Studio(root, workspace)
+    smoke_ms = os.environ.get('REELTERN_STUDIO_SMOKE_MS', '').strip()
+    if smoke_ms.isdigit() and int(smoke_ms) > 0:
+        root.after(int(smoke_ms), app.close)
     root.mainloop()

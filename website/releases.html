@@ -9,7 +9,7 @@
       content="Download current and future Reeltern releases (macOS, Windows, Linux bundles, wheels, source tarballs) with live GitHub Releases synchronization and in-browser SHA-256 verification."
     />
     <link rel="canonical" href="https://codesphere-u.github.io/reeltern/releases.html" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.5.0" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.6.0" />
     <script>
       (function () {
         try {
@@ -18,7 +18,7 @@
         } catch (e) {}
       })();
     </script>
-    <link rel="stylesheet" href="./styles.css?v=0.5.0" />
+    <link rel="stylesheet" href="./styles.css?v=0.6.0" />
   </head>
   <body>
     <header class="site-header">
@@ -49,7 +49,7 @@
             <span class="cmd-k-text">Search…</span>
             <kbd>⌘K</kbd>
           </button>
-          <a class="release-pill" href="#releases-list"><span class="pulse-dot"></span><span data-latest-tag>v0.5.0</span></a>
+          <a class="release-pill" href="#releases-list"><span class="pulse-dot"></span><span data-latest-tag>v0.6.0</span></a>
           <button class="icon-btn" type="button" id="theme-toggle" aria-label="Toggle theme" title="Switch light / dark theme">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
@@ -79,7 +79,7 @@
         <div class="container">
           <div class="verify-dropzone" id="sha-dropzone" tabindex="0">
             <div class="section-kicker" style="margin-bottom: 0.35rem;">Zero-Upload Browser Verification</div>
-            <h2 style="margin: 0 0 0.35rem; font-size: 1.2rem;">Verify Any Downloaded Archive (.zip, .whl, .tar.gz)</h2>
+            <h2 style="margin: 0 0 0.35rem; font-size: 1.2rem;">Verify Any Downloaded Package (.dmg, .zip, .whl, .tar.gz)</h2>
             <p style="margin: 0; color: var(--ink-muted); font-size: 0.9rem;">
               Drop a local archive here or click to hash it with Web Crypto SHA-256 and match against official GitHub Release digests.
             </p>
@@ -142,6 +142,6 @@
       </div>
     </div>
 
-    <script src="./app.js?v=0.5.0"></script>
+    <script src="./app.js?v=0.6.0"></script>
   </body>
 </html>

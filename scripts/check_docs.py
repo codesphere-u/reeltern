@@ -23,4 +23,4 @@ entry = tomllib.loads((root/'examples/clients/codex.toml').read_text())['mcp_ser
 assert entry['tool_timeout_sec'] >= 240
 reference = json.loads((root/'docs/mcp-tools.json').read_text(encoding='utf-8'))
 assert len(reference['tools']) == len({t['name'] for t in reference['tools']}) == 31
-print(f'Checked {checked} local links, five client configurations, and the 31-tool reference.')
+print(f'Checked {checked} local links, six client configurations, and the 31-tool reference.')

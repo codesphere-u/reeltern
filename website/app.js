@@ -41,13 +41,44 @@
 
   function classifyAsset(name) {
     const lower = (name || '').toLowerCase();
-    if (lower.includes('macos')) return { key: 'macos', label: 'macOS Bundle (.zip)', badge: 'macOS' };
-    if (lower.includes('windows')) return { key: 'windows', label: 'Windows Bundle (.zip)', badge: 'Windows' };
-    if (lower.includes('linux')) return { key: 'linux', label: 'Linux Bundle (.zip)', badge: 'Linux' };
-    if (lower.endsWith('.whl')) return { key: 'wheel', label: 'Python Wheel (.whl)', badge: 'pip / venv' };
-    if (lower.endsWith('.tar.gz')) return { key: 'source', label: 'Source Archive (.tar.gz)', badge: 'Source' };
-    if (lower.includes('sha256')) return { key: 'checksum', label: 'SHA-256 Checksums', badge: 'Verify' };
-    return { key: 'other', label: name, badge: 'Asset' };
+    const isDesktopApp = lower.startsWith('reeltern-studio-');
+    if (lower.includes('macos-arm64')) {
+      return { key: 'macos', app: isDesktopApp, rank: isDesktopApp ? 0 : 1, label: 'macOS Apple Silicon Studio App (.dmg)', badge: 'macOS arm64 App' };
+    }
+    if (lower.includes('macos-x64')) {
+      return { key: 'macos', app: isDesktopApp, rank: isDesktopApp ? 0 : 1, label: 'macOS Intel Studio App (.dmg)', badge: 'macOS Intel App' };
+    }
+    if (lower.includes('macos')) {
+      return {
+        key: 'macos',
+        app: isDesktopApp,
+        rank: isDesktopApp ? 0 : 1,
+        label: isDesktopApp ? 'macOS Studio App (.dmg)' : 'macOS Python CLI Bundle (.zip)',
+        badge: isDesktopApp ? 'macOS Studio App' : 'macOS CLI Zip',
+      };
+    }
+    if (lower.includes('windows')) {
+      return {
+        key: 'windows',
+        app: isDesktopApp,
+        rank: isDesktopApp ? 0 : 1,
+        label: isDesktopApp ? 'Windows Desktop Studio App (.zip)' : 'Windows Python CLI Bundle (.zip)',
+        badge: isDesktopApp ? 'Windows Studio App' : 'Windows CLI Zip',
+      };
+    }
+    if (lower.includes('linux')) {
+      return {
+        key: 'linux',
+        app: isDesktopApp,
+        rank: isDesktopApp ? 0 : 1,
+        label: isDesktopApp ? 'Linux Desktop Studio App (.tar.gz)' : 'Linux Python CLI Bundle (.zip)',
+        badge: isDesktopApp ? 'Linux Studio App' : 'Linux CLI Zip',
+      };
+    }
+    if (lower.endsWith('.whl')) return { key: 'wheel', app: false, rank: 2, label: 'Python Wheel (.whl)', badge: 'pip / venv' };
+    if (lower.endsWith('.tar.gz')) return { key: 'source', app: false, rank: 3, label: 'Source Archive (.tar.gz)', badge: 'Source' };
+    if (lower.includes('sha256')) return { key: 'checksum', app: false, rank: 4, label: 'SHA-256 Checksums', badge: 'Verify' };
+    return { key: 'other', app: false, rank: 5, label: name, badge: 'Asset' };
   }
 
   function copyWithFeedback(btn, text) {
@@ -111,11 +142,11 @@
       { title: 'Overview & Live Studio', kind: 'Page', href: './', keywords: 'home hero timeline canvas' },
       { title: 'blur_fill Halo Framing · Aspect Comparison', kind: 'Feature', href: './#blur-compare', keywords: 'blur_fill blur contain cover 9:16 vertical letterboxing' },
       { title: 'Interactive Director Studio Sandbox', kind: 'Page', href: './studio.html', keywords: 'studio playground viral_reel cinematic noir_trailer' },
-      { title: 'MCP Setup Guide (Claude, Codex, Cursor, VS Code)', kind: 'Docs', href: './docs.html#mcp-setup', keywords: 'mcp-config toml claude codex cursor vscode' },
+      { title: 'MCP Setup Guide (Antigravity, Claude, Codex, Cursor, VS Code)', kind: 'Docs', href: './docs.html#mcp-setup', keywords: 'antigravity gemini mcp-config toml claude codex cursor vscode' },
       { title: 'AI Director Production Profiles (5 styles)', kind: 'Docs', href: './docs.html#director-profiles', keywords: 'viral_reel cinematic tutorial documentary noir_trailer' },
-      { title: 'CLI Subcommands Reference', kind: 'Docs', href: './docs.html#cli-reference', keywords: 'compose inspect audit studio demo' },
+      { title: 'CLI Subcommands Reference', kind: 'Docs', href: './docs.html#cli-reference', keywords: 'compose inspect audit studio demo transcript agent card' },
       { title: '31 MCP Tool Schemas', kind: 'Spec', href: './tools.html', keywords: 'tools schema agentflight' },
-      { title: 'Releases & Client-Side SHA-256 Verifier', kind: 'Downloads', href: './releases.html', keywords: 'zip wheel tar.gz checksum sha256 macos windows linux' },
+      { title: 'Releases, Desktop Studio Apps & SHA-256 Verifier', kind: 'Downloads', href: './releases.html', keywords: 'dmg exe studio zip wheel tar.gz checksum sha256 macos windows linux' },
     ];
 
     let allItems = [...baseItems];
@@ -193,8 +224,16 @@
     const stepsEl = document.getElementById('hero-steps-list');
     if (!tabBtns.length || !cmdText || !stepsEl) return;
 
-    const ver = (latestTag || 'v0.5.0').replace(/^v/, '');
+    const ver = (latestTag || 'v0.6.0').replace(/^v/, '');
     const PROFILES = {
+      antigravity: {
+        cmd: `reeltern mcp-config antigravity --workspace ./ws --media-root ./footage`,
+        steps: [
+          `Merge mcpServers.reeltern into ~/.gemini/config/mcp_config.json (or click Connect AI inside Reeltern Studio)`,
+          `Both Python venv and standalone Desktop Studio app binaries work as local MCP stdio servers`,
+          `Reload MCP in Antigravity to unlock 31 tools, 2 visual PNG resources & 4 prompts`,
+        ],
+      },
       claude: {
         cmd: `pip install -e '.[mcp]' && reeltern mcp-config claude-code --workspace ./ws --media-root ./footage`,
         steps: [
@@ -215,7 +254,7 @@
         cmd: `reeltern mcp-config cursor --workspace ./ws --media-root ./footage > .cursor/mcp.json`,
         steps: [
           `Reload Cursor MCP servers to register 31 typed video tools`,
-          `Open .cursor/mcp.json to verify virtualenv python executable path`,
+          `Open .cursor/mcp.json to verify executable path`,
           `Ask Composer: "compose demo.mp4 with style=tutorial & preview"`,
         ],
       },
@@ -231,40 +270,40 @@
         cmd: `pip install -e '.[mcp]' && reeltern compose launch.mp4 --style viral_reel --music bgm.wav --preview --audit`,
         steps: [
           `Run zero-setup synthetic test project: reeltern demo --workspace demo-ws`,
-          `Launch native Tk desktop timeline: reeltern studio`,
+          `Launch native Desktop Studio GUI: reeltern studio`,
           `Re-audit any job anytime: reeltern audit JOB_ID --workspace ./ws`,
         ],
       },
       macos: {
-        cmd: `unzip reeltern-${ver}-macos-python.zip && cd reeltern-${ver}-macos-python && python3 install.py`,
+        cmd: `open "Reeltern-Studio-${ver}-macos-arm64.dmg"   # Drag Reeltern Studio.app -> /Applications`,
         steps: [
-          `Creates isolated .venv inside the extracted folder (never alters system Python)`,
-          `Verify archive checksum locally using ./releases.html dropzone`,
-          `Launch Desktop Studio or CLI with ./reeltern.sh gui`,
+          `Available for Apple Silicon (arm64) and Intel (x64) Macs — bundled FFmpeg, PyAV & Tk included`,
+          `Click Load Demo on launch to inspect storyboard, waveform & timeline immediately`,
+          `Click Connect AI inside Studio to copy ready-to-paste Antigravity / MCP config`,
         ],
       },
       windows: {
-        cmd: `Expand-Archive reeltern-${ver}-windows-python.zip -DestinationPath . && cd reeltern-${ver}-windows-python && py -3.12 install.py`,
+        cmd: `Expand-Archive Reeltern-Studio-${ver}-windows-x64.zip -DestinationPath . ; .\\Reeltern-Studio\\"Reeltern Studio.exe"`,
         steps: [
-          `Includes bundled portable runner script (.\\reeltern.cmd)`,
-          `Run preview render: .\\reeltern.cmd compose clip.mp4 --style viral_reel --preview`,
-          `Open Desktop Studio: .\\reeltern.cmd gui`,
+          `Zero Python setup required — double-click Reeltern Studio.exe directly from Explorer`,
+          `Click Load Demo or Import Video, pick an AI Director preset, and export locally`,
+          `Or invoke CLI / Antigravity MCP directly via "Reeltern Studio.exe" mcp ...`,
         ],
       },
       linux: {
-        cmd: `unzip reeltern-${ver}-linux-python.zip && cd reeltern-${ver}-linux-python && python3 install.py`,
+        cmd: `tar -xzf Reeltern-Studio-${ver}-linux-x64.tar.gz && ./reeltern-studio/reeltern-studio`,
         steps: [
-          `GUI requires system python3-tk; headless CLI & MCP server work anywhere`,
-          `Verify SHA-256 matches official SHA256SUMS.txt from GitHub Releases`,
-          `Start MCP or demo: sh reeltern.sh demo --workspace demo-project`,
+          `Portable x86_64 Desktop Studio build with bundled FFmpeg, PyAV, Tcl/Tk & MCP stdio`,
+          `Includes reeltern-studio.desktop launcher for Ubuntu / Fedora / desktop menus`,
+          `Also exposes CLI & Antigravity MCP stdio directly without modifying system Python`,
         ],
       },
     };
 
-    let activeKey = 'claude';
+    let activeKey = 'antigravity';
     function render(key) {
       activeKey = key;
-      const p = PROFILES[key] || PROFILES.claude;
+      const p = PROFILES[key] || PROFILES.antigravity;
       tabBtns.forEach((b) => b.classList.toggle('active', b.dataset.target === key));
       cmdText.textContent = p.cmd;
       stepsEl.innerHTML = p.steps
@@ -649,7 +688,7 @@
 
     const MODES = {
       agent: {
-        title: 'MCP Workflow · Claude Code / Codex / Cursor / VS Code',
+        title: 'MCP Workflow · Antigravity / Claude Code / Codex / Cursor',
         code: `assistant -> call import_media(path="footage/launch.mp4")\nassistant -> call inspect_media_visuals(asset_id)   # PNG contact sheet + cuts\nassistant -> call compose_video(asset_ids, style="viral_reel", music_id=...)\nassistant -> call render_plan(plan_id, preview=true) -> audit_render(job_id)\n# PASSED (-16.0 LUFS, 0 black frames) -> export final 1080p MP4`,
         steps: [
           { t: 'Inspect real frames', d: 'Your AI reads a tiled PNG contact sheet, scene cuts, and speech peaks before editing.' },
@@ -719,15 +758,15 @@
   }
 
   function renderInstallSnippet(osTab, ver) {
-    const cleanVer = (ver || '0.5.0').replace(/^v/, '');
+    const cleanVer = (ver || '0.6.0').replace(/^v/, '');
     if (osTab === 'macos') {
-      return `# Extract reeltern-${cleanVer}-macos-python.zip cleanly:\ncd reeltern-${cleanVer}-macos-python\npython3 install.py\n./reeltern.sh compose your-clip.mp4 --style viral_reel --preview --audit\n./reeltern.sh gui`;
+      return `# Standalone macOS Desktop Studio App (Apple Silicon or Intel):\nopen "Reeltern-Studio-${cleanVer}-macos-arm64.dmg"\n# Drag "Reeltern Studio.app" into /Applications and double-click to launch!\n\n# Or use the Python CLI bundle:\nunzip reeltern-${cleanVer}-macos-python.zip && cd reeltern-${cleanVer}-macos-python\npython3 install.py && ./reeltern.sh studio`;
     }
     if (osTab === 'windows') {
-      return `# Extract reeltern-${cleanVer}-windows-python.zip, then in PowerShell:\ncd reeltern-${cleanVer}-windows-python\npy -3.12 install.py\n.\\reeltern.cmd compose your-clip.mp4 --style viral_reel --preview --audit\n.\\reeltern.cmd gui`;
+      return `# Standalone Windows x64 Desktop Studio App (PowerShell):\nExpand-Archive Reeltern-Studio-${cleanVer}-windows-x64.zip -DestinationPath .\n.\\Reeltern-Studio\\"Reeltern Studio.exe"\n\n# Or use the Python CLI bundle:\nExpand-Archive reeltern-${cleanVer}-windows-python.zip -DestinationPath .\ncd reeltern-${cleanVer}-windows-python && py -3.12 install.py && .\\reeltern.cmd studio`;
     }
     if (osTab === 'linux') {
-      return `# Extract reeltern-${cleanVer}-linux-python.zip (GUI needs python3-tk):\ncd reeltern-${cleanVer}-linux-python\npython3 install.py\nsh reeltern.sh demo --workspace demo-project\nsh reeltern.sh gui`;
+      return `# Standalone Linux x86_64 Desktop Studio App:\ntar -xzf Reeltern-Studio-${cleanVer}-linux-x64.tar.gz\n./reeltern-studio/reeltern-studio\n\n# Or use the Python CLI bundle:\nunzip reeltern-${cleanVer}-linux-python.zip && cd reeltern-${cleanVer}-linux-python\npython3 install.py && sh reeltern.sh demo --workspace demo-project`;
     }
     return `python3 -m venv .venv && source .venv/bin/activate\npython -m pip install "./reeltern-${cleanVer}-py3-none-any.whl[mcp]"\n# Or install directly from GitHub:\npython -m pip install "git+${REPO_URL}.git"`;
   }
@@ -736,7 +775,7 @@
     const userOS = detectPlatform();
     const { releases, source } = await fetchReleasesData();
     const latest = releases[0] || null;
-    const latestTag = latest ? latest.tag_name : 'v0.5.0';
+    const latestTag = latest ? latest.tag_name : 'v0.6.0';
 
     document.querySelectorAll('[data-latest-tag]').forEach((el) => {
       el.textContent = latestTag;
@@ -755,11 +794,15 @@
     if (heroBtn && heroLabel && heroMeta) {
       if (latest && Array.isArray(latest.assets) && latest.assets.length) {
         const match =
+          latest.assets.find((a) => {
+            const c = classifyAsset(a.name);
+            return c.key === userOS && c.app;
+          }) ||
           latest.assets.find((a) => classifyAsset(a.name).key === userOS) ||
           latest.assets.find((a) => classifyAsset(a.name).key === 'wheel') ||
           latest.assets[0];
         heroBtn.href = match.browser_download_url;
-        heroLabel.textContent = `Download for ${platformLabel(userOS)} (${latest.tag_name})`;
+        heroLabel.textContent = `Download Studio for ${platformLabel(userOS)} (${latest.tag_name})`;
         const sha = match.digest ? ` · sha256:${match.digest.replace(/^sha256:/, '').slice(0, 12)}…` : '';
         heroMeta.textContent = `${match.name} · ${formatBytes(match.size)}${sha}`;
       } else {
@@ -797,16 +840,22 @@
       if (titleEl) titleEl.textContent = rel.name || `Reeltern ${rel.tag_name}`;
       if (installPre) installPre.textContent = renderInstallSnippet(activeOsTab, rel.tag_name);
 
-      const sorted = [...(rel.assets || [])].sort((a, b) => (classifyAsset(a.name).key === userOS ? -1 : 0) - (classifyAsset(b.name).key === userOS ? -1 : 0));
+      const sorted = [...(rel.assets || [])].sort((a, b) => {
+        const ca = classifyAsset(a.name);
+        const cb = classifyAsset(b.name);
+        const pa = (ca.key === userOS ? 0 : 10) + (ca.rank ?? 5);
+        const pb = (cb.key === userOS ? 0 : 10) + (cb.rank ?? 5);
+        return pa - pb;
+      });
       tbody.innerHTML = sorted
         .map((a) => {
           const info = classifyAsset(a.name);
-          const rec = info.key === userOS;
+          const rec = info.key === userOS && info.app;
           const sha = (a.digest || '').replace(/^sha256:/, '');
           return `
             <tr class="${rec ? 'is-recommended' : ''}">
               <td><code>${esc(a.name)}</code></td>
-              <td><span class="badge-rec ${rec ? 'accent' : ''}">${rec ? 'Recommended OS' : esc(info.badge)}</span></td>
+              <td><span class="badge-rec ${rec ? 'accent' : ''}">${rec ? 'Recommended App' : esc(info.badge)}</span></td>
               <td class="mono">${formatBytes(a.size)}</td>
               <td class="mono" style="color:var(--ink-muted)">${sha ? esc(sha.slice(0, 16) + '…') : '—'}</td>
               <td style="text-align:right">
@@ -828,7 +877,7 @@
         renderHomeTable(chosen);
       });
     } else if (installPre) {
-      installPre.textContent = renderInstallSnippet(activeOsTab, '0.5.0');
+      installPre.textContent = renderInstallSnippet(activeOsTab, '0.6.0');
     }
 
     initReleasesPage(releases, source, userOS);
@@ -991,8 +1040,9 @@
     const copyBtn = document.getElementById('cfg-copy-btn');
     if (!out || !tabs.length) return;
 
-    let client = 'claude-code';
+    let client = 'antigravity';
     const FILES = {
+      antigravity: '~/.gemini/config/mcp_config.json',
       'claude-code': '.mcp.json',
       codex: '~/.codex/config.toml',
       cursor: '.cursor/mcp.json',
@@ -1004,7 +1054,10 @@
       const py = pyIn?.value.trim() || 'python3';
       const ws = wsIn?.value.trim() || './workspace';
       const media = mediaIn?.value.trim() || './footage';
-      const args = ['-m', 'reeltern.cli', 'mcp', '--workspace', ws, '--media-root', media];
+      const isPython = /(^|[\\/])python(\d+(\.\d+)*)?(\.exe)?$/i.test(py);
+      const args = isPython
+        ? ['-m', 'reeltern.cli', 'mcp', '--workspace', ws, '--media-root', media]
+        : ['mcp', '--workspace', ws, '--media-root', media];
       if (fileTag) fileTag.textContent = FILES[client] || 'config.json';
       if (client === 'codex') {
         out.textContent = `[mcp_servers.reeltern]\ncommand = ${JSON.stringify(py)}\nargs = ${JSON.stringify(args)}\ntool_timeout_sec = 300`;
