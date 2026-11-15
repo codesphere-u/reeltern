@@ -167,7 +167,7 @@ class AdvancedWorkflowTests(unittest.TestCase):
         import tkinter as tk
         try:
             root = tk.Tk()
-        except tk.TclError as exc:
+        except (tk.TclError, RuntimeError) as exc:
             self.skipTest(f'No graphical display available for Tk test: {exc}')
         root.withdraw()
         # Release parent fixture lock before Studio claims workspace ownership.

@@ -281,7 +281,7 @@ class DirectorV5Tests(unittest.TestCase):
     def test_studio_v5_widgets_and_actions(self):
         try:
             root = tk.Tk()
-        except tk.TclError as exc:
+        except (tk.TclError, RuntimeError) as exc:
             self.skipTest(f'Tk unavailable: {exc}')
         root.withdraw()
         app = Studio(root, Path(self.temp.name) / 'studio-ws')
