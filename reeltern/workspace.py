@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 import shutil
 import uuid
-from .media import atomic_json, digest, key, probe, number, ff, silence_ranges, kept_ranges
+from .media import atomic_json, digest, key, probe, number, ff, read_json, silence_ranges, kept_ranges
 
 from .effects import (
     CAPTION_MODES, CAPTION_STYLES, COLOR_GRADES, FIT_MODES, FLIPS, MOTIONS,
@@ -39,7 +39,7 @@ class Workspace:
         return candidate
 
     def read(self, kind, identifier):
-        return json.loads(self.path(kind, identifier).read_text(encoding='utf-8'))
+        return read_json(self.path(kind, identifier))
 
     def _resolve_import_path(self, filename):
         path = Path(filename).expanduser()
@@ -352,7 +352,7 @@ class Workspace:
         cache_path = self.path('analysis', self.visuals_cache_id(identifier, thumbs, samples))
         thumb_dir = self.root / 'analysis' / 'thumbs' / identifier[:16]
         if cache_path.exists():
-            cached = json.loads(cache_path.read_text(encoding='utf-8'))
+            cached = read_json(cache_path)
             sheet_ok = cached.get('contact_sheet') is None or Path(cached['contact_sheet']).is_file()
             if sheet_ok and all(Path(item['path']).is_file() for item in cached.get('storyboard', [])):
                 return cached

@@ -1,10 +1,12 @@
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
 import threading
 import unittest
-from reeltern.media import Cancelled, execute
+from unittest import mock
+from reeltern.media import Cancelled, atomic_json, execute, read_json
 
 
 class RuntimeTests(unittest.TestCase):
@@ -28,3 +30,36 @@ class RuntimeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaisesRegex(RuntimeError, 'exceeded'):
                 execute([sys.executable, '-c', 'import time; time.sleep(20)'], Path(tmp), timeout=.1)
+
+    def test_atomic_json_and_read_json_retry_permission_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / 'job.json'
+            real_replace = os.replace
+            replace_attempts = []
+
+            def flaky_replace(src, dst):
+                replace_attempts.append((src, dst))
+                if len(replace_attempts) < 3:
+                    raise PermissionError(5, 'Access is denied')
+                return real_replace(src, dst)
+
+            with mock.patch('reeltern.media.os.replace', side_effect=flaky_replace), mock.patch('reeltern.media.time.sleep'):
+                atomic_json(target, {'status': 'complete', 'ok': True})
+
+            self.assertEqual(len(replace_attempts), 3)
+            self.assertEqual(list(Path(tmp).glob('*.tmp')), [])
+
+            real_read_text = Path.read_text
+            read_attempts = []
+
+            def flaky_read_text(self_path, *args, **kwargs):
+                read_attempts.append(self_path)
+                if len(read_attempts) < 3:
+                    raise PermissionError(5, 'Access is denied')
+                return real_read_text(self_path, *args, **kwargs)
+
+            with mock.patch.object(Path, 'read_text', flaky_read_text), mock.patch('reeltern.media.time.sleep'):
+                data = read_json(target)
+
+            self.assertEqual(len(read_attempts), 3)
+            self.assertEqual(data, {'status': 'complete', 'ok': True})

@@ -473,7 +473,7 @@ def create_server(workspace, media_root, agent_model=None, ollama_url="http://12
         if not 1 <= limit <= 100:
             raise ValueError('Limit must be 1–100')
         files = sorted((ws.root / 'jobs').glob('*.json'), key=lambda p: p.stat().st_mtime, reverse=True)
-        return [json.loads(p.read_text()) for p in files[:limit]]
+        return [ws.read('jobs', p.stem) for p in files[:limit]]
 
     @server.tool(annotations=read, structured_output=False)
     def get_render_receipt(

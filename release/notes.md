@@ -23,6 +23,7 @@ Edit directly in the **Reeltern Studio** standalone desktop app (macOS Apple Sil
 - **Native Cross-OS Desktop Studio Executables:** Built with bundled FFmpeg (`imageio-ffmpeg`), PyAV, Tkinter dark workstation UI, and headless CLI/MCP stdio support inside `packaging/desktop_entry.py` and `scripts/build_desktop_app.py`. Double-click to open Studio cleanly (`~/ReelternWorkspace` default writable directory), or pass `mcp --workspace ... --media-root ...` for headless MCP stdio.
 - **First-Class Antigravity MCP Support:** Added `antigravity` to `mcp-config` (`~/.gemini/config/mcp_config.json`), `examples/clients/antigravity.json`, documentation, and the website hero/docs configurators.
 - **One-Click Studio Onboarding:** Added **Load Demo** (loads synthetic footage, storyboard, waveform, and timeline immediately), **Workspace…** folder switcher, and **Connect AI** live configuration copy modal inside **Reeltern Studio**, plus `reeltern studio` CLI alias.
+- **Resilient Atomic State I/O:** Hardened workspace JSON reads/writes and render segment promotion (`atomic_json`, `atomic_replace`, `read_json`) against transient Windows file-sharing locks during concurrent MCP status polling.
 
 ### Release checks & limits
 

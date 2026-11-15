@@ -7,7 +7,7 @@ import threading
 import time
 import uuid
 from .effects import COLOR_GRADES, TRANSITIONS, atempo_filters, build_captions_ass, build_overlay_ass, motion_filters
-from .media import Cancelled, atomic_json, digest, ff, ffmpeg, key, probe, execute
+from .media import Cancelled, atomic_json, atomic_replace, digest, ff, ffmpeg, key, probe, read_json, execute
 from .workspace import PRESETS
 
 
@@ -18,7 +18,7 @@ class Renderer:
         self.ownership = WorkspaceLock(self.ws.root / '.render.lock')
         try:
             for path in (self.ws.root / 'jobs').glob('*.json'):
-                previous = json.loads(path.read_text())
+                previous = read_json(path)
                 if previous.get('status') in ('queued', 'running', 'verifying'):
                     previous.update(status='interrupted', error='Previous renderer ended before completion. Retry creates a new job and reuses verified cached segments.')
                     atomic_json(path, previous)
@@ -196,7 +196,7 @@ class Renderer:
                     info = probe(temp)
                     if abs(info['duration'] - length) > 0.1:
                         raise RuntimeError('Segment duration failed verification')
-                    temp.replace(cached)
+                    atomic_replace(temp, cached)
                     atomic_json(receipt_path, {'sha256': digest(cached), 'duration': info['duration']})
                 segments.append(cached)
                 state['completed_clips'] = index + 1

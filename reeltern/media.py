@@ -27,12 +27,36 @@ def key(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 
+def _retry_windows_lock(operation, attempts=12):
+    """Retry transient Windows file-sharing PermissionError briefly."""
+    for attempt in range(attempts):
+        try:
+            return operation()
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(0.01 * min(attempt + 1, 5))
+
+
+def read_json(path):
+    """Read and parse JSON, retrying briefly on transient Windows file locks."""
+    target = Path(path)
+    return json.loads(_retry_windows_lock(lambda: target.read_text(encoding='utf-8')))
+
+
+def atomic_replace(source, destination):
+    """Atomically replace destination with source, retrying transient Windows locks."""
+    src = Path(source)
+    dst = Path(destination)
+    _retry_windows_lock(lambda: os.replace(src, dst))
+
+
 def atomic_json(path, value):
     path = Path(path)
     temp = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
     try:
         temp.write_text(json.dumps(value, indent=2, allow_nan=False), encoding='utf-8')
-        os.replace(temp, path)
+        atomic_replace(temp, path)
     finally:
         temp.unlink(missing_ok=True)
 
