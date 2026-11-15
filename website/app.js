@@ -224,7 +224,7 @@
     const stepsEl = document.getElementById('hero-steps-list');
     if (!tabBtns.length || !cmdText || !stepsEl) return;
 
-    const ver = (latestTag || 'v0.6.0').replace(/^v/, '');
+    const ver = (latestTag || 'v0.7.0').replace(/^v/, '');
     const PROFILES = {
       antigravity: {
         cmd: `reeltern mcp-config antigravity --workspace ./ws --media-root ./footage`,
@@ -758,7 +758,7 @@
   }
 
   function renderInstallSnippet(osTab, ver) {
-    const cleanVer = (ver || '0.6.0').replace(/^v/, '');
+    const cleanVer = (ver || '0.7.0').replace(/^v/, '');
     if (osTab === 'macos') {
       return `# Standalone macOS Desktop Studio App (Apple Silicon M1-M4 or Intel):\nopen "Reeltern-Studio-${cleanVer}-macos-arm64.dmg"\n# 1. Drag "Reeltern Studio.app" -> /Applications\n# 2. First launch (unsigned open-source build): click Done, then open\n#    System Settings -> Privacy & Security -> Security -> Open Anyway\n\n# Or launch Desktop Studio cleanly via Python (no Gatekeeper prompt):\npython3 -m venv ~/.reeltern-studio\n~/.reeltern-studio/bin/python -m pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v${cleanVer}/reeltern-${cleanVer}-py3-none-any.whl"\n~/.reeltern-studio/bin/reeltern studio`;
     }
@@ -775,7 +775,7 @@
     const userOS = detectPlatform();
     const { releases, source } = await fetchReleasesData();
     const latest = releases[0] || null;
-    const latestTag = latest ? latest.tag_name : 'v0.6.0';
+    const latestTag = latest ? latest.tag_name : 'v0.7.0';
 
     document.querySelectorAll('[data-latest-tag]').forEach((el) => {
       el.textContent = latestTag;
@@ -877,7 +877,7 @@
         renderHomeTable(chosen);
       });
     } else if (installPre) {
-      installPre.textContent = renderInstallSnippet(activeOsTab, '0.6.0');
+      installPre.textContent = renderInstallSnippet(activeOsTab, '0.7.0');
     }
 
     initReleasesPage(releases, source, userOS);

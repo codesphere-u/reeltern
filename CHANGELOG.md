@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.0 — 15 November 2026
+
+- **Real-Time Program Monitor Compositor (`reeltern/preview.py`):**
+  - Added thread-safe LRU-cached PyAV frame decoding (`PreviewEngine`) and live filter compositing (`GRADE_META`, `fit_monitor_box`, `clip_at_time`, `ppm_from_rgb_frame`) rendering `blur_fill` vertical halos, `cover`/`contain` framing, rotation/flips, Ken Burns crop interpolation, fade-in/out ramps, brightness/contrast/saturation, and all 10 color grades (including true monochrome `noir`) directly in the desktop monitor.
+- **Redesigned Flagship Reeltern Studio Workstation (`reeltern/studio.py`, `reeltern/studio_widgets.py`):**
+  - Replaced plain system widgets with crisp custom flat dark-studio controls (`PillButton`, `ToggleSwitch`, `ParamSlider`, `MetricTile`, `ScrollablePane`), a live Program Monitor with `Live` / `Rendered` switcher and safe-zone/thirds guides, interactive multi-track `V1/T1/A1` visual timeline with clip thumbnails, welcome quick-start cards, keyboard transport shortcuts (`Space`, `←/→`, `I`, `O`, `S`, `⌘Z`), and a 4-tab Inspector (`✦ Director` visual cards, `Look & FX` 2×5 grade swatch grid + sliders, `Trim & Clip` `[ Mark In` / `Mark Out ]` + speed pills, `Mix & QA` switches + inline LUFS/Peak/Luma/Black scorecard + contact-sheet viewer).
+- **Load Demo & Playhead Trim Fixes (`reeltern/demo.py`, `reeltern/studio.py`):**
+  - Updated `run_demo(workspace, renderer=None)` so `Studio.load_demo()` reuses the active Studio renderer without triggering a `.render.lock` conflict and immediately enables `Rendered` preview switching and `Audit QA`.
+  - Fixed `mark_in_at_playhead` and `mark_out_at_playhead` to resolve `timeline_start` from `self.plan['clips']` and eliminated widget clipping across window sizes.
+
 ## 0.6.0 — 15 November 2026
 
 - **Standalone Cross-OS Desktop Studio Apps (`packaging/desktop_entry.py`, `scripts/build_desktop_app.py`):**

@@ -132,7 +132,7 @@ def create_server(workspace, media_root, agent_model=None, ollama_url="http://12
         try:
             ver = _metadata.version('reeltern')
         except _metadata.PackageNotFoundError:
-            ver = '0.6.0'
+            ver = '0.7.0'
         return {
             'version': ver,
             'editorial_agent_enabled': agent is not None,

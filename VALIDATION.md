@@ -2,7 +2,7 @@
 
 ## Version 0.5.0 AI Director, creator-grade visual/audio polish, and closed-loop render QA
 
-- **53 automated tests passed locally** on macOS (Python 3.13.18 venv, PyAV 16.1.0, imageio-ffmpeg 0.8.1, MCP SDK 1.30.0) in 19.95 seconds, and **93 relative documentation links + five client configurations + the 31-tool MCP reference** checked cleanly.
+- **59 automated tests passed locally** on macOS (Python 3.13.18 venv, PyAV 16.1.0, imageio-ffmpeg 0.8.1, MCP SDK 1.30.0) across unit, CLI, MCP stdio, real-time `PreviewEngine` frame composition, and `Studio` workstation UI checks, and **93 relative documentation links + six client configurations + the 31-tool MCP reference** checked cleanly.
 - **New verified coverage (`test_director_v5.py` & expanded `test_mcp.py`):**
   - `import_audio` soundtrack import (WAV metadata validation + rejection of non-audio inputs).
   - Pixel-level frame verification of `fit='blur_fill'` red border halo vs `fit='contain'` black bars in `portrait` output, plus sliding bottom blue `#3B82F6` `progress_bar` pixels.

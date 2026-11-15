@@ -9,7 +9,7 @@
 **Local video editing · Reversible decisions · AI through MCP**
 
 [![Tests](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml/badge.svg)](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/preview-v0.6.0-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/preview-v0.7.0-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
 [![MCP](https://img.shields.io/badge/MCP-31_tools_Grade_A-2f665a?style=flat-square&labelColor=172333)](docs/mcp.md)
 [![License](https://img.shields.io/badge/license-GPL_3.0_or_later-365b79?style=flat-square&labelColor=172333)](LICENSE)
 
@@ -24,7 +24,7 @@ Reeltern gives people and AI assistants the same editing engine. Select moments 
 **The idea:** an AI edit should come with source evidence, a reversible plan, and a result you can check.
 
 > [!NOTE]
-> **Early preview, actively being built.** The core suite passes all 53 automated tests locally (including `blur_fill` portrait pixel halos, animated progress bar & kinetic ASS pixels, Ken Burns camera motion, sidechain-ducked music mix, desktop Tk widget verification, and stdio MCP checks). Optional enhancement adapters remain experimental. [See exactly what is tested →](VALIDATION.md)
+> **Early preview, actively being built.** The core suite passes all 59 automated tests locally (including live in-window `PreviewEngine` compositing, `blur_fill` portrait pixel halos, animated progress bar & kinetic ASS pixels, Ken Burns camera motion, sidechain-ducked music mix, desktop Studio NLE workstation actions, and stdio MCP checks). Optional enhancement adapters remain experimental. [See exactly what is tested →](VALIDATION.md)
 
 ## An edit is more than an output file
 

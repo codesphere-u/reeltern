@@ -16,7 +16,7 @@
     <text x="120" y="90" fill="#f4f4f5" font-size="25" font-weight="700" letter-spacing="-0.5">Reeltern</text>
 
     <rect x="242" y="68" width="154" height="28" rx="999" fill="#818cf8" fill-opacity="0.14" stroke="#818cf8" stroke-opacity="0.4"/>
-    <text x="319" y="87" text-anchor="middle" fill="#a5b4fc" font-size="13" font-weight="600" font-family="monospace">v0.6.0 · GRADE A</text>
+    <text x="319" y="87" text-anchor="middle" fill="#a5b4fc" font-size="13" font-weight="600" font-family="monospace">v0.7.0 · GRADE A</text>
 
     <text x="68" y="206" fill="#f4f4f5" font-size="66" font-weight="800" letter-spacing="-2.6">Local video editing</text>
     <text x="68" y="280" fill="#f4f4f5" font-size="66" font-weight="800" letter-spacing="-2.6">for people and <tspan fill="#818cf8">agents.</tspan></text>
@@ -26,7 +26,7 @@
     <rect x="70" y="446" width="234" height="46" rx="10" fill="#6366f1"/>
     <text x="187" y="475" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="600">31 MCP Tools · 100/100</text>
     <rect x="320" y="446" width="210" height="46" rx="10" fill="#121216" stroke="#27272a"/>
-    <text x="425" y="475" text-anchor="middle" fill="#f4f4f5" font-size="16" font-weight="600">53 Verified Checks</text>
+    <text x="425" y="475" text-anchor="middle" fill="#f4f4f5" font-size="16" font-weight="600">59 Verified Checks</text>
     <text x="70" y="540" fill="#71717a" font-size="15" font-family="monospace">SHA-256 snapshots · EBU R128 -16.0 LUFS · GPL-3.0 open source</text>
 
     <!-- Right Univer Studio Canvas Frame -->

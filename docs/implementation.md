@@ -1,6 +1,6 @@
 # Implementation guide
 
-This guide is for contributors building features on Reeltern 0.6.0. Use [client setup](clients.md) to connect an assistant, [the operating workflow](agent-workflow.md) to edit footage, and [architecture](architecture.md) for storage and timing details.
+This guide is for contributors building features on Reeltern 0.7.0. Use [client setup](clients.md) to connect an assistant, [the operating workflow](agent-workflow.md) to edit footage, and [architecture](architecture.md) for storage and timing details.
 
 ## Development environment
 
@@ -31,6 +31,8 @@ The desktop additionally needs Tkinter. Tests use synthetic media and the FFmpeg
 | `reeltern/locking.py` | Cross-platform renderer ownership | Changing recovery/concurrency |
 | `reeltern/mcp_server.py` | Typed protocol wrappers, discovery, resources and prompts | Exposing a core operation to assistants |
 | `reeltern/client_config.py` | JSON/TOML client launch configuration | Supporting a client's configuration format |
+| `reeltern/preview.py` | Thread-safe LRU PyAV frame decoding & live monitor filter preview (`blur_fill`, 10 grades, fades, motion) | Adding real-time monitor effect compositing |
+| `reeltern/studio_widgets.py` | Flat Obsidian workstation controls (`PillButton`, `ToggleSwitch`, `ParamSlider`, `MetricTile`, `ScrollablePane`) | Updating desktop Studio UI components |
 | `reeltern/cli.py`, `studio.py` | Human interfaces over the same core | Adding a command or desktop control |
 | `reeltern/engine.py`, `gui.py` | Legacy optional adapters | Experimental upstream integration work |
 

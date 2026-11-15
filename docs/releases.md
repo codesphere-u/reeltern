@@ -1,20 +1,20 @@
 # Releases and installation packages
 
-Download assets from the [Reeltern Releases Showcase](https://codesphere-u.github.io/reeltern/releases.html) or directly from [GitHub Releases](https://github.com/codesphere-u/reeltern/releases). Version 0.6.0 provides **standalone Desktop Studio GUI applications** (zero Python setup required) alongside Python installation bundles, a wheel, and source archives.
+Download assets from the [Reeltern Releases Showcase](https://codesphere-u.github.io/reeltern/releases.html) or directly from [GitHub Releases](https://github.com/codesphere-u/reeltern/releases). Version 0.7.0 provides **standalone Desktop Studio GUI applications** (zero Python setup required) alongside Python installation bundles, a wheel, and source archives.
 
 ## Choose a download
 
 | Asset | Use it for | Requirements |
 |---|---|---|
-| `Reeltern-Studio-0.6.0-macos-arm64.dmg` | **macOS Apple Silicon** standalone Desktop Studio app + bundled CLI/MCP | macOS Apple Silicon; drag `Reeltern Studio.app` to Applications |
-| `Reeltern-Studio-0.6.0-macos-x64.dmg` | **macOS Intel** standalone Desktop Studio app + bundled CLI/MCP | macOS x86_64; drag `Reeltern Studio.app` to Applications |
-| `Reeltern-Studio-0.6.0-windows-x64.zip` | **Windows x64** portable Desktop Studio app (`Reeltern Studio.exe`) + CLI/MCP | Windows x64; extract zip and double-click `Reeltern Studio.exe` |
-| `Reeltern-Studio-0.6.0-linux-x64.tar.gz` | **Linux x64** portable Desktop Studio app (`reeltern-studio`) + `.desktop` launcher | Linux x86_64; extract archive and run `./reeltern-studio/reeltern-studio` |
-| `reeltern-0.6.0-windows-python.zip` | Windows Python installation with command/desktop launchers | Python 3.10–3.12 recommended; x64 release checks |
-| `reeltern-0.6.0-macos-python.zip` | macOS Python installation with shell/desktop launchers | Python 3.10–3.12 recommended; Apple Silicon and Intel release checks |
-| `reeltern-0.6.0-linux-python.zip` | Linux Python installation with a shell launcher | Python 3.10–3.12 recommended; x64 release checks; Tkinter for GUI |
-| `reeltern-0.6.0-py3-none-any.whl` | Existing Python environments, CLI, MCP or embedding | Compatible PyAV and imageio-ffmpeg wheels/binaries for the platform |
-| `reeltern-0.6.0.tar.gz` | Source development and rebuilding | Build dependencies and a supported Python environment |
+| `Reeltern-Studio-0.7.0-macos-arm64.dmg` | **macOS Apple Silicon** standalone Desktop Studio app + bundled CLI/MCP | macOS Apple Silicon; drag `Reeltern Studio.app` to Applications |
+| `Reeltern-Studio-0.7.0-macos-x64.dmg` | **macOS Intel** standalone Desktop Studio app + bundled CLI/MCP | macOS x86_64; drag `Reeltern Studio.app` to Applications |
+| `Reeltern-Studio-0.7.0-windows-x64.zip` | **Windows x64** portable Desktop Studio app (`Reeltern Studio.exe`) + CLI/MCP | Windows x64; extract zip and double-click `Reeltern Studio.exe` |
+| `Reeltern-Studio-0.7.0-linux-x64.tar.gz` | **Linux x64** portable Desktop Studio app (`reeltern-studio`) + `.desktop` launcher | Linux x86_64; extract archive and run `./reeltern-studio/reeltern-studio` |
+| `reeltern-0.7.0-windows-python.zip` | Windows Python installation with command/desktop launchers | Python 3.10–3.12 recommended; x64 release checks |
+| `reeltern-0.7.0-macos-python.zip` | macOS Python installation with shell/desktop launchers | Python 3.10–3.12 recommended; Apple Silicon and Intel release checks |
+| `reeltern-0.7.0-linux-python.zip` | Linux Python installation with a shell launcher | Python 3.10–3.12 recommended; x64 release checks; Tkinter for GUI |
+| `reeltern-0.7.0-py3-none-any.whl` | Existing Python environments, CLI, MCP or embedding | Compatible PyAV and imageio-ffmpeg wheels/binaries for the platform |
+| `reeltern-0.7.0.tar.gz` | Source development and rebuilding | Build dependencies and a supported Python environment |
 | `SHA256SUMS.txt` | Detect a damaged or altered download | Compare the SHA-256 hash with the release's checksum list |
 
 ## First launch on macOS and Windows
@@ -30,7 +30,7 @@ Desktop app builds are currently unsigned (ad-hoc signed on macOS; no paid Apple
 
 ```sh
 python3 -m venv ~/.reeltern-studio
-~/.reeltern-studio/bin/python -m pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/reeltern-0.6.0-py3-none-any.whl"
+~/.reeltern-studio/bin/python -m pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/reeltern-0.7.0-py3-none-any.whl"
 ~/.reeltern-studio/bin/reeltern studio
 ```
 
@@ -76,7 +76,7 @@ From the directory containing the downloaded wheel:
 ```sh
 python -m venv .venv
 # Activate it, or use its Python executable directly.
-python -m pip install './reeltern-0.6.0-py3-none-any.whl[mcp]'
+python -m pip install './reeltern-0.7.0-py3-none-any.whl[mcp]'
 python -m reeltern.cli demo --workspace demo-project
 ```
 
@@ -103,11 +103,11 @@ Containers, WSL and SSH environments can use the wheel/CLI/MCP when a compatible
 # Linux
 sha256sum --check SHA256SUMS.txt
 # macOS
-shasum -a 256 Reeltern-Studio-0.6.0-macos-arm64.dmg
+shasum -a 256 Reeltern-Studio-0.7.0-macos-arm64.dmg
 ```
 
 ```powershell
-Get-FileHash .\Reeltern-Studio-0.6.0-windows-x64.zip -Algorithm SHA256
+Get-FileHash .\Reeltern-Studio-0.7.0-windows-x64.zip -Algorithm SHA256
 ```
 
 Compare the reported digest with the corresponding line in `SHA256SUMS.txt`. To use the Linux all-files check, download all files named in the list; otherwise check the asset you downloaded individually. Checksums detect corruption; they are not a code-signing identity or independent trust guarantee.
