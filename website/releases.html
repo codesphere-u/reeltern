@@ -1,44 +1,64 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reeltern Releases — Current &amp; Future Downloads + SHA-256 Verifier</title>
+    <title>Reeltern Releases — Downloads &amp; SHA-256 Verifier</title>
     <meta
       name="description"
       content="Download current and future Reeltern releases (macOS, Windows, Linux bundles, wheels, source tarballs) with live GitHub Releases synchronization and in-browser SHA-256 verification."
     />
     <link rel="canonical" href="https://codesphere-u.github.io/reeltern/releases.html" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.5.0" />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('reeltern-theme');
+          if (saved === 'light' || saved === 'dark') document.documentElement.setAttribute('data-theme', saved);
+        } catch (e) {}
+      })();
+    </script>
     <link rel="stylesheet" href="./styles.css?v=0.5.0" />
   </head>
   <body>
-    <div class="ambient-backdrop" aria-hidden="true"></div>
-    <div class="grid-overlay" aria-hidden="true"></div>
-
     <header class="site-header">
       <div class="header-inner">
         <a class="brand-link" href="./" aria-label="Reeltern home">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <rect x="2" y="2" width="60" height="60" rx="16" fill="#0b1221" stroke="#66ddbe" stroke-opacity="0.38" stroke-width="2" />
-            <path d="M16 17L30 25L49 13L34 34L29 28L21 36L24 25Z" fill="#66ddbe" />
-            <rect x="14" y="42" width="22" height="7" rx="3.5" fill="#66ddbe" fill-opacity="0.32" stroke="#66ddbe" stroke-width="1.4" />
-            <rect x="39" y="42" width="11" height="7" rx="3.5" fill="#ffd166" />
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5" />
+            <path d="M6.5 7.2L11.5 10L18 6L12.8 13.5L11 11.2L8.2 14L9.4 10Z" fill="#818cf8" />
+            <rect x="5.5" y="16" width="8.5" height="2.6" rx="1.3" fill="#818cf8" />
+            <rect x="15" y="16" width="3.8" height="2.6" rx="1.3" fill="#34d399" />
           </svg>
-          <span>REELTERN</span>
+          <span>Reeltern</span>
         </a>
         <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
         <nav class="header-nav" aria-label="Primary navigation">
           <a class="nav-link" href="./">Overview</a>
-          <a class="nav-link" href="./studio.html">Director Studio</a>
-          <a class="nav-link" href="./tools.html">MCP Tools (31)</a>
+          <a class="nav-link" href="./studio.html">Studio</a>
+          <a class="nav-link" href="./docs.html#mcp-setup">MCP Setup</a>
+          <a class="nav-link" href="./tools.html">Tools (31)</a>
           <a class="nav-link active" href="./releases.html">Releases</a>
           <a class="nav-link" href="./docs.html">Docs</a>
         </nav>
         <div class="header-actions">
-          <a class="release-pill" href="#releases-list" data-latest-pill>
-            <span class="pulse-dot" aria-hidden="true"></span>
-            <span data-latest-tag>Loading…</span>
+          <button class="cmd-k-btn" type="button" id="open-cmdk" aria-label="Quick search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <span class="cmd-k-text">Search…</span>
+            <kbd>⌘K</kbd>
+          </button>
+          <a class="release-pill" href="#releases-list"><span class="pulse-dot"></span><span data-latest-tag>v0.5.0</span></a>
+          <button class="icon-btn" type="button" id="theme-toggle" aria-label="Toggle theme" title="Switch light / dark theme">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+          </button>
+          <a class="icon-btn" href="https://github.com/codesphere-u/reeltern" target="_blank" rel="noopener noreferrer" aria-label="Reeltern on GitHub">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+            </svg>
           </a>
         </div>
       </div>
@@ -47,42 +67,40 @@
     <main>
       <section class="page-hero">
         <div class="container">
-          <span class="section-kicker">GitHub Releases Feed + Local Verifier</span>
+          <span class="section-kicker">GitHub Releases Feed</span>
           <h1>Releases &amp; Checksum Verification</h1>
           <p>
-            Automatically pulls every published release and pre-release from <code>codesphere-u/reeltern</code> (with CI-cached snapshot fallback). Every future tag appears here automatically as soon as GitHub Actions finishes building and testing across macOS, Windows, and Linux.
+            Automatically pulls every published release and preview from <code>codesphere-u/reeltern</code> (with CI-synced JSON snapshot fallback). Future tags appear here immediately once GitHub Actions finishes macOS, Windows, and Linux matrix checks.
           </p>
         </div>
       </section>
 
-      <!-- Client-Side WebCrypto SHA-256 Verifier -->
-      <section class="section" style="border-top: none; padding-top: 0.6rem; padding-bottom: 2.2rem;">
+      <section class="section" style="border-top: none; padding-top: 2rem; padding-bottom: 2rem;">
         <div class="container">
           <div class="verify-dropzone" id="sha-dropzone" tabindex="0">
-            <span class="bento-tag" style="margin-inline: auto;">Zero-Upload Browser Verification</span>
-            <h2 style="margin: 0.6rem 0 0.35rem; font-size: 1.25rem;">Verify Any Downloaded Archive (.zip, .whl, .tar.gz)</h2>
-            <p style="margin: 0; color: var(--ink-65); font-size: 0.92rem;">
-              Drop a file here or click to hash it locally in your browser with Web Crypto SHA-256 and match against official GitHub Release digests.
+            <div class="section-kicker" style="margin-bottom: 0.35rem;">Zero-Upload Browser Verification</div>
+            <h2 style="margin: 0 0 0.35rem; font-size: 1.2rem;">Verify Any Downloaded Archive (.zip, .whl, .tar.gz)</h2>
+            <p style="margin: 0; color: var(--ink-muted); font-size: 0.9rem;">
+              Drop a local archive here or click to hash it with Web Crypto SHA-256 and match against official GitHub Release digests.
             </p>
             <input id="sha-file-input" type="file" hidden />
-            <div class="mono" id="sha-result" style="margin-top: 0.9rem; font-size: 0.82rem; color: var(--mint-hi);"></div>
+            <div class="mono" id="sha-result" style="margin-top: 0.85rem; font-size: 0.82rem; color: var(--verified);"></div>
           </div>
         </div>
       </section>
 
-      <!-- Full Release Archive Feed -->
       <section class="section" id="releases-list" style="padding-top: 2rem;">
         <div class="container">
-          <div class="search-bar" style="justify-content: space-between;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
             <div class="pill-selector" id="release-filter-pills">
               <button class="chip-btn active" type="button" data-rel-filter="all">All Releases</button>
               <button class="chip-btn" type="button" data-rel-filter="stable">Stable Only</button>
               <button class="chip-btn" type="button" data-rel-filter="pre">Previews</button>
             </div>
-            <span class="mono" style="font-size: 0.78rem; color: var(--ink-45);" id="rel-sync-meta">Checking GitHub API…</span>
+            <span class="mono" style="font-size: 0.78rem; color: var(--ink-subtle);" id="rel-sync-meta">Checking GitHub Releases…</span>
           </div>
 
-          <div id="all-releases-container" style="display: flex; flex-direction: column; gap: 1.5rem;"></div>
+          <div id="all-releases-container" style="display: flex; flex-direction: column; gap: 1.75rem;"></div>
         </div>
       </section>
     </main>
@@ -90,17 +108,39 @@
     <footer class="site-footer">
       <div class="container footer-grid">
         <div>
-          <strong style="color: var(--mint-hi); letter-spacing: 0.1em;">REELTERN</strong>
-          <p style="margin: 0.35rem 0 0;">Direct asset URLs point to <code>github.com/codesphere-u/reeltern/releases</code>.</p>
+          <strong style="color: var(--ink);">Reeltern</strong>
+          <p style="margin: 0.45rem 0 0;">Assets served directly from <code>github.com/codesphere-u/reeltern/releases</code>.</p>
         </div>
-        <div class="footer-links">
-          <a href="./">Overview</a>
-          <a href="./studio.html">Director Studio</a>
-          <a href="./tools.html">31 MCP Tools</a>
-          <a href="./docs.html">Documentation</a>
+        <div>
+          <h4 class="footer-col-title">Pages</h4>
+          <div class="footer-col-list">
+            <a href="./">Overview</a>
+            <a href="./studio.html">Studio</a>
+            <a href="./tools.html">Tools (31)</a>
+            <a href="./docs.html">Docs</a>
+          </div>
         </div>
+        <div>
+          <h4 class="footer-col-title">Agents</h4>
+          <div class="footer-col-list">
+            <a href="./llms.txt">llms.txt</a>
+            <a href="./mcp-tools.json">mcp-tools.json</a>
+            <a href="./releases.json">releases.json</a>
+          </div>
+        </div>
+        <div></div>
       </div>
     </footer>
+
+    <div class="cmdk-backdrop" id="cmdk-modal" role="dialog" aria-modal="true" aria-label="Quick search">
+      <div class="cmdk-dialog">
+        <div class="cmdk-input-row">
+          <input id="cmdk-input" type="search" placeholder="Search 31 MCP tools, docs sections, or pages..." autocomplete="off" />
+          <kbd style="font-size: 0.7rem;">ESC</kbd>
+        </div>
+        <div class="cmdk-results" id="cmdk-results"></div>
+      </div>
+    </div>
 
     <script src="./app.js?v=0.5.0"></script>
   </body>

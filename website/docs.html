@@ -1,120 +1,230 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reeltern Documentation — CLI, AI Director Styles &amp; Validation</title>
+    <title>Reeltern Documentation — MCP Setup, AI Director &amp; CLI</title>
     <meta
       name="description"
-      content="Documentation for Reeltern 0.5.0: AI Director production profiles, CLI reference, MCP workflow cookbook, architecture contracts, and verified test evidence."
+      content="Documentation for Reeltern 0.5.0: Stitch-style MCP client setup, AI Director production profiles, CLI reference, architecture contracts, and verified test evidence."
     />
     <link rel="canonical" href="https://codesphere-u.github.io/reeltern/docs.html" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.5.0" />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('reeltern-theme');
+          if (saved === 'light' || saved === 'dark') document.documentElement.setAttribute('data-theme', saved);
+        } catch (e) {}
+      })();
+    </script>
     <link rel="stylesheet" href="./styles.css?v=0.5.0" />
   </head>
   <body>
-    <div class="ambient-backdrop" aria-hidden="true"></div>
-    <div class="grid-overlay" aria-hidden="true"></div>
-
     <header class="site-header">
       <div class="header-inner">
         <a class="brand-link" href="./" aria-label="Reeltern home">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <rect x="2" y="2" width="60" height="60" rx="16" fill="#0b1221" stroke="#66ddbe" stroke-opacity="0.38" stroke-width="2" />
-            <path d="M16 17L30 25L49 13L34 34L29 28L21 36L24 25Z" fill="#66ddbe" />
-            <rect x="14" y="42" width="22" height="7" rx="3.5" fill="#66ddbe" fill-opacity="0.32" stroke="#66ddbe" stroke-width="1.4" />
-            <rect x="39" y="42" width="11" height="7" rx="3.5" fill="#ffd166" />
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5" />
+            <path d="M6.5 7.2L11.5 10L18 6L12.8 13.5L11 11.2L8.2 14L9.4 10Z" fill="#818cf8" />
+            <rect x="5.5" y="16" width="8.5" height="2.6" rx="1.3" fill="#818cf8" />
+            <rect x="15" y="16" width="3.8" height="2.6" rx="1.3" fill="#34d399" />
           </svg>
-          <span>REELTERN</span>
+          <span>Reeltern</span>
         </a>
         <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
         <nav class="header-nav" aria-label="Primary navigation">
           <a class="nav-link" href="./">Overview</a>
-          <a class="nav-link" href="./studio.html">Director Studio</a>
-          <a class="nav-link" href="./tools.html">MCP Tools (31)</a>
+          <a class="nav-link" href="./studio.html">Studio</a>
+          <a class="nav-link" href="./docs.html#mcp-setup">MCP Setup</a>
+          <a class="nav-link" href="./tools.html">Tools (31)</a>
           <a class="nav-link" href="./releases.html">Releases</a>
           <a class="nav-link active" href="./docs.html">Docs</a>
         </nav>
         <div class="header-actions">
-          <a class="release-pill" href="./releases.html" data-latest-pill>
-            <span class="pulse-dot" aria-hidden="true"></span>
-            <span data-latest-tag>Loading…</span>
+          <button class="cmd-k-btn" type="button" id="open-cmdk" aria-label="Quick search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <span class="cmd-k-text">Search…</span>
+            <kbd>⌘K</kbd>
+          </button>
+          <a class="release-pill" href="./releases.html"><span class="pulse-dot"></span><span data-latest-tag>v0.5.0</span></a>
+          <button class="icon-btn" type="button" id="theme-toggle" aria-label="Toggle theme" title="Switch light / dark theme">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+          </button>
+          <a class="icon-btn" href="https://github.com/codesphere-u/reeltern" target="_blank" rel="noopener noreferrer" aria-label="Reeltern on GitHub">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+            </svg>
           </a>
         </div>
       </div>
     </header>
 
     <main>
-      <section class="page-hero">
-        <div class="container">
-          <span class="section-kicker">Engineering Handbook</span>
-          <h1>CLI, AI Director Cookbook &amp; Validation</h1>
-          <p>Everything runs locally over FFmpeg and PyAV — inspect the architecture, CLI commands, and repository documentation links.</p>
-        </div>
-      </section>
-
-      <section class="section" style="border-top: none; padding-top: 1rem;">
-        <div class="container bento-grid">
-          <article class="bento-card span-12" style="grid-column: span 12;">
-            <span class="bento-tag">AI Director Profiles (v0.5.0)</span>
-            <h3>Five Pre-Tuned Production Profiles</h3>
-            <div class="table-scroll-hint">Swipe horizontally to inspect all 5 columns →</div>
-            <div style="overflow-x: auto;">
-              <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
-                <thead>
-                  <tr style="border-bottom: 1px solid var(--rule); color: var(--mint-hi);">
-                    <th style="padding: 0.6rem;">Style</th>
-                    <th style="padding: 0.6rem;">Default Preset &amp; Fit</th>
-                    <th style="padding: 0.6rem;">Grade &amp; Motion</th>
-                    <th style="padding: 0.6rem;">Transition &amp; Audio</th>
-                    <th style="padding: 0.6rem;">Captions &amp; Overlay</th>
-                  </tr>
-                </thead>
-                <tbody style="color: var(--ink-65);">
-                  <tr style="border-bottom: 1px solid var(--rule-subtle);">
-                    <td style="padding: 0.6rem;"><code>viral_reel</code></td>
-                    <td style="padding: 0.6rem;"><code>reels</code> (1080×1920) · <code>blur_fill</code></td>
-                    <td style="padding: 0.6rem;"><code>vivid</code> · zoom/pan alternating</td>
-                    <td style="padding: 0.6rem;"><code>slideleft</code> · voice EQ + ducked music</td>
-                    <td style="padding: 0.6rem;"><code>kinetic</code> captions + progress bar</td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid var(--rule-subtle);">
-                    <td style="padding: 0.6rem;"><code>cinematic</code></td>
-                    <td style="padding: 0.6rem;"><code>fhd</code> (1920×1080) · <code>cover</code></td>
-                    <td style="padding: 0.6rem;"><code>cinematic</code> · gentle zooms</td>
-                    <td style="padding: 0.6rem;"><code>crossfade</code> · -16 LUFS + ducking</td>
-                    <td style="padding: 0.6rem;"><code>clean</code> captions</td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid var(--rule-subtle);">
-                    <td style="padding: 0.6rem;"><code>tutorial</code></td>
-                    <td style="padding: 0.6rem;"><code>fhd</code> (1920×1080) · <code>contain</code></td>
-                    <td style="padding: 0.6rem;"><code>studio</code> · steady readable framing</td>
-                    <td style="padding: 0.6rem;"><code>wipeleft</code> · voice cleanup EQ</td>
-                    <td style="padding: 0.6rem;"><code>boxed</code> captions + progress bar</td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid var(--rule-subtle);">
-                    <td style="padding: 0.6rem;"><code>documentary</code></td>
-                    <td style="padding: 0.6rem;"><code>fhd</code> (1920×1080) · <code>contain</code></td>
-                    <td style="padding: 0.6rem;"><code>vintage</code> · pan/zoom motion</td>
-                    <td style="padding: 0.6rem;"><code>dissolve</code> · warm music ducking</td>
-                    <td style="padding: 0.6rem;"><code>clean</code> soft/burned captions</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 0.6rem;"><code>noir_trailer</code></td>
-                    <td style="padding: 0.6rem;"><code>fhd</code> (1920×1080) · <code>cover</code></td>
-                    <td style="padding: 0.6rem;"><code>noir</code> · dramatic zooms</td>
-                    <td style="padding: 0.6rem;"><code>fadeblack</code> · -16 LUFS master</td>
-                    <td style="padding: 0.6rem;"><code>bold</code> high-contrast captions</td>
-                  </tr>
-                </tbody>
-              </table>
+      <div class="docs-shell">
+        <!-- Left Sidebar (AG-UI Docs Navigation) -->
+        <aside class="docs-sidebar" aria-label="Documentation sections">
+          <div class="docs-nav-group">
+            <div class="docs-nav-heading">Get Started</div>
+            <div class="docs-nav-list">
+              <a class="docs-nav-item active" href="#overview">Introduction</a>
+              <a class="docs-nav-item" href="#mcp-setup">MCP Client Setup</a>
             </div>
-          </article>
+          </div>
+          <div class="docs-nav-group">
+            <div class="docs-nav-heading">Video Direction</div>
+            <div class="docs-nav-list">
+              <a class="docs-nav-item" href="#director-profiles">AI Director Styles</a>
+              <a class="docs-nav-item" href="#closed-loop">Inspect → Audit Loop</a>
+            </div>
+          </div>
+          <div class="docs-nav-group">
+            <div class="docs-nav-heading">Reference</div>
+            <div class="docs-nav-list">
+              <a class="docs-nav-item" href="#cli-reference">CLI Subcommands</a>
+              <a class="docs-nav-item" href="#validation">Security &amp; Validation</a>
+              <a class="docs-nav-item" href="./tools.html">31 MCP Tool Schemas →</a>
+            </div>
+          </div>
+        </aside>
 
-          <article class="bento-card span-6" style="grid-column: span 6;">
-            <span class="bento-tag">Command Line Reference</span>
-            <h3>Essential CLI Subcommands</h3>
-            <pre class="code-window" style="font-size: 0.78rem;">reeltern gui
+        <!-- Center Content Column -->
+        <article class="docs-prose">
+          <div id="overview">
+            <div class="docs-eyebrow">Get Started</div>
+            <h1>Reeltern Engineering Handbook</h1>
+            <p class="lead">
+              A local, reversible video editing engine, AI Director composer, and 31-tool Model Context Protocol (MCP) stdio server powered cleanly by FFmpeg and PyAV.
+            </p>
+
+            <div class="callout">
+              <strong>Local-first security contract:</strong> All imports are copied into content-addressed SHA-256 snapshots scoped inside <code>--media-root</code>. Original footage is never modified in place, and zero shell commands or external cloud APIs are exposed over MCP.
+            </div>
+          </div>
+
+          <!-- Stitch-style Interactive MCP Client Setup -->
+          <section id="mcp-setup">
+            <div class="docs-eyebrow">Model Context Protocol</div>
+            <h2>Connect via Local MCP</h2>
+            <p>
+              Unlike remote cloud MCP bridges, Reeltern runs directly as a <strong>local stdio server</strong> next to your footage. Choose your coding assistant below and paste the generated configuration without modifying global system state.
+            </p>
+
+            <div class="vault-card" style="margin-top: 1.25rem;">
+              <div class="vault-toolbar" style="padding: 0.9rem 1.1rem;">
+                <div class="pill-selector" id="mcp-client-tabs">
+                  <button class="chip-btn active" type="button" data-client="claude-code">Claude Code</button>
+                  <button class="chip-btn" type="button" data-client="codex">Codex (TOML)</button>
+                  <button class="chip-btn" type="button" data-client="cursor">Cursor</button>
+                  <button class="chip-btn" type="button" data-client="vscode">VS Code</button>
+                  <button class="chip-btn" type="button" data-client="generic">Generic JSON</button>
+                </div>
+                <span class="mono" style="font-size: 0.74rem; color: var(--accent);" id="cfg-filename">.mcp.json</span>
+              </div>
+
+              <div style="padding: 1.1rem; display: flex; flex-direction: column; gap: 0.85rem;">
+                <div class="control-grid-3">
+                  <label class="control-group">
+                    <span class="control-label">Python Executable</span>
+                    <input class="input-box" id="cfg-python" type="text" value="/path/to/reeltern/.venv/bin/python" />
+                  </label>
+                  <label class="control-group">
+                    <span class="control-label">Workspace (--workspace)</span>
+                    <input class="input-box" id="cfg-workspace" type="text" value="/path/to/editing-workspace" />
+                  </label>
+                  <label class="control-group">
+                    <span class="control-label">Media Root (--media-root)</span>
+                    <input class="input-box" id="cfg-media" type="text" value="/path/to/footage" />
+                  </label>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="mono" style="font-size: 0.74rem; color: var(--ink-subtle);">Generated client entry (equivalent to <code>reeltern mcp-config</code>)</span>
+                  <button class="copy-btn" type="button" id="cfg-copy-btn">Copy Config</button>
+                </div>
+                <pre class="code-window" id="cfg-output" style="border-radius: 8px; border: 1px solid var(--border);"></pre>
+              </div>
+            </div>
+          </section>
+
+          <section id="director-profiles">
+            <h2>Five AI Director Profiles</h2>
+            <p>
+              Both <code>reeltern compose</code> and the MCP <code>compose_video</code> tool share these five calibrated profiles:
+            </p>
+            <div class="vault-card">
+              <div class="table-wrap">
+                <table class="asset-table">
+                  <thead>
+                    <tr>
+                      <th>Style</th>
+                      <th>Preset &amp; Fit</th>
+                      <th>Grade &amp; Motion</th>
+                      <th>Audio &amp; Transition</th>
+                      <th>Captions &amp; Overlay</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>viral_reel</code></td>
+                      <td><code>reels</code> · <code>blur_fill</code></td>
+                      <td><code>vivid</code> · zoom / pan</td>
+                      <td><code>slideleft</code> · voice EQ + duck</td>
+                      <td><code>kinetic</code> + progress bar</td>
+                    </tr>
+                    <tr>
+                      <td><code>cinematic</code></td>
+                      <td><code>fhd</code> · <code>cover</code></td>
+                      <td><code>cinematic</code> · zoom</td>
+                      <td><code>crossfade</code> · -16 LUFS + duck</td>
+                      <td><code>clean</code> captions</td>
+                    </tr>
+                    <tr>
+                      <td><code>tutorial</code></td>
+                      <td><code>fhd</code> · <code>contain</code></td>
+                      <td><code>studio</code> · steady</td>
+                      <td><code>wipeleft</code> · voice cleanup EQ</td>
+                      <td><code>boxed</code> + progress bar</td>
+                    </tr>
+                    <tr>
+                      <td><code>documentary</code></td>
+                      <td><code>fhd</code> · <code>contain</code></td>
+                      <td><code>vintage</code> · pan / zoom</td>
+                      <td><code>dissolve</code> · warm ducking</td>
+                      <td><code>clean</code> soft + burned</td>
+                    </tr>
+                    <tr>
+                      <td><code>noir_trailer</code></td>
+                      <td><code>fhd</code> · <code>cover</code></td>
+                      <td><code>noir</code> · dramatic zoom</td>
+                      <td><code>fadeblack</code> · -16 LUFS master</td>
+                      <td><code>bold</code> high contrast</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section id="closed-loop">
+            <h2>Closed-Loop Inspect → Audit Protocol</h2>
+            <p>
+              Every serious agent session follows four verified steps instead of firing blind filter strings:
+            </p>
+            <pre class="code-window" style="border-radius: 8px; border: 1px solid var(--border);">1. inspect_media_visuals(asset_id)  → Read PNG contact sheet + scene_cuts[]
+2. compose_video(assets, style=...) → Build immutable reversible Plan v2
+3. render_plan(plan_id, preview=1)  → Cache unchanged segments, mix -16 LUFS
+4. audit_render(job_id)             → Inspect ebur128 + black frames → final 1080p</pre>
+          </section>
+
+          <section id="cli-reference">
+            <h2>CLI Reference</h2>
+            <p>Every workflow is mirrored across desktop, CLI, Python, and MCP:</p>
+            <pre class="code-window" style="border-radius: 8px; border: 1px solid var(--border);">reeltern gui
 reeltern demo --workspace demo-project
 reeltern compose clip.mp4 --style viral_reel --music bgm.wav --preview --audit
 reeltern audit JOB_ID --workspace reeltern-workspace
@@ -122,37 +232,71 @@ reeltern import-audio soundtrack.mp3 --workspace reeltern-workspace
 reeltern inspect clip.mp4 --thumbs 6 --samples 32
 reeltern card "Chapter One" --subtitle "Intro" --duration 2.0
 reeltern mcp-config claude-code --workspace ws --media-root footage</pre>
-          </article>
+          </section>
 
-          <article class="bento-card span-6" style="grid-column: span 6;">
-            <span class="bento-tag">Repository Markdown Guides</span>
-            <h3>Full Technical Reference on GitHub</h3>
-            <ul style="margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.45rem; color: var(--ink-65);">
-              <li><a href="https://github.com/codesphere-u/reeltern/blob/main/docs/agent-workflow.md" target="_blank" rel="noopener noreferrer" style="color: var(--mint-hi);">Agent Operating Workflow</a> — closed-loop inspect → compose → render → audit</li>
-              <li><a href="https://github.com/codesphere-u/reeltern/blob/main/docs/clients.md" target="_blank" rel="noopener noreferrer" style="color: var(--mint-hi);">MCP Client Setup</a> — Claude Code, Codex, Cursor, VS Code, Generic</li>
-              <li><a href="https://github.com/codesphere-u/reeltern/blob/main/docs/architecture.md" target="_blank" rel="noopener noreferrer" style="color: var(--mint-hi);">Architecture &amp; Contracts</a> — immutable cut plans &amp; segment cache hashing</li>
-              <li><a href="https://github.com/codesphere-u/reeltern/blob/main/VALIDATION.md" target="_blank" rel="noopener noreferrer" style="color: var(--mint-hi);">Validation Record</a> — 53 local automated tests + pixel/audio checks</li>
-              <li><a href="https://github.com/codesphere-u/reeltern/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer" style="color: var(--mint-hi);">Changelog</a> — v0.1.0 through v0.5.0 release notes</li>
+          <section id="validation">
+            <h2>Architecture, Security &amp; Validation</h2>
+            <p>Deep technical guides live directly alongside the codebase on GitHub:</p>
+            <ul>
+              <li><a href="https://github.com/codesphere-u/reeltern/blob/main/docs/agent-workflow.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">Agent Operating Workflow</a></li>
+              <li><a href="https://github.com/codesphere-u/reeltern/blob/main/docs/clients.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">MCP Client Configuration Guide</a></li>
+              <li><a href="https://github.com/codesphere-u/reeltern/blob/main/docs/architecture.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">Immutable Plans &amp; Segment Cache Architecture</a></li>
+              <li><a href="https://github.com/codesphere-u/reeltern/blob/main/VALIDATION.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">Validation Record (53 automated tests)</a></li>
             </ul>
-          </article>
-        </div>
-      </section>
+          </section>
+        </article>
+
+        <!-- Right Sticky TOC (AG-UI On This Page) -->
+        <aside class="docs-toc" aria-label="On this page">
+          <div class="toc-title">On this page</div>
+          <nav class="toc-list">
+            <a class="toc-link active" href="#overview">Introduction</a>
+            <a class="toc-link" href="#mcp-setup">Connect via Local MCP</a>
+            <a class="toc-link" href="#director-profiles">AI Director Profiles</a>
+            <a class="toc-link" href="#closed-loop">Inspect → Audit Loop</a>
+            <a class="toc-link" href="#cli-reference">CLI Reference</a>
+            <a class="toc-link" href="#validation">Security &amp; Validation</a>
+          </nav>
+        </aside>
+      </div>
     </main>
 
     <footer class="site-footer">
       <div class="container footer-grid">
         <div>
-          <strong style="color: var(--mint-hi); letter-spacing: 0.1em;">REELTERN</strong>
-          <p style="margin: 0.35rem 0 0;">GPL-3.0-or-later · Local execution · No telemetry or accounts.</p>
+          <strong style="color: var(--ink);">Reeltern</strong>
+          <p style="margin: 0.45rem 0 0;">GPL-3.0-or-later · Local execution · No telemetry.</p>
         </div>
-        <div class="footer-links">
-          <a href="./">Overview</a>
-          <a href="./studio.html">Director Studio</a>
-          <a href="./tools.html">31 MCP Tools</a>
-          <a href="./releases.html">Releases</a>
+        <div>
+          <h4 class="footer-col-title">Navigation</h4>
+          <div class="footer-col-list">
+            <a href="./">Overview</a>
+            <a href="./studio.html">Studio</a>
+            <a href="./tools.html">Tools (31)</a>
+            <a href="./releases.html">Releases</a>
+          </div>
         </div>
+        <div>
+          <h4 class="footer-col-title">Agents</h4>
+          <div class="footer-col-list">
+            <a href="./llms.txt">llms.txt</a>
+            <a href="./mcp-tools.json">mcp-tools.json</a>
+            <a href="https://github.com/codesphere-u/reeltern" target="_blank" rel="noopener noreferrer">GitHub</a>
+          </div>
+        </div>
+        <div></div>
       </div>
     </footer>
+
+    <div class="cmdk-backdrop" id="cmdk-modal" role="dialog" aria-modal="true" aria-label="Quick search">
+      <div class="cmdk-dialog">
+        <div class="cmdk-input-row">
+          <input id="cmdk-input" type="search" placeholder="Search 31 MCP tools, docs sections, or pages..." autocomplete="off" />
+          <kbd style="font-size: 0.7rem;">ESC</kbd>
+        </div>
+        <div class="cmdk-results" id="cmdk-results"></div>
+      </div>
+    </div>
 
     <script src="./app.js?v=0.5.0"></script>
   </body>
