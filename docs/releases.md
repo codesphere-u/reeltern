@@ -17,6 +17,23 @@ Download assets from the [Reeltern Releases Showcase](https://codesphere-u.githu
 | `reeltern-0.6.0.tar.gz` | Source development and rebuilding | Build dependencies and a supported Python environment |
 | `SHA256SUMS.txt` | Detect a damaged or altered download | Compare the SHA-256 hash with the release's checksum list |
 
+## First launch on macOS and Windows
+
+Desktop app builds are currently unsigned (ad-hoc signed on macOS; no paid Apple Developer ID notarization or Windows Authenticode certificate yet):
+
+- **macOS (`"Reeltern Studio" Not Opened`):**
+  1. Drag `Reeltern Studio.app` from the `.dmg` into **Applications** (`macos-arm64.dmg` for Apple Silicon M1–M4, `macos-x64.dmg` for Intel).
+  2. Double-click it once and click **Done** when Gatekeeper appears.
+  3. Open **System Settings** → **Privacy & Security** → **Security**, click **Open Anyway** next to *Reeltern Studio*, and confirm with Touch ID or your password.
+- **Windows SmartScreen:** Click **More info** → **Run anyway** after extracting `Reeltern Studio.exe`.
+- **Zero-Gatekeeper Python alternative on macOS:** If you have Python 3.10+ with Tk, install the release wheel directly in a virtual environment (without triggering Finder Gatekeeper on an unsigned `.app`):
+
+```sh
+python3 -m venv ~/.reeltern-studio
+~/.reeltern-studio/bin/python -m pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/reeltern-0.6.0-py3-none-any.whl"
+~/.reeltern-studio/bin/reeltern studio
+```
+
 The three installation ZIPs contain the same pure-Python Reeltern wheel with OS-specific launchers. They install dependencies from the user's configured Python package index into a private `.venv` inside the extracted folder. They do not contain a Python runtime, downloaded model weights, or third-party dependency binaries. Installation requires internet access and does not install packages globally.
 
 ## Installation bundles

@@ -104,6 +104,9 @@
             <div class="callout">
               <strong>Local-first security contract:</strong> All imports are copied into content-addressed SHA-256 snapshots scoped inside <code>--media-root</code>. Original footage is never modified in place, and zero shell commands or external cloud APIs are exposed over MCP.
             </div>
+            <div class="callout">
+              <strong>macOS &amp; Windows desktop launch note:</strong> Unsigned open-source builds trigger macOS Gatekeeper / Windows SmartScreen on first run. On <strong>macOS</strong>, copy <code>Reeltern Studio.app</code> into <strong>Applications</strong>, click <strong>Done</strong>, then open <strong>System Settings → Privacy &amp; Security → Open Anyway</strong> (or install the wheel with Python and run <code>reeltern studio</code>).
+            </div>
           </div>
 
           <!-- Stitch-style Interactive MCP Client Setup -->

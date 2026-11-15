@@ -52,6 +52,9 @@ Every plan records **what was selected, where it came from, how fast it plays, a
 
 **Prefer a download?** [GitHub Releases](https://github.com/codesphere-u/reeltern/releases) provides **standalone Desktop Studio GUI apps** for macOS (Apple Silicon & Intel), Windows, and Linux — plus Python installation bundles, wheel, and source archives. [Choose a package →](docs/releases.md)
 
+> [!TIP]
+> **First launch on macOS / Windows (unsigned open-source builds):** If macOS says *"Apple could not verify Reeltern Studio"*, copy `Reeltern Studio.app` to **Applications**, click **Done**, then open **System Settings → Privacy & Security → Open Anyway**. On Windows SmartScreen, click **More info → Run anyway** — or run `reeltern studio` directly via Python below.
+
 **Try a complete edit before bringing your own footage.** Use Python 3.12 for parity with the test environment; the package supports Python 3.10+.
 
 ### macOS / Linux

@@ -275,17 +275,17 @@
         ],
       },
       macos: {
-        cmd: `open "Reeltern-Studio-${ver}-macos-arm64.dmg"   # Drag Reeltern Studio.app -> /Applications`,
+        cmd: `open "Reeltern-Studio-${ver}-macos-arm64.dmg"   # Copy to /Applications, then System Settings -> Open Anyway`,
         steps: [
-          `Available for Apple Silicon (arm64) and Intel (x64) Macs — bundled FFmpeg, PyAV & Tk included`,
-          `Click Load Demo on launch to inspect storyboard, waveform & timeline immediately`,
-          `Click Connect AI inside Studio to copy ready-to-paste Antigravity / MCP config`,
+          `Drag Reeltern Studio.app -> /Applications (macos-arm64 for Apple Silicon M1–M4, macos-x64 for Intel)`,
+          `Unsigned preview: click Done on Gatekeeper -> System Settings -> Privacy & Security -> Open Anyway`,
+          `Zero-Gatekeeper Python launch: pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v${ver}/reeltern-${ver}-py3-none-any.whl" && reeltern studio`,
         ],
       },
       windows: {
         cmd: `Expand-Archive Reeltern-Studio-${ver}-windows-x64.zip -DestinationPath . ; .\\Reeltern-Studio\\"Reeltern Studio.exe"`,
         steps: [
-          `Zero Python setup required — double-click Reeltern Studio.exe directly from Explorer`,
+          `Zero Python setup required — extract ZIP and open Reeltern Studio.exe (More info -> Run anyway if SmartScreen prompts)`,
           `Click Load Demo or Import Video, pick an AI Director preset, and export locally`,
           `Or invoke CLI / Antigravity MCP directly via "Reeltern Studio.exe" mcp ...`,
         ],
@@ -760,15 +760,15 @@
   function renderInstallSnippet(osTab, ver) {
     const cleanVer = (ver || '0.6.0').replace(/^v/, '');
     if (osTab === 'macos') {
-      return `# Standalone macOS Desktop Studio App (Apple Silicon or Intel):\nopen "Reeltern-Studio-${cleanVer}-macos-arm64.dmg"\n# Drag "Reeltern Studio.app" into /Applications and double-click to launch!\n\n# Or use the Python CLI bundle:\nunzip reeltern-${cleanVer}-macos-python.zip && cd reeltern-${cleanVer}-macos-python\npython3 install.py && ./reeltern.sh studio`;
+      return `# Standalone macOS Desktop Studio App (Apple Silicon M1-M4 or Intel):\nopen "Reeltern-Studio-${cleanVer}-macos-arm64.dmg"\n# 1. Drag "Reeltern Studio.app" -> /Applications\n# 2. First launch (unsigned open-source build): click Done, then open\n#    System Settings -> Privacy & Security -> Security -> Open Anyway\n\n# Or launch Desktop Studio cleanly via Python (no Gatekeeper prompt):\npython3 -m venv ~/.reeltern-studio\n~/.reeltern-studio/bin/python -m pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v${cleanVer}/reeltern-${cleanVer}-py3-none-any.whl"\n~/.reeltern-studio/bin/reeltern studio`;
     }
     if (osTab === 'windows') {
-      return `# Standalone Windows x64 Desktop Studio App (PowerShell):\nExpand-Archive Reeltern-Studio-${cleanVer}-windows-x64.zip -DestinationPath .\n.\\Reeltern-Studio\\"Reeltern Studio.exe"\n\n# Or use the Python CLI bundle:\nExpand-Archive reeltern-${cleanVer}-windows-python.zip -DestinationPath .\ncd reeltern-${cleanVer}-windows-python && py -3.12 install.py && .\\reeltern.cmd studio`;
+      return `# Standalone Windows x64 Desktop Studio App (PowerShell):\nExpand-Archive Reeltern-Studio-${cleanVer}-windows-x64.zip -DestinationPath .\n.\\Reeltern-Studio\\"Reeltern Studio.exe"\n# If Windows SmartScreen appears: click "More info" -> "Run anyway".\n\n# Or use the Python CLI bundle:\nExpand-Archive reeltern-${cleanVer}-windows-python.zip -DestinationPath .\ncd reeltern-${cleanVer}-windows-python && py -3.12 install.py && .\\reeltern.cmd studio`;
     }
     if (osTab === 'linux') {
       return `# Standalone Linux x86_64 Desktop Studio App:\ntar -xzf Reeltern-Studio-${cleanVer}-linux-x64.tar.gz\n./reeltern-studio/reeltern-studio\n\n# Or use the Python CLI bundle:\nunzip reeltern-${cleanVer}-linux-python.zip && cd reeltern-${cleanVer}-linux-python\npython3 install.py && sh reeltern.sh demo --workspace demo-project`;
     }
-    return `python3 -m venv .venv && source .venv/bin/activate\npython -m pip install "./reeltern-${cleanVer}-py3-none-any.whl[mcp]"\n# Or install directly from GitHub:\npython -m pip install "git+${REPO_URL}.git"`;
+    return `python3 -m venv .venv && source .venv/bin/activate\npython -m pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v${cleanVer}/reeltern-${cleanVer}-py3-none-any.whl"\n# Or install directly from GitHub:\npython -m pip install "git+${REPO_URL}.git"`;
   }
 
   async function initReleasesSystem() {
