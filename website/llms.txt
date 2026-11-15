@@ -1,0 +1,10 @@
+# Reeltern
+
+> Local, reversible video editing for creators, engineers, and MCP assistants. Powered by FFmpeg & PyAV with 31 AgentFlight Grade-A tools, AI Director style presets, `blur_fill` halo framing, Ken Burns camera motion, `kinetic` word-highlight captions, sidechain-ducked background music, and EBU R128 closed-loop QA.
+
+- Showcase: https://codesphere-u.github.io/reeltern/
+- Director Studio Simulator: https://codesphere-u.github.io/reeltern/studio.html
+- 31 MCP Tools Reference: https://codesphere-u.github.io/reeltern/tools.html
+- Releases & SHA-256 Verifier: https://codesphere-u.github.io/reeltern/releases.html
+- Handbook & Docs: https://codesphere-u.github.io/reeltern/docs.html
+- Repository: https://github.com/codesphere-u/reeltern

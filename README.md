@@ -13,7 +13,7 @@
 [![MCP](https://img.shields.io/badge/MCP-31_tools_Grade_A-2f665a?style=flat-square&labelColor=172333)](docs/mcp.md)
 [![License](https://img.shields.io/badge/license-GPL_3.0_or_later-365b79?style=flat-square&labelColor=172333)](LICENSE)
 
-[**Get started**](#get-started) &nbsp;·&nbsp; [**Connect your AI**](#connect-your-ai) &nbsp;·&nbsp; [**Read the docs**](docs/README.md) &nbsp;·&nbsp; [**Build with us**](#build-with-us)
+[**Live Showcase & Downloads**](https://codesphere-u.github.io/reeltern/) &nbsp;·&nbsp; [**Get started**](#get-started) &nbsp;·&nbsp; [**Connect your AI**](#connect-your-ai) &nbsp;·&nbsp; [**Read the docs**](docs/README.md) &nbsp;·&nbsp; [**Build with us**](#build-with-us)
 
 </div>
 

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reeltern Releases — Current &amp; Future Downloads + SHA-256 Verifier</title>
+    <meta
+      name="description"
+      content="Download current and future Reeltern releases (macOS, Windows, Linux bundles, wheels, source tarballs) with live GitHub Releases synchronization and in-browser SHA-256 verification."
+    />
+    <link rel="canonical" href="https://codesphere-u.github.io/reeltern/releases.html" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.5.0" />
+    <link rel="stylesheet" href="./styles.css?v=0.5.0" />
+  </head>
+  <body>
+    <div class="ambient-backdrop" aria-hidden="true"></div>
+    <div class="grid-overlay" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand-link" href="./" aria-label="Reeltern home">
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="60" height="60" rx="16" fill="#0b1221" stroke="#66ddbe" stroke-opacity="0.38" stroke-width="2" />
+            <path d="M16 17L30 25L49 13L34 34L29 28L21 36L24 25Z" fill="#66ddbe" />
+            <rect x="14" y="42" width="22" height="7" rx="3.5" fill="#66ddbe" fill-opacity="0.32" stroke="#66ddbe" stroke-width="1.4" />
+            <rect x="39" y="42" width="11" height="7" rx="3.5" fill="#ffd166" />
+          </svg>
+          <span>REELTERN</span>
+        </a>
+        <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <nav class="header-nav" aria-label="Primary navigation">
+          <a class="nav-link" href="./">Overview</a>
+          <a class="nav-link" href="./studio.html">Director Studio</a>
+          <a class="nav-link" href="./tools.html">MCP Tools (31)</a>
+          <a class="nav-link active" href="./releases.html">Releases</a>
+          <a class="nav-link" href="./docs.html">Docs</a>
+        </nav>
+        <div class="header-actions">
+          <a class="release-pill" href="#releases-list" data-latest-pill>
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span data-latest-tag>Loading…</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <span class="section-kicker">GitHub Releases Feed + Local Verifier</span>
+          <h1>Releases &amp; Checksum Verification</h1>
+          <p>
+            Automatically pulls every published release and pre-release from <code>codesphere-u/reeltern</code> (with CI-cached snapshot fallback). Every future tag appears here automatically as soon as GitHub Actions finishes building and testing across macOS, Windows, and Linux.
+          </p>
+        </div>
+      </section>
+
+      <!-- Client-Side WebCrypto SHA-256 Verifier -->
+      <section class="section" style="border-top: none; padding-top: 0.6rem; padding-bottom: 2.2rem;">
+        <div class="container">
+          <div class="verify-dropzone" id="sha-dropzone" tabindex="0">
+            <span class="bento-tag" style="margin-inline: auto;">Zero-Upload Browser Verification</span>
+            <h2 style="margin: 0.6rem 0 0.35rem; font-size: 1.25rem;">Verify Any Downloaded Archive (.zip, .whl, .tar.gz)</h2>
+            <p style="margin: 0; color: var(--ink-65); font-size: 0.92rem;">
+              Drop a file here or click to hash it locally in your browser with Web Crypto SHA-256 and match against official GitHub Release digests.
+            </p>
+            <input id="sha-file-input" type="file" hidden />
+            <div class="mono" id="sha-result" style="margin-top: 0.9rem; font-size: 0.82rem; color: var(--mint-hi);"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Full Release Archive Feed -->
+      <section class="section" id="releases-list" style="padding-top: 2rem;">
+        <div class="container">
+          <div class="search-bar" style="justify-content: space-between;">
+            <div class="pill-selector" id="release-filter-pills">
+              <button class="chip-btn active" type="button" data-rel-filter="all">All Releases</button>
+              <button class="chip-btn" type="button" data-rel-filter="stable">Stable Only</button>
+              <button class="chip-btn" type="button" data-rel-filter="pre">Previews</button>
+            </div>
+            <span class="mono" style="font-size: 0.78rem; color: var(--ink-45);" id="rel-sync-meta">Checking GitHub API…</span>
+          </div>
+
+          <div id="all-releases-container" style="display: flex; flex-direction: column; gap: 1.5rem;"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <strong style="color: var(--mint-hi); letter-spacing: 0.1em;">REELTERN</strong>
+          <p style="margin: 0.35rem 0 0;">Direct asset URLs point to <code>github.com/codesphere-u/reeltern/releases</code>.</p>
+        </div>
+        <div class="footer-links">
+          <a href="./">Overview</a>
+          <a href="./studio.html">Director Studio</a>
+          <a href="./tools.html">31 MCP Tools</a>
+          <a href="./docs.html">Documentation</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./app.js?v=0.5.0"></script>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://codesphere-u.github.io/reeltern/sitemap.xml

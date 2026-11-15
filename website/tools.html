@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reeltern MCP Tools — 31 AgentFlight Grade-A Schemas</title>
+    <meta
+      name="description"
+      content="Explore all 31 typed MCP stdio tools, binary PNG visual resources, and editorial prompts exposed by Reeltern 0.5.0 — audited at 100/100 Grade A."
+    />
+    <link rel="canonical" href="https://codesphere-u.github.io/reeltern/tools.html" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.5.0" />
+    <link rel="stylesheet" href="./styles.css?v=0.5.0" />
+  </head>
+  <body>
+    <div class="ambient-backdrop" aria-hidden="true"></div>
+    <div class="grid-overlay" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand-link" href="./" aria-label="Reeltern home">
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="60" height="60" rx="16" fill="#0b1221" stroke="#66ddbe" stroke-opacity="0.38" stroke-width="2" />
+            <path d="M16 17L30 25L49 13L34 34L29 28L21 36L24 25Z" fill="#66ddbe" />
+            <rect x="14" y="42" width="22" height="7" rx="3.5" fill="#66ddbe" fill-opacity="0.32" stroke="#66ddbe" stroke-width="1.4" />
+            <rect x="39" y="42" width="11" height="7" rx="3.5" fill="#ffd166" />
+          </svg>
+          <span>REELTERN</span>
+        </a>
+        <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <nav class="header-nav" aria-label="Primary navigation">
+          <a class="nav-link" href="./">Overview</a>
+          <a class="nav-link" href="./studio.html">Director Studio</a>
+          <a class="nav-link active" href="./tools.html">MCP Tools (31)</a>
+          <a class="nav-link" href="./releases.html">Releases</a>
+          <a class="nav-link" href="./docs.html">Docs</a>
+        </nav>
+        <div class="header-actions">
+          <a class="release-pill" href="./releases.html" data-latest-pill>
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span data-latest-tag>Loading…</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <span class="section-kicker">AgentFlight 100 / 100 Grade A</span>
+          <h1>31 MCP Tools, Visual Resources &amp; Prompts</h1>
+          <p>
+            Live browser explorer loaded directly from <code>mcp-tools.json</code> — every schema uses compact descriptions and strict validation with <strong>0 errors and 0 warnings</strong> (~5,310 est. tokens/turn).
+          </p>
+        </div>
+      </section>
+
+      <section class="section" style="border-top: none; padding-top: 1rem;">
+        <div class="container">
+          <div class="search-bar">
+            <input class="input-box" id="tool-search" type="search" placeholder="Filter tools by name or description (e.g. compose, blur_fill, audit, audio)..." style="max-width: 440px;" />
+            <div class="pill-selector" id="tool-category-pills">
+              <button class="chip-btn active" type="button" data-cat="all">All (31)</button>
+              <button class="chip-btn" type="button" data-cat="director">Director &amp; Style</button>
+              <button class="chip-btn" type="button" data-cat="media">Media &amp; Inspect</button>
+              <button class="chip-btn" type="button" data-cat="plan">Plans &amp; Timeline</button>
+              <button class="chip-btn" type="button" data-cat="render">Render &amp; Audit</button>
+              <button class="chip-btn" type="button" data-cat="transcript">Transcript &amp; Agent</button>
+            </div>
+          </div>
+
+          <div class="tools-grid" id="tools-explorer-grid"></div>
+
+          <div class="bento-grid" style="margin-top: 2rem;">
+            <article class="bento-card">
+              <span class="bento-tag">MCP Resources &amp; Templates</span>
+              <h3>Visual Contact Sheet Inspection</h3>
+              <p>Assistants inspect imported footage and rendered exports directly over stdio via binary PNG resources:</p>
+              <pre class="code-window" style="font-size: 0.8rem;">reeltern://guide
+reeltern://cookbook
+reeltern://visual/asset/{asset_id}   (image/png)
+reeltern://visual/render/{job_id}    (image/png)</pre>
+            </article>
+            <article class="bento-card">
+              <span class="bento-tag">Built-In MCP Prompts</span>
+              <h3>Structured Editorial Kickstarts</h3>
+              <p>Pre-built multi-step instructions exposed cleanly to Claude Code, Codex, Cursor, and VS Code:</p>
+              <pre class="code-window" style="font-size: 0.8rem;">first_pass(asset_id)
+editorial_draft(transcript_id, brief)
+viral_short(asset_id, intro_title?)
+polish_edit(plan_id, goal)</pre>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <strong style="color: var(--mint-hi); letter-spacing: 0.1em;">REELTERN</strong>
+          <p style="margin: 0.35rem 0 0;">Schemas generated directly by <code>scripts/export_mcp_reference.py</code>.</p>
+        </div>
+        <div class="footer-links">
+          <a href="./">Overview</a>
+          <a href="./studio.html">Director Studio</a>
+          <a href="./releases.html">Releases</a>
+          <a href="./docs.html">Documentation</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./app.js?v=0.5.0"></script>
+  </body>
+</html>

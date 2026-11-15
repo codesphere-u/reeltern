@@ -1,0 +1,16 @@
+{
+  "name": "Reeltern",
+  "short_name": "Reeltern",
+  "description": "Local reversible video editing engine, AI Director composer, and 31-tool AgentFlight Grade-A MCP server.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#060a12",
+  "theme_color": "#0b1221",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

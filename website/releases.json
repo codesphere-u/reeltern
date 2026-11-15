@@ -1,0 +1,63 @@
+[
+  {
+    "tag_name": "v0.3.2",
+    "name": "Reeltern 0.3.2 \u00b7 Local editing for people and AI",
+    "prerelease": true,
+    "draft": false,
+    "published_at": "2026-11-11T11:39:38Z",
+    "html_url": "https://github.com/codesphere-u/reeltern/releases/tag/v0.3.2",
+    "tarball_url": "https://api.github.com/repos/codesphere-u/reeltern/tarball/v0.3.2",
+    "zipball_url": "https://api.github.com/repos/codesphere-u/reeltern/zipball/v0.3.2",
+    "body": "## Reeltern 0.3.2 \u2014 local editing for people and AI\n\nFirst packaged GitHub preview release. Edit through the desktop, command line, or 21 MCP tools for Claude Code, Codex, Cursor, VS Code and other local clients.\n\n### Downloads\n\n- **Windows:** `reeltern-0.3.2-windows-python.zip`\n- **macOS (Apple Silicon or Intel):** `reeltern-0.3.2-macos-python.zip`\n- **Linux:** `reeltern-0.3.2-linux-python.zip`\n- **Existing Python environment:** `reeltern-0.3.2-py3-none-any.whl`\n- **Source:** `reeltern-0.3.2.tar.gz`\n- **Download verification:** `SHA256SUMS.txt`\n\n**These are Python installation bundles, not standalone native apps.** Install Python first (3.12 recommended), extract the ZIP, and run `python3 install.py` on macOS/Linux or `py -3.12 install.py` on Windows. The installer creates a private environment and downloads dependencies from your configured package index. It does not install model weights or change global Python packages. See the included `START-HERE.md`.\n\n### What works\n\n- Reversible source-based cut plans, trim/reorder/speed, and silence-assisted first passes.\n- Supplied SRT transcripts, cue selection and retimed selectable captions.\n- Optional local Ollama editorial drafts with source evidence and bounded validation.\n- Verified previews/exports, cached segments and explicit interrupted-job retry.\n- Client configuration generation, 21 MCP tools, implementation docs and an executable example.\n\n### Release checks\n\nPublication is gated on core tests and a clean bundle installation, real demo render, cache-reuse check and MCP handshake for Python 3.10, 3.11 and 3.12 on Ubuntu 22.04 x64, Windows Server 2022 x64, macOS 15 Apple Silicon and macOS 15 Intel. These checks do not certify every desktop OS version or GUI interaction.\n\n### Limits\n\nEarly preview. Python and an internet connection are required for installation. GUI use needs Tkinter and a desktop session. Bundles are unsigned. No built-in transcription, burned-in captions, face tracking or full multitrack editor. The original optional enhancement adapters remain experimental. AI suggestions require review. No PyPI, container image or GitHub Packages registry publication is included.\n\n[Install guide](https://github.com/codesphere-u/reeltern/blob/v0.3.2/docs/releases.md) \u00b7 [AI setup](https://github.com/codesphere-u/reeltern/blob/v0.3.2/docs/clients.md) \u00b7 [Validation](https://github.com/codesphere-u/reeltern/blob/v0.3.2/VALIDATION.md) \u00b7 [Roadmap](https://github.com/codesphere-u/reeltern/blob/v0.3.2/docs/roadmap.md)\n",
+    "assets": [
+      {
+        "name": "reeltern-0.3.2-linux-python.zip",
+        "size": 126680,
+        "digest": "sha256:0bd447f69944170ec77d4e1506fb7f23fc1f1ff013f785a7e4fa454d4df02546",
+        "download_count": 1,
+        "updated_at": "2026-11-11T11:39:37Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.3.2/reeltern-0.3.2-linux-python.zip"
+      },
+      {
+        "name": "reeltern-0.3.2-macos-python.zip",
+        "size": 126905,
+        "digest": "sha256:a546c462cddfbea0146aaa9d3b6e6202801ddd8cf12b57a6288278d253a75669",
+        "download_count": 1,
+        "updated_at": "2026-11-11T11:39:37Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.3.2/reeltern-0.3.2-macos-python.zip"
+      },
+      {
+        "name": "reeltern-0.3.2-py3-none-any.whl",
+        "size": 55719,
+        "digest": "sha256:99f4e70d9bf2d20ba09ec5b97b792eeb1adb4338f53c81a4f9125bf911934a64",
+        "download_count": 1,
+        "updated_at": "2026-11-11T11:39:37Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.3.2/reeltern-0.3.2-py3-none-any.whl"
+      },
+      {
+        "name": "reeltern-0.3.2-windows-python.zip",
+        "size": 127001,
+        "digest": "sha256:304e398ebeb37fa6b2b3078a14364adb2f0453bdbe2e3274e3e2b36d4b744950",
+        "download_count": 1,
+        "updated_at": "2026-11-11T11:39:37Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.3.2/reeltern-0.3.2-windows-python.zip"
+      },
+      {
+        "name": "reeltern-0.3.2.tar.gz",
+        "size": 108161,
+        "digest": "sha256:316264b70087356ed8f767a3186856bb417429e3b548b325f8b23e4c21e407c3",
+        "download_count": 1,
+        "updated_at": "2026-11-11T11:39:37Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.3.2/reeltern-0.3.2.tar.gz"
+      },
+      {
+        "name": "SHA256SUMS.txt",
+        "size": 482,
+        "digest": "sha256:479e259d633beb12e5c4bfbfdc0fd87852e2dda06cc3c36dbf02d29d28d541ba",
+        "download_count": 1,
+        "updated_at": "2026-11-11T11:39:37Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.3.2/SHA256SUMS.txt"
+      }
+    ]
+  }
+]

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reeltern Studio — Interactive AI Director &amp; Plan Builder</title>
+    <meta
+      name="description"
+      content="Experiment with Reeltern's AI Director presets, blur_fill framing, Ken Burns motion, color grades, and generate runnable CLI commands and cut-plan JSON."
+    />
+    <link rel="canonical" href="https://codesphere-u.github.io/reeltern/studio.html" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=0.5.0" />
+    <link rel="stylesheet" href="./styles.css?v=0.5.0" />
+  </head>
+  <body>
+    <div class="ambient-backdrop" aria-hidden="true"></div>
+    <div class="grid-overlay" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand-link" href="./" aria-label="Reeltern home">
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="60" height="60" rx="16" fill="#0b1221" stroke="#66ddbe" stroke-opacity="0.38" stroke-width="2" />
+            <path d="M16 17L30 25L49 13L34 34L29 28L21 36L24 25Z" fill="#66ddbe" />
+            <rect x="14" y="42" width="22" height="7" rx="3.5" fill="#66ddbe" fill-opacity="0.32" stroke="#66ddbe" stroke-width="1.4" />
+            <rect x="39" y="42" width="11" height="7" rx="3.5" fill="#ffd166" />
+          </svg>
+          <span>REELTERN</span>
+        </a>
+        <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <nav class="header-nav" aria-label="Primary navigation">
+          <a class="nav-link" href="./">Overview</a>
+          <a class="nav-link active" href="./studio.html">Director Studio</a>
+          <a class="nav-link" href="./tools.html">MCP Tools (31)</a>
+          <a class="nav-link" href="./releases.html">Releases</a>
+          <a class="nav-link" href="./docs.html">Docs</a>
+        </nav>
+        <div class="header-actions">
+          <a class="release-pill" href="./releases.html" data-latest-pill>
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span data-latest-tag>Loading…</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <span class="section-kicker">Interactive Director Sandbox</span>
+          <h1>Compose, Tune &amp; Inspect Before Exporting</h1>
+          <p>
+            Configure a multi-clip timeline right in the browser to preview real composition parameters and copy the exact <code>reeltern compose</code> CLI command or version-2 cut-plan payload.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" style="border-top: none; padding-top: 1rem;">
+        <div class="container">
+          <div class="studio-showcase" style="margin-top: 0;">
+            <div class="window-chrome">
+              <div class="traffic-lights" aria-hidden="true">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <div class="window-title">
+                <span>Reeltern Plan Builder</span>
+                <span class="window-badge" id="pg-summary-badge">viral_reel · reels</span>
+              </div>
+              <div class="mono" style="font-size: 0.78rem; color: var(--mint-hi);" id="pg-dur-badge">Total: 8.5s (255 frames @ 30fps)</div>
+            </div>
+
+            <div class="workstation-grid">
+              <div class="viewport-pane">
+                <div class="control-group">
+                  <div class="control-label">
+                    <span>01 · Production Profile</span>
+                    <span class="mono">director.py</span>
+                  </div>
+                  <div class="pill-selector" id="pg-style-pills">
+                    <button class="chip-btn active" type="button" data-pg-style="viral_reel">viral_reel</button>
+                    <button class="chip-btn" type="button" data-pg-style="cinematic">cinematic</button>
+                    <button class="chip-btn" type="button" data-pg-style="tutorial">tutorial</button>
+                    <button class="chip-btn" type="button" data-pg-style="documentary">documentary</button>
+                    <button class="chip-btn" type="button" data-pg-style="noir_trailer">noir_trailer</button>
+                  </div>
+                </div>
+
+                <div class="control-grid-3">
+                  <label class="control-group">
+                    <span class="control-label">Output Preset</span>
+                    <select class="release-select" id="pg-preset">
+                      <option value="reels" selected>reels (1080×1920)</option>
+                      <option value="fhd">fhd (1920×1080)</option>
+                      <option value="portrait">portrait (720×1280)</option>
+                      <option value="landscape">landscape (1280×720)</option>
+                      <option value="square">square (720×720)</option>
+                    </select>
+                  </label>
+                  <label class="control-group">
+                    <span class="control-label">Framing Fit</span>
+                    <select class="release-select" id="pg-fit">
+                      <option value="blur_fill" selected>blur_fill</option>
+                      <option value="contain">contain</option>
+                      <option value="cover">cover</option>
+                    </select>
+                  </label>
+                  <label class="control-group">
+                    <span class="control-label">Transition</span>
+                    <select class="release-select" id="pg-transition">
+                      <option value="slideleft" selected>slideleft</option>
+                      <option value="crossfade">crossfade</option>
+                      <option value="wipeleft">wipeleft</option>
+                      <option value="wiperight">wiperight</option>
+                      <option value="slideright">slideright</option>
+                      <option value="dissolve">dissolve</option>
+                      <option value="smoothleft">smoothleft</option>
+                      <option value="circleopen">circleopen</option>
+                      <option value="fadeblack">fadeblack</option>
+                      <option value="cut">cut</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="control-grid-3">
+                  <label class="control-group">
+                    <span class="control-label">Color Grade</span>
+                    <select class="release-select" id="pg-grade">
+                      <option value="vivid" selected>vivid</option>
+                      <option value="cinematic">cinematic</option>
+                      <option value="teal_orange">teal_orange</option>
+                      <option value="studio">studio</option>
+                      <option value="warm">warm</option>
+                      <option value="crisp">crisp</option>
+                      <option value="vintage">vintage</option>
+                      <option value="moody">moody</option>
+                      <option value="noir">noir</option>
+                      <option value="none">none</option>
+                    </select>
+                  </label>
+                  <label class="control-group">
+                    <span class="control-label">Camera Motion</span>
+                    <select class="release-select" id="pg-motion">
+                      <option value="zoom_in" selected>zoom_in</option>
+                      <option value="zoom_out">zoom_out</option>
+                      <option value="pan_left">pan_left</option>
+                      <option value="pan_right">pan_right</option>
+                      <option value="none">none</option>
+                    </select>
+                  </label>
+                  <label class="control-group">
+                    <span class="control-label">Caption Style</span>
+                    <select class="release-select" id="pg-captions">
+                      <option value="kinetic" selected>kinetic</option>
+                      <option value="boxed">boxed</option>
+                      <option value="bold">bold</option>
+                      <option value="clean">clean</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="pill-selector">
+                  <button class="chip-btn active" type="button" id="pg-toggle-voice" data-bool="true">voice_cleanup EQ: ON</button>
+                  <button class="chip-btn active" type="button" id="pg-toggle-duck" data-bool="true">music_ducking: ON</button>
+                  <button class="chip-btn active" type="button" id="pg-toggle-bar" data-bool="true">progress_bar: ON</button>
+                  <button class="chip-btn active" type="button" id="pg-toggle-loud" data-bool="true">loudnorm (-16 LUFS): ON</button>
+                </div>
+
+                <label class="control-group">
+                  <span class="control-label">Optional Opening Slate Title</span>
+                  <input class="input-box" id="pg-intro" type="text" value="Reeltern v0.5 Launch" />
+                </label>
+              </div>
+
+              <div class="inspector-pane">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="bento-tag">Generated Command &amp; Plan</span>
+                  <button class="copy-btn" type="button" id="pg-copy-cli">Copy CLI</button>
+                </div>
+                <pre class="code-window" id="pg-cli-out"></pre>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="mono" style="font-size: 0.75rem; color: var(--ink-65);">Immutable Plan Payload (JSON)</span>
+                  <button class="copy-btn" type="button" id="pg-copy-json">Copy JSON</button>
+                </div>
+                <pre class="code-window" id="pg-json-out" style="max-height: 220px;"></pre>
+                <div class="audit-strip" id="pg-qa-preview"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <strong style="color: var(--mint-hi); letter-spacing: 0.1em;">REELTERN</strong>
+          <p style="margin: 0.35rem 0 0;">Local, reversible video editing engine &amp; AI Director MCP server.</p>
+        </div>
+        <div class="footer-links">
+          <a href="./">Overview</a>
+          <a href="./tools.html">31 MCP Tools</a>
+          <a href="./releases.html">Releases</a>
+          <a href="./docs.html">Documentation</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./app.js?v=0.5.0"></script>
+  </body>
+</html>

@@ -1,16 +1,16 @@
 # Releases and installation packages
 
-Download assets from [GitHub Releases](https://github.com/codesphere-u/reeltern/releases). Version 0.3.2 is an early-preview release with Python installation bundles, a wheel and source distribution. It is not a standalone native executable, signed installer, or offline package.
+Download assets from the [Reeltern Releases Showcase](https://codesphere-u.github.io/reeltern/releases.html) or directly from [GitHub Releases](https://github.com/codesphere-u/reeltern/releases). Version 0.5.0 is an early-preview release with Python installation bundles, a wheel and source distribution. It is not a standalone native executable, signed installer, or offline package.
 
 ## Choose a download
 
 | Asset | Use it for | Requirements |
 |---|---|---|
-| `reeltern-0.3.2-windows-python.zip` | Windows installation with command/desktop launchers | Python 3.10–3.12 recommended; x64 release checks |
-| `reeltern-0.3.2-macos-python.zip` | macOS installation with shell/desktop launchers | Python 3.10–3.12 recommended; Apple Silicon and Intel release checks |
-| `reeltern-0.3.2-linux-python.zip` | Linux installation with a shell launcher | Python 3.10–3.12 recommended; x64 release checks; a desktop session and Tkinter for GUI |
-| `reeltern-0.3.2-py3-none-any.whl` | Existing Python environments, CLI, MCP or embedding | Compatible PyAV and imageio-ffmpeg wheels/binaries for the platform |
-| `reeltern-0.3.2.tar.gz` | Source development and rebuilding | Build dependencies and a supported Python environment |
+| `reeltern-0.5.0-windows-python.zip` | Windows installation with command/desktop launchers | Python 3.10–3.12 recommended; x64 release checks |
+| `reeltern-0.5.0-macos-python.zip` | macOS installation with shell/desktop launchers | Python 3.10–3.12 recommended; Apple Silicon and Intel release checks |
+| `reeltern-0.5.0-linux-python.zip` | Linux installation with a shell launcher | Python 3.10–3.12 recommended; x64 release checks; a desktop session and Tkinter for GUI |
+| `reeltern-0.5.0-py3-none-any.whl` | Existing Python environments, CLI, MCP or embedding | Compatible PyAV and imageio-ffmpeg wheels/binaries for the platform |
+| `reeltern-0.5.0.tar.gz` | Source development and rebuilding | Build dependencies and a supported Python environment |
 | `SHA256SUMS.txt` | Detect a damaged or altered download | Compare the SHA-256 hash with the release's checksum list |
 
 The three installation ZIPs contain the same pure-Python Reeltern wheel with OS-specific launchers. They install dependencies from the user's configured Python package index into a private `.venv` inside the extracted folder. They do not contain a Python runtime, downloaded model weights, or third-party dependency binaries. Installation requires internet access and does not install packages globally.
@@ -55,7 +55,7 @@ From the directory containing the downloaded wheel:
 ```sh
 python -m venv .venv
 # Activate it, or use its Python executable directly.
-python -m pip install './reeltern-0.3.2-py3-none-any.whl[mcp]'
+python -m pip install './reeltern-0.5.0-py3-none-any.whl[mcp]'
 python -m reeltern.cli demo --workspace demo-project
 ```
 
@@ -82,11 +82,11 @@ Containers, WSL and SSH environments can use the wheel/CLI/MCP when a compatible
 # Linux
 sha256sum --check SHA256SUMS.txt
 # macOS
-shasum -a 256 reeltern-0.3.2-macos-python.zip
+shasum -a 256 reeltern-0.5.0-macos-python.zip
 ```
 
 ```powershell
-Get-FileHash .\reeltern-0.3.2-windows-python.zip -Algorithm SHA256
+Get-FileHash .\reeltern-0.5.0-windows-python.zip -Algorithm SHA256
 ```
 
 Compare the reported digest with the corresponding line in `SHA256SUMS.txt`. To use the Linux all-files check, download all files named in the list; otherwise check the asset you downloaded individually. Checksums detect corruption; they are not a code-signing identity or independent trust guarantee.

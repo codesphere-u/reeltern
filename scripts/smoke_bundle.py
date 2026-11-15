@@ -16,10 +16,10 @@ async def check_server(config):
         async with ClientSession(read, write) as session:
             await session.initialize()
             tools = await session.list_tools()
-            assert len(tools.tools) == 21
+            assert len(tools.tools) == 31
             result = await session.call_tool('capabilities', {})
             assert not result.isError, result
-            assert json.loads(result.content[0].text)['version'] == '0.3.2'
+            assert json.loads(result.content[0].text)['version'] == '0.5.0'
 
 
 def main():
