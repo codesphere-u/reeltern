@@ -4,7 +4,7 @@
 |---|---|
 | `No module named reeltern` / `mcp` | Run the exact Python path in the client configuration with `-m pip show reeltern mcp`. Install `'.[mcp]'` from the repository with that interpreter. Regenerate config after moving an environment. |
 | Server starts in a terminal but not the client | Use generated absolute executable/argument paths. Check client logs. Stdio is launched by the client; do not run it as an HTTP service. A terminal apparently waiting after `reeltern mcp` is normal. |
-| No tools appear | Restart the configured server/session, check its enabled/trusted state and call `capabilities`. The current release exposes 21 tools. Check whether the client expects `mcpServers`, `servers`, or TOML. |
+| No tools appear | Restart the configured server/session, check its enabled/trusted state and call `capabilities`. The current release exposes 26 tools. Check whether the client expects `mcpServers`, `servers`, or TOML. |
 | `Another Reeltern renderer owns this workspace` | Close the other Studio/MCP process or choose a different workspace. Do not delete the lock file to bypass a live owner. OS locks are released when their process exits. |
 | Import rejected | The file must exist under the configured media root, including after resolving symlinks. A relative import is relative to that root. Use paths on the server's machine. |
 | `draft_edit` is disabled | Select cues with the assistant and `plan_from_transcript`, or restart with `--agent-model` and an already installed local Ollama model. |

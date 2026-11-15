@@ -1,6 +1,6 @@
 # Reeltern
 
-> Local, reversible video editing for people and MCP assistants. Early preview; original media is preserved. Stdio transport, 21 tools, optional local Ollama drafts, supplied transcripts, verified renders. No built-in speech recognition or public HTTP server.
+> Local, reversible video editing for people and MCP assistants. Early preview; original media is preserved. Stdio transport, 26 AgentFlight Grade-A tools, optional local Ollama drafts, title cards, transitions, color grades, burned-in captions, storyboard/waveform inspection, and verified renders. No built-in speech recognition or public HTTP server.
 
 ## Use
 - [Release downloads](docs/releases.md): OS Python bundles, wheel/source packages and the tested environment matrix.

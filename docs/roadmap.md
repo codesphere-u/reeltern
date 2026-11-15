@@ -2,9 +2,9 @@
 
 This is a prioritized proposal, not a promise of delivery dates. Released functionality is documented in the [README](../README.md) and [validation record](../VALIDATION.md). Open an issue with a concrete editing case before committing to a large feature.
 
-## Available now — 0.3.1
+## Available now — 0.4.0
 
-Local imports, immutable cut plans, trimming/reordering/speed, silence-assisted proposals, supplied-transcript selection, retimed captions, optional constrained Ollama drafts, verified preview/export, segment reuse, job retry, desktop controls, 21 MCP tools and client configuration generation. Optional upstream adapters remain experimental.
+Local imports, immutable cut plans, non-destructive playhead splitting, trimming/reordering/`0.25–4×` speed, synthesized title/chapter cards, color grading presets, fades/volume/rotation/flip/lower-third overlays, `crossfade`/`wipe`/`slide`/`dissolve` transitions, EBU R128 loudness normalization, stylized burned-in and selectable SRT captions, storyboard filmstrips & audio waveforms, dark interactive desktop NLE canvas, silence-assisted proposals, supplied-transcript selection, constrained token-compacted local Ollama drafts, verified preview/export, segment reuse, job retry, and 26 AgentFlight Grade-A MCP tools. Optional upstream adapters remain experimental.
 
 ## Next: make the first useful edit easier
 

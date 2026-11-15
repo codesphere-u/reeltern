@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 — 15 November 2026
+
+- Added `reeltern/effects.py` creative and audio core: synthesized chapter/title cards (`create_card`), non-destructive timeline clip splitting (`split_clip`), color grading presets (`cinematic`, `warm`, `crisp`, `noir`, `vivid`, `moody`), brightness/contrast/saturation controls, fade-in/out ramps, `0.25×–4×` chained `atempo` speed, horizontal/vertical flips and `90°/180°/270°` rotation, safe ASS lower-third text overlays, `crossfade`/`wipeleft`/`slideleft`/`dissolve` joins (`xfade` + `acrossfade`), EBU R128 loudness normalization (`loudnorm`), stylized burned-in captions (`clean`, `boxed`, `bold`), Full HD presets (`fhd` 1920×1080, `reels` 1080×1920), storyboard filmstrip generation, and audio waveform peak inspection.
+- Redesigned `Reeltern Studio` desktop UI with an obsidian dark workstation theme, interactive proportional timeline canvas with clickable playhead & clip hitboxes, live cached PNG storyboard filmstrip & waveform canvases, multi-tab inspector (`Trim & Split`, `Color, Audio & Lower Third`, `Transitions & Burned Captions`), Title Card creation modal, revision diff comparator, and receipt inspector.
+- Applied `AgentFlight` schema hardening and token compaction across all 26 MCP tools (`ergonomics_score: 100/100 Grade A`, `0` warnings, `0` errors) and compacted `EditorialAgent` prompts & cue serialization (omitting duplicated JSON Schema when Ollama structured `format` enforces schema, using compact cue keys).
+- Extended CLI with `card`, `inspect`, and style/transition/caption flags on `edit`.
+
 ## 0.3.2 — 11 November 2026
 
 - Added a gated GitHub release workflow with wheel, source archive, OS-specific Python installation bundles and SHA-256 checksums.

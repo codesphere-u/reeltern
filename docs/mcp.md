@@ -6,15 +6,20 @@ Reeltern uses the official Python MCP SDK's supported 1.x line (`mcp>=1.28,<2`),
 
 | Tool | Purpose |
 |---|---|
-| `capabilities` | Discover features and limits |
+| `capabilities` | Discover features, presets, looks, transitions, and limits |
 | `import_media` | Copy an allowed local video into a verified source snapshot |
 | `list_assets` | Inspect imported names, durations, dimensions and audio availability |
+| `create_title_card` | Generate and import an animated-layout title/chapter card MP4 into the workspace |
+| `inspect_media_visuals` | Extract cached storyboard PNG frames and normalized audio waveform peaks |
 | `analyze_audio` | Detect quiet intervals and suggested kept ranges |
 | `suggest_edit` | Save a conservative first-pass plan |
 | `create_plan` | Save a multi-clip timeline or child revision |
-| `get_plan` | Inspect every cut, source time, reason, speed and output time |
+| `split_clip` | Non-destructively split a clip at a timeline offset into two child clips |
+| `style_clip` | Apply color grade, fade-in/out, volume gain, rotation, or lower-third overlay |
+| `apply_timeline_style` | Configure transitions, loudness normalization (-16 LUFS), and soft/burned captions |
+| `get_plan` | Inspect every cut, source time, reason, speed, FX and output time |
 | `list_plans` | Discover saved versions |
-| `compare_plans` | Compare ordered selections, duration and output format |
+| `compare_plans` | Compare ordered selections, duration, transitions, captions and format |
 | `render_plan` | Queue a preview or final export; returns a job ID |
 | `job_status` | Check progress, result paths or failure |
 | `cancel_job` | Request cancellation of a job owned by the current server |

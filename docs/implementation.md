@@ -1,6 +1,6 @@
 # Implementation guide
 
-This guide is for contributors building features on Reeltern 0.3.2. Use [client setup](clients.md) to connect an assistant, [the operating workflow](agent-workflow.md) to edit footage, and [architecture](architecture.md) for storage and timing details.
+This guide is for contributors building features on Reeltern 0.4.0. Use [client setup](clients.md) to connect an assistant, [the operating workflow](agent-workflow.md) to edit footage, and [architecture](architecture.md) for storage and timing details.
 
 ## Development environment
 
@@ -70,8 +70,8 @@ The source must be at least two seconds long. `Workspace` may create working dir
 ## Reference contracts
 
 - Asset/plan/transcript IDs: SHA-256 strings, 64 lowercase hex characters. Job and agent-run IDs are separate identifiers. Never mix them.
-- Plans: 1–200 clips; source seconds; speed 0.5–2×; whole output frames at 30 fps; four-hour timeline limit.
-- Presets: landscape 1280×720, portrait 720×1280, square 720×720. Preview halves both dimensions. `contain` pads; `cover` crops the center.
+- Plans: 1–200 clips; source seconds; speed 0.25–4×; whole output frames at 30 fps; four-hour timeline limit; optional clip color grades, fades, volume, flip/rotate, lower-third overlays, transitions, loudness normalization, and burned-in captions.
+- Presets: landscape 1280×720, portrait 720×1280, square 720×720, fhd 1920×1080, reels 1080×1920. Preview halves both dimensions. `contain` pads; `cover` crops the center.
 - Transcript cues: chronological, non-overlapping, positive duration, within source; maximum 10,000 cues. One attached transcript per source.
 - Agent: one transcript window; at most 200 cues / 40,000 text characters; 1–600-second budget; up to 30 selected unique cues; at most two model calls. A validated draft is not a statement that context is preserved.
 - Queue: at most eight unfinished jobs, one render worker, one renderer per workspace. Complete means the output passed the implemented technical checks.

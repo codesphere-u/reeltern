@@ -31,13 +31,37 @@ def main():
     agent.add_argument("--model", required=True)
     agent.add_argument("--workspace", default="reeltern-workspace")
     agent.add_argument("--seconds", type=float, default=60)
-    agent.add_argument("--preset", choices=["landscape", "portrait", "square"], default="portrait")
+    agent.add_argument("--preset", choices=["landscape", "portrait", "square", "fhd", "reels"], default="portrait")
     demo = sub.add_parser("demo", help="Generate a small reproducible captioned edit")
     demo.add_argument("--workspace", default="reeltern-demo")
-    edit = sub.add_parser("edit", help="Create a silence-assisted plan, optionally preview/render")
+    card = sub.add_parser("card", help="Generate a verified title/chapter card asset")
+    card.add_argument("title")
+    card.add_argument("--subtitle", default="")
+    card.add_argument("--duration", type=float, default=3.0)
+    card.add_argument("--preset", choices=["landscape", "portrait", "square", "fhd", "reels"], default="landscape")
+    card.add_argument("--background", default="#0f172a")
+    card.add_argument("--accent", default="#38bdf8")
+    card.add_argument("--workspace", default="reeltern-workspace")
+    inspect_cmd = sub.add_parser("inspect", help="Extract storyboard frames and audio waveform envelope")
+    inspect_cmd.add_argument("input", type=Path)
+    inspect_cmd.add_argument("--workspace", default="reeltern-workspace")
+    inspect_cmd.add_argument("--thumbs", type=int, default=6)
+    inspect_cmd.add_argument("--samples", type=int, default=60)
+    edit = sub.add_parser("edit", help="Create a silence-assisted plan with optional polish, optionally preview/render")
     edit.add_argument("input", type=Path)
     edit.add_argument("--workspace", default="reeltern-workspace")
-    edit.add_argument("--preset", choices=["landscape", "portrait", "square"], default="landscape")
+    edit.add_argument("--preset", choices=["landscape", "portrait", "square", "fhd", "reels"], default="landscape")
+    edit.add_argument("--fit", choices=["contain", "cover"], default="contain")
+    edit.add_argument("--grade", choices=["none", "cinematic", "warm", "crisp", "noir", "vivid", "moody"], default="none")
+    edit.add_argument("--transition", choices=["cut", "crossfade", "wipeleft", "slideleft", "dissolve"], default="cut")
+    edit.add_argument("--fade-in", type=float, default=0.0)
+    edit.add_argument("--fade-out", type=float, default=0.0)
+    edit.add_argument("--volume", type=float, default=1.0)
+    edit.add_argument("--title-overlay", default="")
+    edit.add_argument("--normalize-audio", action="store_true")
+    edit.add_argument("--srt", type=Path)
+    edit.add_argument("--burn-captions", action="store_true")
+    edit.add_argument("--caption-style", choices=["clean", "boxed", "bold"], default="clean")
     edit.add_argument("--render", action="store_true")
     edit.add_argument("--preview", action="store_true")
     sub.add_parser("doctor", help="Check optional tools")
@@ -75,12 +99,57 @@ def main():
         elif args.command == "demo":
             from .demo import run_demo
             print(json.dumps(run_demo(args.workspace), indent=2))
+        elif args.command == "card":
+            from .workspace import Workspace
+            ws = Workspace(args.workspace)
+            asset = ws.create_card(args.title, args.subtitle, args.duration, args.preset, args.background, args.accent)
+            print(json.dumps(asset, indent=2))
+        elif args.command == "inspect":
+            from .workspace import Workspace
+            ws = Workspace(args.workspace)
+            asset = ws.import_media(args.input)
+            print(json.dumps(ws.inspect_visuals(asset['id'], args.thumbs, args.samples), indent=2))
         elif args.command == "edit":
             from .workspace import Workspace
             from .render import Renderer
             ws = Workspace(args.workspace)
             asset = ws.import_media(args.input)
+            transcript_ids = []
+            if args.srt:
+                from .transcript import parse_srt, register
+                t = register(ws, asset['id'], parse_srt(args.srt.read_text(encoding='utf-8-sig')))
+                transcript_ids = [t['id']]
             plan = ws.suggest(asset["id"], args.preset)
+            clips = ws._raw_clips(plan)
+            for clip in clips:
+                if args.grade != 'none':
+                    clip['grade'] = args.grade
+                if args.fade_in > 0:
+                    clip['fade_in'] = args.fade_in
+                if args.fade_out > 0:
+                    clip['fade_out'] = args.fade_out
+                if abs(args.volume - 1.0) > 1e-6:
+                    clip['volume'] = args.volume
+            if args.title_overlay and clips:
+                clips[0]['title_overlay'] = args.title_overlay
+            has_style = (
+                args.fit != 'contain' or args.grade != 'none' or args.transition != 'cut'
+                or args.fade_in > 0 or args.fade_out > 0 or abs(args.volume - 1.0) > 1e-6
+                or args.title_overlay or args.normalize_audio or transcript_ids or args.burn_captions
+            )
+            if has_style:
+                plan = ws.create_plan(
+                    clips,
+                    preset=args.preset,
+                    fit=args.fit,
+                    parent=plan['id'],
+                    notes='CLI workflow edit',
+                    transcript_ids=transcript_ids,
+                    transition=args.transition,
+                    normalize_audio=args.normalize_audio,
+                    caption_mode='both' if (args.burn_captions and transcript_ids) else ('burn' if args.burn_captions else 'soft'),
+                    caption_style=args.caption_style,
+                )
             print(json.dumps(plan, indent=2))
             if args.render or args.preview:
                 renderer = Renderer(ws)

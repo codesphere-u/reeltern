@@ -3,32 +3,32 @@
   "tools": [
     {
       "name": "capabilities",
-      "description": "Describe supported editing operations and explicit limitations.",
+      "description": "List supported editing tools, presets, effects, and strict limits.",
       "inputSchema": {
         "properties": {},
-        "title": "capabilitiesArguments",
-        "type": "object"
+        "type": "object",
+        "required": []
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "import_media",
-      "description": "Snapshot a video inside the configured media root. Returns an asset ID.",
+      "description": "Snapshot a local video inside media root and return its asset ID.",
       "inputSchema": {
         "properties": {
           "path": {
-            "title": "Path",
+            "description": "Media path inside media root",
             "type": "string"
           }
         },
         "required": [
           "path"
         ],
-        "title": "import_mediaArguments",
         "type": "object"
       },
       "annotations": {
@@ -39,64 +39,136 @@
     },
     {
       "name": "list_assets",
-      "description": "List imported media, duration, dimensions and audio availability.",
+      "description": "List imported assets with duration, resolution, and audio status.",
       "inputSchema": {
         "properties": {},
-        "title": "list_assetsArguments",
-        "type": "object"
-      },
-      "outputSchema": {
-        "properties": {
-          "result": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Result",
-            "type": "array"
-          }
-        },
-        "required": [
-          "result"
-        ],
-        "title": "list_assetsOutput",
-        "type": "object"
+        "type": "object",
+        "required": []
       },
       "annotations": {
         "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "create_title_card",
+      "description": "Generate and import an MP4 title/chapter slate asset in workspace.",
+      "inputSchema": {
+        "properties": {
+          "subtitle": {
+            "default": "",
+            "description": "Optional subtitle",
+            "maxLength": 200,
+            "type": "string"
+          },
+          "duration": {
+            "default": 3.0,
+            "description": "Duration in sec",
+            "maximum": 30.0,
+            "minimum": 0.5,
+            "type": "number"
+          },
+          "preset": {
+            "default": "landscape",
+            "description": "Frame size preset",
+            "enum": [
+              "landscape",
+              "portrait",
+              "square",
+              "fhd",
+              "reels"
+            ],
+            "type": "string"
+          },
+          "background": {
+            "default": "#0f172a",
+            "description": "Hex backdrop e.g. #0f172a",
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "type": "string"
+          },
+          "accent": {
+            "default": "#38bdf8",
+            "description": "Hex bar/sub color",
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "inspect_media_visuals",
+      "description": "Extract cached storyboard PNG frame paths and audio waveform peaks.",
+      "inputSchema": {
+        "properties": {
+          "asset_id": {
+            "description": "Target asset SHA-256 ID",
+            "type": "string"
+          },
+          "thumbs": {
+            "default": 6,
+            "description": "Storyboard frame count",
+            "maximum": 24,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "samples": {
+            "default": 60,
+            "description": "Waveform amplitude buckets",
+            "maximum": 512,
+            "minimum": 8,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "asset_id"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
         "destructiveHint": false,
         "openWorldHint": false
       }
     },
     {
       "name": "analyze_audio",
-      "description": "Detect quiet intervals and proposed kept ranges. Analysis writes a cached report; does not edit media.",
+      "description": "Detect quiet intervals and suggested kept ranges without editing source media.",
       "inputSchema": {
         "properties": {
           "asset_id": {
-            "title": "Asset Id",
+            "description": "Target asset SHA-256 ID",
             "type": "string"
           },
           "threshold_db": {
             "default": -35,
-            "title": "Threshold Db",
+            "description": "Silence gate in dB",
             "type": "number"
           },
           "minimum_silence": {
             "default": 0.6,
-            "title": "Minimum Silence",
+            "description": "Min silence span in sec",
             "type": "number"
           },
           "margin": {
             "default": 0.15,
-            "title": "Margin",
+            "description": "Padding around speech sec",
             "type": "number"
           }
         },
         "required": [
           "asset_id"
         ],
-        "title": "analyze_audioArguments",
         "type": "object"
       },
       "annotations": {
@@ -107,38 +179,44 @@
     },
     {
       "name": "suggest_edit",
-      "description": "Create a reversible first-pass cut plan based on audio activity. Review before rendering.",
+      "description": "Create a reversible silence-trimmed draft plan for review before render.",
       "inputSchema": {
         "properties": {
           "asset_id": {
-            "title": "Asset Id",
+            "description": "Target asset SHA-256 ID",
             "type": "string"
           },
           "preset": {
             "default": "landscape",
-            "title": "Preset",
+            "description": "Output frame preset",
+            "enum": [
+              "landscape",
+              "portrait",
+              "square",
+              "fhd",
+              "reels"
+            ],
             "type": "string"
           },
           "threshold_db": {
             "default": -35,
-            "title": "Threshold Db",
+            "description": "Silence gate in dB",
             "type": "number"
           },
           "minimum_silence": {
             "default": 0.6,
-            "title": "Minimum Silence",
+            "description": "Min silence span in sec",
             "type": "number"
           },
           "margin": {
             "default": 0.15,
-            "title": "Margin",
+            "description": "Padding around speech sec",
             "type": "number"
           }
         },
         "required": [
           "asset_id"
         ],
-        "title": "suggest_editArguments",
         "type": "object"
       },
       "annotations": {
@@ -149,121 +227,350 @@
     },
     {
       "name": "create_plan",
-      "description": "Create an immutable timeline/revision. Each clip: asset_id, start/end in source seconds, optional speed 0.5–2 and reason. Array order is playback order. Parent identifies an earlier plan. fit=cover center-crops; contain preserves the whole image.",
+      "description": "Save an immutable timeline revision with ordered clips and framing.",
       "inputSchema": {
-        "$defs": {
-          "ClipInput": {
-            "additionalProperties": false,
-            "properties": {
-              "asset_id": {
-                "pattern": "^[a-f0-9]{64}$",
-                "title": "Asset Id",
-                "type": "string"
-              },
-              "start": {
-                "default": 0,
-                "minimum": 0,
-                "title": "Start",
-                "type": "number"
-              },
-              "end": {
-                "anyOf": [
-                  {
-                    "exclusiveMinimum": 0,
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "default": null,
-                "title": "End"
-              },
-              "speed": {
-                "default": 1,
-                "maximum": 2,
-                "minimum": 0.5,
-                "title": "Speed",
-                "type": "number"
-              },
-              "reason": {
-                "default": "User selection",
-                "maxLength": 500,
-                "title": "Reason",
-                "type": "string"
-              }
-            },
-            "required": [
-              "asset_id"
-            ],
-            "title": "ClipInput",
-            "type": "object"
-          }
-        },
         "properties": {
           "clips": {
+            "description": "Ordered playback clips",
             "items": {
-              "$ref": "#/$defs/ClipInput"
+              "additionalProperties": false,
+              "properties": {
+                "asset_id": {
+                  "description": "SHA-256 asset ID",
+                  "pattern": "^[a-f0-9]{64}$",
+                  "type": "string"
+                },
+                "start": {
+                  "default": 0,
+                  "description": "Source start s",
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "end": {
+                  "default": null,
+                  "description": "Source end s",
+                  "exclusiveMinimum": 0,
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "speed": {
+                  "default": 1,
+                  "description": "Speed 0.25–4x",
+                  "maximum": 4.0,
+                  "minimum": 0.25,
+                  "type": "number"
+                },
+                "reason": {
+                  "default": "User selection",
+                  "description": "Clip reason",
+                  "maxLength": 500,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "asset_id"
+              ],
+              "type": "object"
             },
-            "title": "Clips",
             "type": "array"
           },
           "preset": {
             "default": "landscape",
+            "description": "Output preset",
             "enum": [
               "landscape",
               "portrait",
-              "square"
+              "square",
+              "fhd",
+              "reels"
             ],
-            "title": "Preset",
             "type": "string"
           },
           "fit": {
             "default": "contain",
+            "description": "Contain or cover",
             "enum": [
               "contain",
               "cover"
             ],
-            "title": "Fit",
             "type": "string"
           },
           "parent": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "default": null,
-            "title": "Parent"
+            "description": "Parent plan ID",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "notes": {
             "default": "Manual edit",
-            "title": "Notes",
+            "description": "Revision note",
             "type": "string"
           },
           "transcript_ids": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "default": null,
-            "title": "Transcript Ids"
+            "description": "Transcript IDs",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "required": [
           "clips"
         ],
-        "title": "create_planArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "split_clip",
+      "description": "Split a timeline clip non-destructively at an output offset into a new revision.",
+      "inputSchema": {
+        "properties": {
+          "plan_id": {
+            "description": "Source plan ID",
+            "type": "string"
+          },
+          "clip_index": {
+            "description": "Zero-based clip index",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "offset_seconds": {
+            "description": "Split point in clip output sec",
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "notes": {
+            "default": null,
+            "description": "Optional revision note",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "plan_id",
+          "clip_index",
+          "offset_seconds"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "style_clip",
+      "description": "Apply color grade, fades, audio volume, rotation, or lower-third overlay to one clip.",
+      "inputSchema": {
+        "properties": {
+          "plan_id": {
+            "description": "Source plan ID",
+            "type": "string"
+          },
+          "clip_index": {
+            "description": "Zero-based clip index",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "grade": {
+            "default": null,
+            "description": "Color grade look",
+            "enum": [
+              "none",
+              "cinematic",
+              "warm",
+              "crisp",
+              "noir",
+              "vivid",
+              "moody"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fade_in": {
+            "default": null,
+            "description": "Fade-in sec",
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "fade_out": {
+            "default": null,
+            "description": "Fade-out sec",
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "volume": {
+            "default": null,
+            "description": "Audio gain 0–2",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "rotate": {
+            "default": null,
+            "description": "Clockwise rotation deg",
+            "enum": [
+              0,
+              90,
+              180,
+              270
+            ],
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "title_overlay": {
+            "default": null,
+            "description": "Lower-third label",
+            "maxLength": 100,
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "plan_id",
+          "clip_index"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "apply_timeline_style",
+      "description": "Set timeline-wide format, transitions, loudness normalization, and burned-in caption style.",
+      "inputSchema": {
+        "properties": {
+          "plan_id": {
+            "description": "Source plan ID",
+            "type": "string"
+          },
+          "preset": {
+            "default": null,
+            "description": "Frame size preset",
+            "enum": [
+              "landscape",
+              "portrait",
+              "square",
+              "fhd",
+              "reels"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fit": {
+            "default": null,
+            "description": "Pad contain or crop cover",
+            "enum": [
+              "contain",
+              "cover"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transition": {
+            "default": null,
+            "description": "Join transition",
+            "enum": [
+              "cut",
+              "crossfade",
+              "wipeleft",
+              "slideleft",
+              "dissolve"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transition_duration": {
+            "default": null,
+            "description": "Transition span sec",
+            "maximum": 1.5,
+            "minimum": 0.15,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "normalize_audio": {
+            "default": null,
+            "description": "Enable EBU R128 loudness",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "caption_mode": {
+            "default": null,
+            "description": "Subtitle burn/track mode",
+            "enum": [
+              "soft",
+              "burn",
+              "both",
+              "none"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "caption_style": {
+            "default": null,
+            "description": "Burned caption look",
+            "enum": [
+              "clean",
+              "boxed",
+              "bold"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "plan_id"
+        ],
         "type": "object"
       },
       "annotations": {
@@ -274,68 +581,52 @@
     },
     {
       "name": "get_plan",
-      "description": "Inspect every source range, reason, playback speed and output time in a plan.",
+      "description": "Inspect source ranges, speed, effects, and timeline offsets of a saved plan.",
       "inputSchema": {
         "properties": {
           "plan_id": {
-            "title": "Plan Id",
+            "description": "Plan SHA-256 ID",
             "type": "string"
           }
         },
         "required": [
           "plan_id"
         ],
-        "title": "get_planArguments",
         "type": "object"
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "list_plans",
-      "description": "List saved plans and their parent revisions, including earlier edits.",
+      "description": "List saved immutable plan revisions in this workspace.",
       "inputSchema": {
         "properties": {},
-        "title": "list_plansArguments",
-        "type": "object"
-      },
-      "outputSchema": {
-        "properties": {
-          "result": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Result",
-            "type": "array"
-          }
-        },
-        "required": [
-          "result"
-        ],
-        "title": "list_plansOutput",
-        "type": "object"
+        "type": "object",
+        "required": []
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "compare_plans",
-      "description": "Compare source ranges, order, duration and format between two saved plans.",
+      "description": "Compare clip order, duration, format, transitions, and captions across two plans.",
       "inputSchema": {
         "properties": {
           "before": {
-            "title": "Before",
+            "description": "Baseline plan ID",
             "type": "string"
           },
           "after": {
-            "title": "After",
+            "description": "Updated plan ID",
             "type": "string"
           }
         },
@@ -343,34 +634,33 @@
           "before",
           "after"
         ],
-        "title": "compare_plansArguments",
         "type": "object"
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "render_plan",
-      "description": "Queue a render of this exact plan. Preview uses half-resolution. Poll job_status; output is local MP4, not automatically shared.",
+      "description": "Queue asynchronous local MP4 preview or full export render and return job ID.",
       "inputSchema": {
         "properties": {
           "plan_id": {
-            "title": "Plan Id",
+            "description": "Target plan ID",
             "type": "string"
           },
           "preview": {
             "default": true,
-            "title": "Preview",
+            "description": "Half-res fast preview",
             "type": "boolean"
           }
         },
         "required": [
           "plan_id"
         ],
-        "title": "render_planArguments",
         "type": "object"
       },
       "annotations": {
@@ -381,40 +671,39 @@
     },
     {
       "name": "job_status",
-      "description": "Read persistent progress, cache hits, output and verification receipt or error.",
+      "description": "Read render progress, cache hits, output file path, or failure details.",
       "inputSchema": {
         "properties": {
           "job_id": {
-            "title": "Job Id",
+            "description": "Render job ID",
             "type": "string"
           }
         },
         "required": [
           "job_id"
         ],
-        "title": "job_statusArguments",
         "type": "object"
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "cancel_job",
-      "description": "Request cancellation of a queued or running render owned by this server.",
+      "description": "Request cancellation of a queued or running local render job.",
       "inputSchema": {
         "properties": {
           "job_id": {
-            "title": "Job Id",
+            "description": "Render job ID",
             "type": "string"
           }
         },
         "required": [
           "job_id"
         ],
-        "title": "cancel_jobArguments",
         "type": "object"
       },
       "annotations": {
@@ -425,48 +714,42 @@
     },
     {
       "name": "register_transcript",
-      "description": "Register user-supplied timecoded text. Cues must be chronological/non-overlapping. This does not transcribe or verify speech.",
+      "description": "Save user-supplied timecoded cues for an imported asset (no ASR run).",
       "inputSchema": {
-        "$defs": {
-          "CueInput": {
-            "additionalProperties": false,
-            "properties": {
-              "start": {
-                "minimum": 0,
-                "title": "Start",
-                "type": "number"
-              },
-              "end": {
-                "exclusiveMinimum": 0,
-                "title": "End",
-                "type": "number"
-              },
-              "text": {
-                "maxLength": 2000,
-                "minLength": 1,
-                "title": "Text",
-                "type": "string"
-              }
-            },
-            "required": [
-              "start",
-              "end",
-              "text"
-            ],
-            "title": "CueInput",
-            "type": "object"
-          }
-        },
         "properties": {
           "asset_id": {
-            "title": "Asset Id",
+            "description": "Target asset ID",
             "type": "string"
           },
           "cues": {
+            "description": "Chronological cues list",
             "items": {
-              "$ref": "#/$defs/CueInput"
+              "additionalProperties": false,
+              "properties": {
+                "start": {
+                  "description": "Cue start sec",
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "end": {
+                  "description": "Cue end sec",
+                  "exclusiveMinimum": 0,
+                  "type": "number"
+                },
+                "text": {
+                  "description": "Caption text",
+                  "maxLength": 2000,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "start",
+                "end",
+                "text"
+              ],
+              "type": "object"
             },
-            "title": "Cues",
             "type": "array"
           }
         },
@@ -474,7 +757,6 @@
           "asset_id",
           "cues"
         ],
-        "title": "register_transcriptArguments",
         "type": "object"
       },
       "annotations": {
@@ -485,89 +767,94 @@
     },
     {
       "name": "list_transcripts",
-      "description": "Discover saved transcript IDs after reconnecting. Returns paged metadata, without full cue text. Optionally filter by imported asset ID.",
+      "description": "List paged transcript metadata without returning full cue arrays.",
       "inputSchema": {
         "properties": {
           "asset_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "default": null,
-            "title": "Asset Id"
+            "description": "Optional asset filter",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "offset": {
             "default": 0,
-            "title": "Offset",
+            "description": "Pagination offset",
+            "minimum": 0,
             "type": "integer"
           },
           "limit": {
             "default": 20,
-            "title": "Limit",
+            "description": "Max items 1–100",
+            "maximum": 100,
+            "minimum": 1,
             "type": "integer"
           }
         },
-        "title": "list_transcriptsArguments",
-        "type": "object"
+        "type": "object",
+        "required": []
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "get_transcript",
-      "description": "Read a page of transcript cues with stable IDs and source timestamps.",
+      "description": "Read a bounded page of transcript cues with IDs and timestamps.",
       "inputSchema": {
         "properties": {
           "transcript_id": {
-            "title": "Transcript Id",
+            "description": "Transcript SHA-256 ID",
             "type": "string"
           },
           "offset": {
             "default": 0,
-            "title": "Offset",
+            "description": "Cue start index",
+            "minimum": 0,
             "type": "integer"
           },
           "limit": {
             "default": 50,
-            "title": "Limit",
+            "description": "Max cues 1–100",
+            "maximum": 100,
+            "minimum": 1,
             "type": "integer"
           }
         },
         "required": [
           "transcript_id"
         ],
-        "title": "get_transcriptArguments",
         "type": "object"
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "search_transcript",
-      "description": "Find cues containing all search words; returns real cue IDs, never invented timestamps.",
+      "description": "Search transcript cues matching all query words and return real cue IDs.",
       "inputSchema": {
         "properties": {
           "transcript_id": {
-            "title": "Transcript Id",
+            "description": "Transcript SHA-256 ID",
             "type": "string"
           },
           "query": {
-            "title": "Query",
+            "description": "Search words",
             "type": "string"
           },
           "limit": {
             "default": 20,
-            "title": "Limit",
+            "description": "Max results 1–100",
+            "maximum": 100,
+            "minimum": 1,
             "type": "integer"
           }
         },
@@ -575,54 +862,56 @@
           "transcript_id",
           "query"
         ],
-        "title": "search_transcriptArguments",
         "type": "object"
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "plan_from_transcript",
-      "description": "Create a captioned draft by selecting actual transcript cue IDs in the requested order.",
+      "description": "Create a captioned timeline revision from exact selected transcript cue IDs.",
       "inputSchema": {
         "properties": {
           "transcript_id": {
-            "title": "Transcript Id",
+            "description": "Transcript SHA-256 ID",
             "type": "string"
           },
           "cue_ids": {
+            "description": "Ordered cue IDs to keep",
             "items": {
               "type": "string"
             },
-            "title": "Cue Ids",
             "type": "array"
           },
           "preset": {
             "default": "landscape",
-            "title": "Preset",
+            "description": "Frame size preset",
+            "enum": [
+              "landscape",
+              "portrait",
+              "square",
+              "fhd",
+              "reels"
+            ],
             "type": "string"
           },
           "parent": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "default": null,
-            "title": "Parent"
+            "description": "Optional parent plan ID",
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
           "transcript_id",
           "cue_ids"
         ],
-        "title": "plan_from_transcriptArguments",
         "type": "object"
       },
       "annotations": {
@@ -633,50 +922,55 @@
     },
     {
       "name": "draft_edit",
-      "description": "Ask the configured local Ollama model to select evidence-backed cues. At most two model calls. Writes a draft/decision receipt, never renders or publishes. Transcript text is sent to the locally configured model service. Requires --agent-model at startup.",
+      "description": "Use the local Ollama model (--agent-model) to draft an evidence-backed plan.",
       "inputSchema": {
         "properties": {
           "transcript_id": {
-            "title": "Transcript Id",
+            "description": "Transcript SHA-256 ID",
             "type": "string"
           },
           "brief": {
-            "title": "Brief",
+            "description": "Editorial selection brief",
             "type": "string"
           },
           "target_seconds": {
             "default": 60,
-            "title": "Target Seconds",
+            "description": "Max duration sec",
+            "maximum": 600,
+            "minimum": 1,
             "type": "number"
           },
           "preset": {
             "default": "portrait",
-            "title": "Preset",
+            "description": "Frame size preset",
+            "enum": [
+              "landscape",
+              "portrait",
+              "square",
+              "fhd",
+              "reels"
+            ],
             "type": "string"
           },
           "start": {
             "default": 0,
-            "title": "Start",
+            "description": "Source window start sec",
+            "minimum": 0,
             "type": "number"
           },
           "end": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "default": null,
-            "title": "End"
+            "description": "Optional window end sec",
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
           "transcript_id",
           "brief"
         ],
-        "title": "draft_editArguments",
         "type": "object"
       },
       "annotations": {
@@ -687,77 +981,62 @@
     },
     {
       "name": "list_jobs",
-      "description": "Discover recent render jobs in this workspace, including earlier sessions.",
+      "description": "List recent render jobs in this workspace, including interrupted jobs.",
       "inputSchema": {
         "properties": {
           "limit": {
             "default": 20,
-            "title": "Limit",
+            "description": "Max jobs 1–100",
+            "maximum": 100,
+            "minimum": 1,
             "type": "integer"
           }
         },
-        "title": "list_jobsArguments",
-        "type": "object"
-      },
-      "outputSchema": {
-        "properties": {
-          "result": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Result",
-            "type": "array"
-          }
-        },
-        "required": [
-          "result"
-        ],
-        "title": "list_jobsOutput",
-        "type": "object"
+        "type": "object",
+        "required": []
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "get_render_receipt",
-      "description": "Read technical verification evidence for a completed render.",
+      "description": "Read technical verification checks, SHA-256 digest, and media info for a job.",
       "inputSchema": {
         "properties": {
           "job_id": {
-            "title": "Job Id",
+            "description": "Completed job ID",
             "type": "string"
           }
         },
         "required": [
           "job_id"
         ],
-        "title": "get_render_receiptArguments",
         "type": "object"
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "retry_job",
-      "description": "Retry a failed, cancelled or interrupted job as a new job; verified segments can be reused.",
+      "description": "Retry a failed, cancelled, or interrupted render as a new job reusing cache.",
       "inputSchema": {
         "properties": {
           "job_id": {
-            "title": "Job Id",
+            "description": "Failed/cancelled job ID",
             "type": "string"
           }
         },
         "required": [
           "job_id"
         ],
-        "title": "retry_jobArguments",
         "type": "object"
       },
       "annotations": {

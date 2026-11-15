@@ -6,7 +6,15 @@ import shutil
 import uuid
 from .media import atomic_json, digest, key, probe, number, ff, silence_ranges, kept_ranges
 
-PRESETS = {'landscape': (1280, 720), 'portrait': (720, 1280), 'square': (720, 720)}
+from .effects import CAPTION_MODES, CAPTION_STYLES, COLOR_GRADES, FLIPS, ROTATIONS, TRANSITIONS, extract_storyboard, render_title_card, waveform_peaks
+
+PRESETS = {
+    'landscape': (1280, 720),
+    'portrait': (720, 1280),
+    'square': (720, 720),
+    'fhd': (1920, 1080),
+    'reels': (1080, 1920),
+}
 
 
 class Workspace:
@@ -93,9 +101,31 @@ class Workspace:
         atomic_json(saved, result)
         return result
 
-    def create_plan(self, clips, preset='landscape', fit='contain', parent=None, notes='Manual edit', transcript_ids=None):
+    def create_plan(
+        self,
+        clips,
+        preset='landscape',
+        fit='contain',
+        parent=None,
+        notes='Manual edit',
+        transcript_ids=None,
+        transition='cut',
+        transition_duration=0.4,
+        normalize_audio=False,
+        caption_mode='soft',
+        caption_style='clean',
+    ):
         if preset not in PRESETS or fit not in ('contain', 'cover'):
-            raise ValueError('Choose landscape/portrait/square and contain/cover')
+            raise ValueError('Choose a supported preset and contain/cover fit')
+        if transition not in TRANSITIONS:
+            raise ValueError(f'Transition must be one of {", ".join(TRANSITIONS)}')
+        transition_duration = number(transition_duration, 'transition duration', 0.15, 1.5)
+        if not isinstance(normalize_audio, bool):
+            raise ValueError('normalize_audio must be a boolean')
+        if caption_mode not in CAPTION_MODES:
+            raise ValueError(f'Caption mode must be one of {", ".join(CAPTION_MODES)}')
+        if caption_style not in CAPTION_STYLES:
+            raise ValueError(f'Caption style must be one of {", ".join(CAPTION_STYLES)}')
         if not isinstance(clips, list) or not 1 <= len(clips) <= 200:
             raise ValueError('A plan needs between 1 and 200 clips')
         if parent:
@@ -109,29 +139,104 @@ class Workspace:
         transcript_assets = [get_transcript(self, t)['asset_id'] for t in transcript_ids]
         if len(set(transcript_assets)) != len(transcript_assets):
             raise ValueError('Attach only one transcript per asset')
+
+        allowed_clip_keys = {
+            'asset_id', 'start', 'end', 'speed', 'reason',
+            'grade', 'fade_in', 'fade_out', 'volume', 'flip', 'rotate',
+            'title_overlay', 'brightness', 'contrast', 'saturation',
+        }
+        extra_plan_fields = {}
+        if transition != 'cut':
+            extra_plan_fields['transition'] = transition
+            if abs(transition_duration - 0.4) > 1e-6:
+                extra_plan_fields['transition_duration'] = transition_duration
+        if normalize_audio:
+            extra_plan_fields['normalize_audio'] = True
+        if caption_mode != 'soft':
+            extra_plan_fields['caption_mode'] = caption_mode
+        if caption_style != 'clean':
+            extra_plan_fields['caption_style'] = caption_style
+
         normalized, cursor = [], 0
-        for clip in clips:
-            if not isinstance(clip, dict) or set(clip) - {'asset_id', 'start', 'end', 'speed', 'reason'}:
-                raise ValueError('Clip accepts only asset_id, start, end, speed and reason')
+        for index, clip in enumerate(clips):
+            if not isinstance(clip, dict) or set(clip) - allowed_clip_keys:
+                raise ValueError('Clip contains unsupported fields')
             asset = self.asset(clip.get('asset_id'))
             start = number(clip.get('start', 0), 'start', 0, asset['duration'])
             end = number(clip.get('end', asset['duration']), 'end', 0, asset['duration'])
-            speed = number(clip.get('speed', 1), 'speed', 0.5, 2)
+            speed = number(clip.get('speed', 1), 'speed', 0.25, 4.0)
             frames = round((end - start) / speed * 30)
             if end <= start or frames < 1:
                 raise ValueError('Every clip must have at least one output frame')
             reason = clip.get('reason', 'User selection')
             if not isinstance(reason, str) or len(reason) > 500:
                 raise ValueError('Clip reason must be text of at most 500 characters')
-            normalized.append({'asset_id': asset['id'], 'start': start, 'end': end, 'speed': speed,
-                               'reason': reason, 'timeline_start': cursor / 30, 'frames': frames})
-            cursor += frames
+
+            overlap_frames = 0
+            if index > 0 and transition != 'cut':
+                prev_dur = normalized[-1]['frames'] / 30
+                cur_dur = frames / 30
+                eff = min(transition_duration, prev_dur * 0.45, cur_dur * 0.45)
+                overlap_frames = min(normalized[-1]['frames'] - 1, frames - 1, round(eff * 30))
+                overlap_frames = max(0, overlap_frames)
+            timeline_cursor = cursor - overlap_frames
+
+            entry = {
+                'asset_id': asset['id'],
+                'start': start,
+                'end': end,
+                'speed': speed,
+                'reason': reason,
+                'timeline_start': timeline_cursor / 30,
+                'frames': frames,
+            }
+            # Preserve identical v2 hash for plain cuts while supporting optional per-clip visual/audio polish.
+            grade = clip.get('grade', 'none')
+            if grade not in COLOR_GRADES:
+                raise ValueError(f'Unknown color grade: {grade}')
+            if grade != 'none':
+                entry['grade'] = grade
+
+            flip = clip.get('flip', 'none')
+            if flip not in FLIPS:
+                raise ValueError(f'Flip must be one of {", ".join(FLIPS)}')
+            if flip != 'none':
+                entry['flip'] = flip
+
+            rotate = clip.get('rotate', 0)
+            if isinstance(rotate, bool) or rotate not in ROTATIONS:
+                raise ValueError('Rotate must be 0, 90, 180 or 270')
+            if rotate:
+                entry['rotate'] = int(rotate)
+
+            for field, default_val, lo, hi in (
+                ('fade_in', 0.0, 0.0, 5.0),
+                ('fade_out', 0.0, 0.0, 5.0),
+                ('volume', 1.0, 0.0, 2.0),
+                ('brightness', 0.0, -0.5, 0.5),
+                ('contrast', 1.0, 0.5, 2.0),
+                ('saturation', 1.0, 0.0, 2.5),
+            ):
+                val = number(clip.get(field, default_val), field, lo, hi)
+                if abs(val - default_val) > 1e-6:
+                    entry[field] = val
+
+            title_overlay = clip.get('title_overlay', '')
+            if not isinstance(title_overlay, str) or len(title_overlay) > 100:
+                raise ValueError('Title overlay must be text of at most 100 characters')
+            if title_overlay.strip():
+                entry['title_overlay'] = title_overlay.strip()
+
+            normalized.append(entry)
+            cursor = timeline_cursor + frames
         if cursor > 30 * 60 * 60 * 4:
             raise ValueError('Timeline limit is four hours')
         plan = {'version': 2, 'fps': 30, 'preset': preset, 'fit': fit, 'clips': normalized,
                 'duration': cursor / 30, 'frames': cursor, 'parent': parent, 'notes': notes}
         if transcript_ids:
             plan['transcript_ids'] = transcript_ids
+        if extra_plan_fields:
+            plan.update(extra_plan_fields)
         identifier = key(plan)
         plan['id'] = identifier
         atomic_json(self.path('plans', identifier), plan)
@@ -158,4 +263,122 @@ class Workspace:
         return {'before': before, 'after': after, 'duration_before': left['duration'], 'duration_after': right['duration'],
                 'duration_change': right['duration'] - left['duration'], 'before_order': a, 'after_order': b,
                 'preset_change': [left['preset'], right['preset']], 'fit_change': [left['fit'], right['fit']],
+                'transition_change': [left.get('transition', 'cut'), right.get('transition', 'cut')],
+                'caption_mode_change': [left.get('caption_mode', 'soft'), right.get('caption_mode', 'soft')],
                 'note': 'Each tuple is asset ID, source start, source end, playback speed. Original plans remain available.'}
+
+    def create_card(self, title, subtitle='', duration=3.0, preset='landscape', background='#0f172a', accent='#38bdf8'):
+        if preset not in PRESETS:
+            raise ValueError('Unsupported preset')
+        width, height = PRESETS[preset]
+        card_dir = self.root / 'analysis' / 'cards'
+        card_dir.mkdir(parents=True, exist_ok=True)
+        card_key = key({'title': title, 'subtitle': subtitle, 'duration': duration, 'preset': preset, 'background': background, 'accent': accent})
+        out_path = card_dir / f'card-{card_key[:16]}.mp4'
+        if not out_path.exists():
+            render_title_card(out_path, width, height, duration, title, subtitle, background=background, accent=accent, work_dir=card_dir)
+        previous_root = self.media_root
+        try:
+            self.media_root = None
+            return self.import_media(out_path)
+        finally:
+            self.media_root = previous_root
+
+    def visuals_cache_id(self, identifier, thumbs=6, samples=80):
+        return key({'asset': identifier, 'visuals': 1, 'thumbs': int(thumbs), 'samples': int(samples)})
+
+    def inspect_visuals(self, identifier, thumbs=6, samples=80):
+        asset = self.asset(identifier, verify=True)
+        source = self.path('assets', identifier, '.media')
+        cache_path = self.path('analysis', self.visuals_cache_id(identifier, thumbs, samples))
+        thumb_dir = self.root / 'analysis' / 'thumbs' / identifier[:16]
+        if cache_path.exists():
+            cached = json.loads(cache_path.read_text(encoding='utf-8'))
+            if all(Path(item['path']).is_file() for item in cached.get('storyboard', [])):
+                return cached
+        storyboard = extract_storyboard(source, thumb_dir, count=thumbs, duration=asset['duration'])
+        waveform = waveform_peaks(source, samples=samples)
+        result = {'asset_id': identifier, 'duration': asset['duration'], 'storyboard': storyboard, 'waveform': waveform}
+        atomic_json(cache_path, result)
+        return result
+
+    @staticmethod
+    def _raw_clips(plan):
+        keys = {'asset_id', 'start', 'end', 'speed', 'reason', 'grade', 'fade_in', 'fade_out', 'volume', 'flip', 'rotate', 'title_overlay', 'brightness', 'contrast', 'saturation'}
+        return [{k: v for k, v in c.items() if k in keys} for c in plan['clips']]
+
+    def plan_options(self, plan):
+        opts = {}
+        for k in ('transition', 'transition_duration', 'normalize_audio', 'caption_mode', 'caption_style'):
+            if k in plan:
+                opts[k] = plan[k]
+        return opts
+
+    def split_clip(self, plan_id, clip_index, offset_seconds, notes=None):
+        plan = self.plan(plan_id)
+        if type(clip_index) is not int or not 0 <= clip_index < len(plan['clips']):
+            raise ValueError('Clip index out of range')
+        clips = self._raw_clips(plan)
+        target = clips[clip_index]
+        clip_output_dur = (target['end'] - target['start']) / target['speed']
+        offset = number(offset_seconds, 'split offset', 0.05, clip_output_dur - 0.05)
+        split_source = round(target['start'] + offset * target['speed'], 4)
+        if split_source <= target['start'] + 0.01 or split_source >= target['end'] - 0.01:
+            raise ValueError('Split offset is too close to clip boundary')
+        left = dict(target)
+        left['end'] = split_source
+        left['reason'] = f"{target['reason']} (Part 1)".strip()
+        right = dict(target)
+        right['start'] = split_source
+        right['reason'] = f"{target['reason']} (Part 2)".strip()
+        new_clips = clips[:clip_index] + [left, right] + clips[clip_index + 1:]
+        return self.create_plan(
+            new_clips,
+            preset=plan['preset'],
+            fit=plan['fit'],
+            parent=plan['id'],
+            notes=notes or f'Split clip {clip_index + 1} at {offset:.2f}s',
+            transcript_ids=plan.get('transcript_ids'),
+            **self.plan_options(plan),
+        )
+
+    def update_clip(self, plan_id, clip_index, changes, notes='Updated clip'):
+        plan = self.plan(plan_id)
+        if type(clip_index) is not int or not 0 <= clip_index < len(plan['clips']):
+            raise ValueError('Clip index out of range')
+        if not isinstance(changes, dict) or not changes:
+            raise ValueError('Provide clip changes')
+        clips = self._raw_clips(plan)
+        clips[clip_index].update(changes)
+        return self.create_plan(
+            clips,
+            preset=plan['preset'],
+            fit=plan['fit'],
+            parent=plan['id'],
+            notes=notes,
+            transcript_ids=plan.get('transcript_ids'),
+            **self.plan_options(plan),
+        )
+
+    def update_plan_style(self, plan_id, *, preset=None, fit=None, transition=None, transition_duration=None, normalize_audio=None, caption_mode=None, caption_style=None, notes='Updated timeline style'):
+        plan = self.plan(plan_id)
+        opts = self.plan_options(plan)
+        if transition is not None:
+            opts['transition'] = transition
+        if transition_duration is not None:
+            opts['transition_duration'] = transition_duration
+        if normalize_audio is not None:
+            opts['normalize_audio'] = normalize_audio
+        if caption_mode is not None:
+            opts['caption_mode'] = caption_mode
+        if caption_style is not None:
+            opts['caption_style'] = caption_style
+        return self.create_plan(
+            self._raw_clips(plan),
+            preset=preset or plan['preset'],
+            fit=fit or plan['fit'],
+            parent=plan['id'],
+            notes=notes,
+            transcript_ids=plan.get('transcript_ids'),
+            **opts,
+        )

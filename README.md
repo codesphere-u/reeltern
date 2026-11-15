@@ -9,8 +9,8 @@
 **Local video editing · Reversible decisions · AI through MCP**
 
 [![Tests](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml/badge.svg)](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/preview-v0.3.2-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
-[![MCP](https://img.shields.io/badge/MCP-21_tools-2f665a?style=flat-square&labelColor=172333)](docs/mcp.md)
+[![Version](https://img.shields.io/badge/preview-v0.4.0-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
+[![MCP](https://img.shields.io/badge/MCP-26_tools_Grade_A-2f665a?style=flat-square&labelColor=172333)](docs/mcp.md)
 [![License](https://img.shields.io/badge/license-GPL_3.0_or_later-365b79?style=flat-square&labelColor=172333)](LICENSE)
 
 [**Get started**](#get-started) &nbsp;·&nbsp; [**Connect your AI**](#connect-your-ai) &nbsp;·&nbsp; [**Read the docs**](docs/README.md) &nbsp;·&nbsp; [**Build with us**](#build-with-us)
@@ -24,14 +24,14 @@ Reeltern gives people and AI assistants the same editing engine. Select moments 
 **The idea:** an AI edit should come with source evidence, a reversible plan, and a result you can check.
 
 > [!NOTE]
-> **Early preview, actively being built.** The core has 38 automated tests passing on Linux, macOS and Windows. Optional enhancement adapters remain experimental. [See exactly what is tested →](VALIDATION.md)
+> **Early preview, actively being built.** The core suite passes all 44 automated tests locally (including desktop Tk widget workflow verification when a graphical session is available, real MP4/ASS pixel checks, transitions, loudness normalization, and stdio MCP checks). Optional enhancement adapters remain experimental. [See exactly what is tested →](VALIDATION.md)
 
 ## An edit is more than an output file
 
-| Start with meaning | Stay in control | Finish with evidence |
+| Create & shape | Stay in control | Finish with evidence |
 | :--- | :--- | :--- |
-| **Edit from text.** Import an SRT transcript and select real source passages. | **Keep every revision.** Trim, reorder, change speed, and return to earlier plans. | **Verify the render.** Check dimensions, duration, decoding and source integrity. |
-| **Work with your assistant.** Use 21 MCP tools, or an optional local Ollama model. | **Carry captions forward.** Captions follow selected source ranges and playback speed. | **Reuse completed work.** Cache unchanged segments and retry interrupted jobs. |
+| **Edit from text & audio.** Import SRT transcripts, generate title cards, inspect waveforms/storyboards, and auto-trim silence. | **Keep every revision.** Split at the playhead, trim, grade color (`cinematic`, `noir`, `warm`, `vivid`), fade, rotate, and undo cleanly. | **Verify the render.** Check dimensions, transitions, burned captions, EBU R128 loudness, decoding, and SHA-256 receipts. |
+| **Work with your assistant.** Use 26 AgentFlight Grade-A MCP tools, or a token-compacted local Ollama model. | **Carry captions forward.** Retime subtitles to cuts/speed and deliver soft tracks, burned-in ASS styles, or both. | **Reuse completed work.** Cache unchanged segments/thumbs cleanly and retry interrupted jobs. |
 
 Desktop, command line and MCP all use the same core. No Reeltern account or API key is required. Your chosen assistant has its own access requirements and data policies.
 
@@ -142,7 +142,7 @@ Then ask your connected assistant:
 
 | Connection | Editing workflow | Tool contracts |
 | :--- | :--- | :--- |
-| [Client setup & configuration](docs/clients.md) | [Agent operating guide](docs/agent-workflow.md) | [21-tool reference](docs/mcp.md) |
+| [Client setup & configuration](docs/clients.md) | [Agent operating guide](docs/agent-workflow.md) | [26-tool reference](docs/mcp.md) |
 | [Ready-to-adapt templates](examples/clients/) | [Executable MCP example](examples/mcp_edit.py) | [Machine-readable schemas](docs/mcp-tools.json) |
 
 The server uses local **stdio**, with imports restricted to the configured media root. Give simultaneous clients separate workspaces. Cloud assistants may receive transcript text, prompts and tool results under their own policies; local rendering does not make every assistant interaction private.
@@ -212,19 +212,21 @@ Coding with an assistant? Start with [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.
 ## Know the current limits
 
 > [!IMPORTANT]
-> This is an early local editor, not a finished multitrack suite. There is no built-in speech recognition, face tracking, burned-in caption mode, one-click installer or hosted service. The desktop currently uses a timeline table and external playback.
+> This is an evolving local editor designed for reproducible automation and hands-on timelines. There is no built-in speech recognition, face tracking, one-click installer, or hosted service.
 
 <details>
-<summary><strong>Formats, captions, resource limits and recovery</strong></summary>
+<summary><strong>Formats, effects, captions, resource limits and recovery</strong></summary>
 
-- **Output:** SDR, 30 fps, H.264/AAC MP4. Landscape 1280×720, portrait 720×1280, square 720×720; previews halve both dimensions. `contain` pads; `cover` center-crops.
+- **Create & polish:** Generate title/chapter cards (`create_card`), split clips non-destructively (`split_clip`), inspect storyboard filmstrips & audio waveforms, and apply color grades (`cinematic`, `warm`, `crisp`, `noir`, `vivid`, `moody`), fades, `0.25×–4×` speed, rotation/flip, lower-third overlays, EBU R128 loudness normalization, and `crossfade`/`wipeleft`/`slideleft`/`dissolve` transitions.
+- **Output:** SDR, 30 fps, H.264/AAC MP4. Landscape `1280×720`, portrait `720×1280`, square `720×720`, `fhd` `1920×1080`, `reels` `1080×1920`; previews halve both dimensions. `contain` pads; `cover` center-crops.
 - **Streams:** only the first source video/audio streams are used. Original HDR, metadata, subtitle tracks, chapters and multitrack audio are not preserved.
-- **Captions:** supplied transcripts produce SRT sidecars and selectable MP4 subtitles. Enable them in your player. Mid-cue trims retain the full cue text because word alignment is not implemented.
-- **Speed:** 0.5×–2× uses ordinary frame-rate conversion and audio tempo adjustment; it does not invoke RIFE interpolation.
+- **Captions:** supplied transcripts produce SRT sidecars and support selectable MP4 subtitles (`soft`), stylized ASS burned-in pixels (`burn` in `clean`/`boxed`/`bold`), or `both`. Mid-cue trims retain the full cue text because word alignment is not implemented.
+- **Speed:** 0.25×–4× uses frame-rate conversion and chained FFmpeg `atempo` filters; it does not invoke RIFE interpolation.
+- **MCP token efficiency:** Schemas are compacted cleanly (100/100 Grade A on AgentFlight linter, 0 findings across 26 tools); `EditorialAgent` sends compact cues and relies on Ollama structured `format` output.
 - **Resources:** input limit 8 GiB/file, timeline limit 200 clips/four hours, queue limit eight unfinished renders. Snapshots and caches consume disk space; automatic eviction is not implemented.
 - **Recovery:** the next renderer marks unfinished jobs interrupted. Explicit retry creates a new job and can reuse verified segments; there is no automatic restart or mid-encoder resume.
 - **Cancellation:** render jobs are cancellable; import/analysis cancellation is not implemented. A client timeout does not prove background work stopped.
-- **Trust:** workspaces are trusted local state. Models can still make poor editorial choices. Core tests use small synthetic fixtures; broad real-footage and every-client UI acceptance remain open work.
+- **Trust:** workspaces are trusted local state. Models can still make poor editorial choices. Core tests use synthetic fixtures; broad real-footage and every-client UI acceptance remain open work.
 
 [Validation record](VALIDATION.md) · [Troubleshooting](docs/troubleshooting.md) · [Full documentation](docs/README.md)
 

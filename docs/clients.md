@@ -69,7 +69,7 @@ Ask your assistant:
 
 > Use Reeltern's capabilities tool and list_assets. Tell me which media root it can access and whether the local editorial agent is enabled. Do not import or render anything yet.
 
-You should see 21 tools, stdio transport, the configured media root, and the current version. Tool names may gain a client-specific prefix. This checks the real connection rather than relying on a config file's existence.
+You should see 26 tools, stdio transport, the configured media root, and the current version. Tool names may gain a client-specific prefix. This checks the real connection rather than relying on a config file's existence.
 
 Then try the generated demo footage:
 

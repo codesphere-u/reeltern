@@ -1,4 +1,17 @@
-# Validation — 11 November 2026
+# Validation — 15 November 2026
+
+## Version 0.4.0 advanced video workflow toolkit & token optimization
+
+- **44 automated tests passed locally** on macOS (Python 3.13.18 venv, PyAV 16.1.0, imageio-ffmpeg 0.8.1, MCP SDK 1.30.0) and **93 relative documentation links + 26-tool MCP reference** checked cleanly.
+- **New verified coverage (`test_workflows_v4.py` & `test_mcp.py`):**
+  - Synthesizing branded H.264/AAC title cards (`create_card`), non-destructive clip splitting (`split_clip`), per-clip color grades/fades/volume/lower-third ASS overlays, `crossfade` (`xfade` + `acrossfade`) joins, and EBU R128 loudness normalization verified by duration, dimension, and receipt checks.
+  - Pixel-level frame check on `noir` grade + `boxed` burned-in captions in `square` resolution (`720×720`) alongside soft `mov_text` track.
+  - Extended speed range (`4.0×` chained `atempo`), `90°` rotation + horizontal flip into `reels` preview (`540×960`), and real storyboard PNG / audio waveform bucket extraction.
+  - CLI `card` and `inspect` end-to-end execution.
+  - Desktop Tkinter `Studio` widget verification (asset selection, timeline assembly, playhead clip splitting, clip effects application, timeline transition styling, undo).
+  - Compact `EditorialAgent` prompt verification (omitting duplicated JSON Schema, compact cues JSON, under 400 chars system prompt).
+  - AgentFlight MCP schema audit across all 26 exported tools (`docs/mcp-tools.json`): **100/100 Grade A (`0` errors, `0` warnings)**, vs baseline 0.3.2 (`0/100 Grade F`, `50` warnings).
+  - Cross-platform OS matrix tests for v0.4.0 will run via GitHub Actions on push (`tests.yml`).
 
 ## Version 0.3.2 packaging
 
