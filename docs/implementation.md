@@ -1,6 +1,6 @@
 # Implementation guide
 
-This guide is for contributors building features on Reeltern 0.4.0. Use [client setup](clients.md) to connect an assistant, [the operating workflow](agent-workflow.md) to edit footage, and [architecture](architecture.md) for storage and timing details.
+This guide is for contributors building features on Reeltern 0.5.0. Use [client setup](clients.md) to connect an assistant, [the operating workflow](agent-workflow.md) to edit footage, and [architecture](architecture.md) for storage and timing details.
 
 ## Development environment
 
@@ -21,7 +21,9 @@ The desktop additionally needs Tkinter. Tests use synthetic media and the FFmpeg
 
 | File | Responsibility | Change here when |
 |---|---|---|
-| `reeltern/workspace.py` | Imports, IDs, immutable plans, silence analysis, revision comparisons | Adding validated plan data or analysis results |
+| `reeltern/workspace.py` | Imports (video & audio), IDs, immutable plans, silence analysis, visual caching, revisions | Adding validated plan data or analysis results |
+| `reeltern/effects.py` | Title cards, 10 color grades, Ken Burns motion, ASS kinetic/lower-third captions, contact sheets, scene/luminance/EBU telemetry | Adding visual/audio filters or inspection telemetry |
+| `reeltern/director.py` | One-call AI Director presets (`compose_plan`) and closed-loop render QA (`audit_job_render`) | Adding multi-step creative presets or post-render checks |
 | `reeltern/transcript.py` | Supplied SRT/cues, transcript integrity, selection, caption retiming | Adding text/timing operations |
 | `reeltern/agent.py` | Optional Ollama request, bounded selection validation, one repair, decision report | Changing editorial planning; never execute model output |
 | `reeltern/render.py` | Job queue, normalized segments, cache, final mux, receipt | Changing output pixels/audio or job behavior |
@@ -70,8 +72,8 @@ The source must be at least two seconds long. `Workspace` may create working dir
 ## Reference contracts
 
 - Asset/plan/transcript IDs: SHA-256 strings, 64 lowercase hex characters. Job and agent-run IDs are separate identifiers. Never mix them.
-- Plans: 1–200 clips; source seconds; speed 0.25–4×; whole output frames at 30 fps; four-hour timeline limit; optional clip color grades, fades, volume, flip/rotate, lower-third overlays, transitions, loudness normalization, and burned-in captions.
-- Presets: landscape 1280×720, portrait 720×1280, square 720×720, fhd 1920×1080, reels 1080×1920. Preview halves both dimensions. `contain` pads; `cover` crops the center.
+- Plans: 1–200 clips; source seconds; speed 0.25–4×; whole output frames at 30 fps; four-hour timeline limit; optional clip color grades (10 looks), fades, volume, Ken Burns motion (`zoom_in`, `zoom_out`, `pan_left`, `pan_right`), flip/rotate, lower-third overlays, 10 transitions, voice cleanup EQ/compressor, sidechain-ducked background music bed, progress bar overlay, EBU R128 loudness normalization, and stylized/kinetic burned-in captions.
+- Presets: landscape 1280×720, portrait 720×1280, square 720×720, fhd 1920×1080, reels 1080×1920. Preview halves both dimensions. `contain` pads; `cover` crops center; `blur_fill` scales blurred canvas behind sharp foreground.
 - Transcript cues: chronological, non-overlapping, positive duration, within source; maximum 10,000 cues. One attached transcript per source.
 - Agent: one transcript window; at most 200 cues / 40,000 text characters; 1–600-second budget; up to 30 selected unique cues; at most two model calls. A validated draft is not a statement that context is preserved.
 - Queue: at most eight unfinished jobs, one render worker, one renderer per workspace. Complete means the output passed the implemented technical checks.

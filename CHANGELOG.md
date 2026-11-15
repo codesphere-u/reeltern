@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.0 — 15 November 2026
+
+- **AI Director & Self-Critique Closed Loop (`reeltern/director.py`):**
+  - Added `compose_video` (`compose_plan` / `reeltern compose --style ...`) with 5 production profiles (`cinematic`, `viral_reel`, `tutorial`, `documentary`, `noir_trailer`) that combine silence detection, intro slates, aspect-matched `blur_fill` / framing, animated camera motion, transitions, voice cleanup, background music ducking, loudness normalization, and kinetic/styled captions in a single deterministic plan.
+  - Added `audit_render` (`audit_job_render` / `reeltern audit JOB_ID`) measuring rendered video EBU R128 integrated loudness & true peak (`ebur128`), average luminance, contrast spread, near-black frames, a `render_contact_sheet.png`, and actionable repair suggestions.
+  - Extended `inspect_media_visuals` with tiled PNG `contact_sheet` generation, PyAV `scene_cuts`, exposure/contrast telemetry, and waveform `energy_peaks`.
+- **Creator-Grade Audio & Video Pipeline (`effects.py`, `workspace.py`, `render.py`, `media.py`):**
+  - Added `blur_fill` halo background canvas mode (`gblur=sigma=24,eq=brightness=-0.10`) for landscape/square clips inside vertical `portrait` or `reels` timelines.
+  - Added per-clip Ken Burns camera motion (`zoom_in`, `zoom_out`, `pan_left`, `pan_right` via `zoompan`/dynamic crop at exact timeline frame counts).
+  - Expanded color grades to 10 (`teal_orange`, `vintage`, `studio`, plus existing looks) and transitions to 10 (`wiperight`, `slideright`, `smoothleft`, `circleopen`, `fadeblack`, plus existing joins).
+  - Added `kinetic` word-highlight ASS subtitle burning over existing supplied cues, animated bottom accent `progress_bar`, `voice_cleanup` (`highpass=f=85,acompressor`), and `import_audio` + `music_asset_id` background soundtrack mixing with FFmpeg `sidechaincompress` ducking.
+- **MCP, CLI & Studio Upgrades:**
+  - Expanded MCP to **31 tools** (added `import_audio`, `compose_video`, `animate_clip`, `configure_audio_mix`, `audit_render`), **`100/100 Grade A`** on AgentFlight (`0` errors, `0` warnings), binary PNG resource templates (`reeltern://visual/asset/{asset_id}`, `reeltern://visual/render/{job_id}`), `reeltern://cookbook`, and `viral_short` / `polish_edit` prompts.
+  - Updated CLI (`import-audio`, `compose`, `audit`, plus `edit` flags) and Desktop `Studio` (`+ Audio`, `AI Director`, `Audit QA`, motion combobox, `blur_fill`, `Voice EQ`, `Progress Bar`, and storyboard telemetry).
+
 ## 0.4.0 — 15 November 2026
 
 - Added `reeltern/effects.py` creative and audio core: synthesized chapter/title cards (`create_card`), non-destructive timeline clip splitting (`split_clip`), color grading presets (`cinematic`, `warm`, `crisp`, `noir`, `vivid`, `moody`), brightness/contrast/saturation controls, fade-in/out ramps, `0.25×–4×` chained `atempo` speed, horizontal/vertical flips and `90°/180°/270°` rotation, safe ASS lower-third text overlays, `crossfade`/`wipeleft`/`slideleft`/`dissolve` joins (`xfade` + `acrossfade`), EBU R128 loudness normalization (`loudnorm`), stylized burned-in captions (`clean`, `boxed`, `bold`), Full HD presets (`fhd` 1920×1080, `reels` 1080×1920), storyboard filmstrip generation, and audio waveform peak inspection.

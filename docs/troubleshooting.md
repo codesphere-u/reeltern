@@ -4,7 +4,7 @@
 |---|---|
 | `No module named reeltern` / `mcp` | Run the exact Python path in the client configuration with `-m pip show reeltern mcp`. Install `'.[mcp]'` from the repository with that interpreter. Regenerate config after moving an environment. |
 | Server starts in a terminal but not the client | Use generated absolute executable/argument paths. Check client logs. Stdio is launched by the client; do not run it as an HTTP service. A terminal apparently waiting after `reeltern mcp` is normal. |
-| No tools appear | Restart the configured server/session, check its enabled/trusted state and call `capabilities`. The current release exposes 26 tools. Check whether the client expects `mcpServers`, `servers`, or TOML. |
+| No tools appear | Restart the configured server/session, check its enabled/trusted state and call `capabilities`. The current release exposes 31 tools. Check whether the client expects `mcpServers`, `servers`, or TOML. |
 | `Another Reeltern renderer owns this workspace` | Close the other Studio/MCP process or choose a different workspace. Do not delete the lock file to bypass a live owner. OS locks are released when their process exits. |
 | Import rejected | The file must exist under the configured media root, including after resolving symlinks. A relative import is relative to that root. Use paths on the server's machine. |
 | `draft_edit` is disabled | Select cues with the assistant and `plan_from_transcript`, or restart with `--agent-model` and an already installed local Ollama model. |
@@ -13,7 +13,8 @@
 | Job failed or interrupted | Read `job_status`; fix the cause. Use `retry_job` for a new attempt. Keep the client running until completion. A completed partial file without a successful job/receipt is not a verified export. |
 | Captions are invisible | The MP4 has selectable subtitles, not burned-in text. Enable subtitles in your player or use `captions.srt`. Social platforms may ignore embedded subtitles. |
 | Captions show words trimmed out | Mid-cue trims keep the full original cue text. Supply finer-grained cues or edit boundaries to complete cues; word-level alignment is planned. |
-| Source looks cropped | `cover` center-crops; revise the plan with `fit: contain` to preserve the whole image with padding. No face tracking is implemented. |
+| Source looks cropped or letterboxed | `cover` center-crops and `contain` adds black bars; revise the plan with `fit: blur_fill` to keep the entire frame centered over a blurred halo canvas. No face tracking is implemented. |
+| Finished export looks too dark or quiet | Call `audit_render` (`reeltern audit JOB_ID` or **Audit QA** in Studio) to measure EBU R128 LUFS loudness, black frames, and exposure, then adjust brightness, fades, or `normalize_audio`. |
 | `doctor` reports missing tools | `doctor` checks optional legacy tools too. Missing RIFE/Demucs/etc. does not mean core editing is unavailable. Run the core demo to check the installed render path. |
 | GUI fails to import Tkinter | Install a Python build with Tk support (often `python3-tk` on Linux), or use CLI/MCP. |
 

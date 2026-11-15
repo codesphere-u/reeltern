@@ -49,17 +49,34 @@ def ffmpeg():
         raise RuntimeError('Install Reeltern dependencies or set REELTERN_FFMPEG') from exc
 
 
-def probe(path):
+def probe(path, allow_audio_only=False):
     import av
     with av.open(str(path), options={'protocol_whitelist': 'file,pipe'}) as container:
         video = next(iter(container.streams.video), None)
+        audio = next(iter(container.streams.audio), None)
         if video is None:
+            if allow_audio_only and audio is not None:
+                duration = float(audio.duration * audio.time_base) if audio.duration is not None else float(container.duration or 0) / av.time_base
+                if not math.isfinite(duration) or duration <= 0:
+                    raise ValueError('Cannot determine a positive audio duration')
+                return {
+                    'kind': 'audio',
+                    'duration': duration,
+                    'width': 0,
+                    'height': 0,
+                    'fps': 0.0,
+                    'audio': True,
+                    'subtitle_tracks': 0,
+                    'video_codec': None,
+                    'audio_codec': audio.codec_context.name,
+                    'format': container.format.name,
+                }
             raise ValueError('The file must contain a video stream')
         duration = float(video.duration * video.time_base) if video.duration is not None else float(container.duration or 0) / av.time_base
         if not math.isfinite(duration) or duration <= 0:
             raise ValueError('Cannot determine a positive video duration')
         return {'duration': duration, 'width': video.width, 'height': video.height,
-                'fps': float(video.average_rate or 0), 'audio': bool(container.streams.audio),
+                'fps': float(video.average_rate or 0), 'audio': bool(audio),
                 'subtitle_tracks': len(container.streams.subtitles), 'video_codec': video.codec_context.name, 'format': container.format.name}
 
 

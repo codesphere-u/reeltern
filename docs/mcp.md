@@ -6,23 +6,28 @@ Reeltern uses the official Python MCP SDK's supported 1.x line (`mcp>=1.28,<2`),
 
 | Tool | Purpose |
 |---|---|
-| `capabilities` | Discover features, presets, looks, transitions, and limits |
+| `capabilities` | Discover features, presets, looks, motions, director styles, transitions, and limits |
 | `import_media` | Copy an allowed local video into a verified source snapshot |
-| `list_assets` | Inspect imported names, durations, dimensions and audio availability |
+| `import_audio` | Copy a WAV, MP3, M4A, AAC, FLAC, or OGG soundtrack inside media root |
+| `list_assets` | Inspect imported video/audio names, durations, dimensions and audio availability |
 | `create_title_card` | Generate and import an animated-layout title/chapter card MP4 into the workspace |
-| `inspect_media_visuals` | Extract cached storyboard PNG frames and normalized audio waveform peaks |
+| `inspect_media_visuals` | Extract storyboard frames, tiled PNG contact sheet, scene cuts, exposure telemetry, and waveform energy peaks |
 | `analyze_audio` | Detect quiet intervals and suggested kept ranges |
 | `suggest_edit` | Save a conservative first-pass plan |
+| `compose_video` | One-call AI Director auto-assembly (`cinematic`, `viral_reel`, `tutorial`, `documentary`, `noir_trailer`) |
 | `create_plan` | Save a multi-clip timeline or child revision |
 | `split_clip` | Non-destructively split a clip at a timeline offset into two child clips |
-| `style_clip` | Apply color grade, fade-in/out, volume gain, rotation, or lower-third overlay |
-| `apply_timeline_style` | Configure transitions, loudness normalization (-16 LUFS), and soft/burned captions |
+| `style_clip` | Apply 10 color grades, fade-in/out, volume gain, rotation, or lower-third overlay |
+| `animate_clip` | Configure Ken Burns `zoom_in`/`zoom_out`/`pan_left`/`pan_right` motion, mirroring, or playback speed |
+| `apply_timeline_style` | Configure `contain`/`cover`/`blur_fill` fit, 10 transitions, `-16 LUFS` normalization, and `clean`/`boxed`/`bold`/`kinetic` captions |
+| `configure_audio_mix` | Attach background music with speech sidechain ducking, voice cleanup EQ/compressor, and bottom progress bar |
 | `get_plan` | Inspect every cut, source time, reason, speed, FX and output time |
 | `list_plans` | Discover saved versions |
 | `compare_plans` | Compare ordered selections, duration, transitions, captions and format |
 | `render_plan` | Queue a preview or final export; returns a job ID |
 | `job_status` | Check progress, result paths or failure |
 | `cancel_job` | Request cancellation of a job owned by the current server |
+| `audit_render` | Closed-loop QA measuring EBU R128 loudness, true peak, luminance, black frames, rendered contact sheet, and fix suggestions |
 | `register_transcript` | Save supplied timecoded cues for an asset |
 | `list_transcripts` | Discover paged transcript metadata, optionally filtered by asset |
 | `get_transcript` | Read a bounded page of cue IDs and text |
@@ -63,7 +68,7 @@ Start/end values always refer to the original imported source, not the previous 
 6. Report the local preview only when status is `complete`. On `failed`, report the error rather than claiming a usable video.
 7. Once the desired plan is clear, render it with `preview: false`.
 
-The `reeltern://guide` resource, `first_pass` prompt and `editorial_draft` prompt provide these workflows to clients. Carry `transcript_ids` forward when revising a captioned plan with `create_plan`. Servers do not upload completed files or open them automatically. A client may choose to display/open the local path using its own capabilities.
+The `reeltern://guide` and `reeltern://cookbook` resources, PNG image templates `reeltern://visual/asset/{asset_id}` and `reeltern://visual/render/{job_id}`, and the `first_pass`, `editorial_draft`, `viral_short`, and `polish_edit` prompts provide structured visual/editorial workflows to clients. Carry `transcript_ids` forward when revising a captioned plan with `create_plan`. Servers do not upload completed files or open them automatically. A client may choose to display/open the local path using its own capabilities.
 
 ## Scope and shutdown
 

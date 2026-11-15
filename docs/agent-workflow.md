@@ -7,6 +7,7 @@ Use this guide when operating Reeltern through any MCP client. Use [AGENTS.md](.
 | User has | Tools | What you may conclude |
 |---|---|---|
 | Video and a supplied transcript | `import_media`, `register_transcript`, `get_transcript`, `plan_from_transcript` | Source ranges contain the supplied text, subject to transcript accuracy |
+| One-call polished production | `inspect_media_visuals`, `compose_video`, `audit_render` | Automated pacing, color/motion polish, contact-sheet visuals, and measured EBU/luma QA |
 | Video without a transcript | `analyze_audio`, `suggest_edit` | Ranges are louder/quieter; not whether words or ideas matter |
 | Explicit in/out times | `create_plan` | Exactly those source intervals are requested |
 | An existing edit | `list_plans`, `get_plan`, `compare_plans` | Saved choices can be inspected and revised |
@@ -35,7 +36,7 @@ The following calls illustrate a video at least six seconds long with user-suppl
 5. `get_plan` with `{"plan_id":"PLAN_ID"}`. Report the actual source quotes, removed section, four-second duration, contain padding and attached captions. Do not describe this synthetic fixture as speech recognition.
 6. When previewing is within the user's request, `render_plan` with `{"plan_id":"PLAN_ID","preview":true}`. Save the returned `id` as `JOB_ID`.
 7. Poll `job_status` with `{"job_id":"JOB_ID"}` roughly every 1–2 seconds initially; back off for longer work. Stop on `complete`, `failed`, `cancelled` or `interrupted`.
-8. Only on `complete`, call `get_render_receipt` with `{"job_id":"JOB_ID"}`. Return the verified output and caption paths. Enable subtitle display in the player's controls.
+8. Only on `complete`, call `audit_render` (`{"job_id":"JOB_ID"}`) and `get_render_receipt` (`{"job_id":"JOB_ID"}`). Inspect `reeltern://visual/render/JOB_ID` for visual contact-sheet confirmation and apply any suggested brightness, fade, or loudness adjustments before final export.
 9. If the user requested final output, repeat `render_plan` for the reviewed plan with `preview:false`. Do not turn a draft-only request into an export or publication.
 
 [examples/mcp_edit.py](../examples/mcp_edit.py) is an executable Python MCP client for this flow. It uses real returned IDs, checks tool errors, polls to a terminal state and reads the receipt. It requires the MCP extra.

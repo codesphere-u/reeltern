@@ -3,7 +3,7 @@
   "tools": [
     {
       "name": "capabilities",
-      "description": "List supported editing tools, presets, effects, and strict limits.",
+      "description": "List supported editing tools, presets, effects, director profiles, and limits.",
       "inputSchema": {
         "properties": {},
         "type": "object",
@@ -23,6 +23,27 @@
         "properties": {
           "path": {
             "description": "Media path inside media root",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "import_audio",
+      "description": "Import a WAV, MP3, M4A, AAC, FLAC, or OGG soundtrack inside media root.",
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "description": "Audio track path in media root",
             "type": "string"
           }
         },
@@ -108,7 +129,7 @@
     },
     {
       "name": "inspect_media_visuals",
-      "description": "Extract cached storyboard PNG frame paths and audio waveform peaks.",
+      "description": "Extract storyboard contact sheet, scene cuts, exposure metrics, and audio peaks.",
       "inputSchema": {
         "properties": {
           "asset_id": {
@@ -226,6 +247,95 @@
       }
     },
     {
+      "name": "compose_video",
+      "description": "Auto-assemble footage with style-matched pacing, grades, motion, ducking, and captions.",
+      "inputSchema": {
+        "properties": {
+          "asset_ids": {
+            "description": "Ordered video asset IDs",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "director_style": {
+            "default": "cinematic",
+            "description": "Preset production style",
+            "enum": [
+              "cinematic",
+              "viral_reel",
+              "tutorial",
+              "documentary",
+              "noir_trailer"
+            ],
+            "type": "string"
+          },
+          "preset": {
+            "default": null,
+            "description": "Optional output preset override",
+            "enum": [
+              "landscape",
+              "portrait",
+              "square",
+              "fhd",
+              "reels"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "target_seconds": {
+            "default": null,
+            "description": "Optional target duration sec",
+            "maximum": 14400.0,
+            "minimum": 1.0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "intro_title": {
+            "default": "",
+            "description": "Optional opening slate title",
+            "maxLength": 120,
+            "type": "string"
+          },
+          "transcript_id": {
+            "default": null,
+            "description": "Optional transcript SHA-256 ID",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "music_asset_id": {
+            "default": null,
+            "description": "Optional background audio ID",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "default": "AI director composition",
+            "description": "Revision note",
+            "maxLength": 2000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_ids"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
       "name": "create_plan",
       "description": "Save an immutable timeline revision with ordered clips and framing.",
       "inputSchema": {
@@ -290,10 +400,11 @@
           },
           "fit": {
             "default": "contain",
-            "description": "Contain or cover",
+            "description": "Contain, cover, or blur_fill",
             "enum": [
               "contain",
-              "cover"
+              "cover",
+              "blur_fill"
             ],
             "type": "string"
           },
@@ -398,7 +509,10 @@
               "crisp",
               "noir",
               "vivid",
-              "moody"
+              "moody",
+              "teal_orange",
+              "vintage",
+              "studio"
             ],
             "type": [
               "string",
@@ -472,6 +586,71 @@
       }
     },
     {
+      "name": "animate_clip",
+      "description": "Configure camera motion, mirroring, or playback speed ramp for one timeline clip.",
+      "inputSchema": {
+        "properties": {
+          "plan_id": {
+            "description": "Source plan ID",
+            "type": "string"
+          },
+          "clip_index": {
+            "description": "Zero-based clip index",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "motion": {
+            "default": null,
+            "description": "Ken Burns zoom or pan",
+            "enum": [
+              "none",
+              "zoom_in",
+              "zoom_out",
+              "pan_left",
+              "pan_right"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "flip": {
+            "default": null,
+            "description": "Mirror axis",
+            "enum": [
+              "none",
+              "horizontal",
+              "vertical"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "speed": {
+            "default": null,
+            "description": "Playback speed 0.25–4x",
+            "maximum": 4.0,
+            "minimum": 0.25,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "plan_id",
+          "clip_index"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
       "name": "apply_timeline_style",
       "description": "Set timeline-wide format, transitions, loudness normalization, and burned-in caption style.",
       "inputSchema": {
@@ -497,10 +676,11 @@
           },
           "fit": {
             "default": null,
-            "description": "Pad contain or crop cover",
+            "description": "Contain, cover, or blur_fill",
             "enum": [
               "contain",
-              "cover"
+              "cover",
+              "blur_fill"
             ],
             "type": [
               "string",
@@ -514,8 +694,13 @@
               "cut",
               "crossfade",
               "wipeleft",
+              "wiperight",
               "slideleft",
-              "dissolve"
+              "slideright",
+              "dissolve",
+              "smoothleft",
+              "circleopen",
+              "fadeblack"
             ],
             "type": [
               "string",
@@ -560,8 +745,86 @@
             "enum": [
               "clean",
               "boxed",
-              "bold"
+              "bold",
+              "kinetic"
             ],
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "plan_id"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "configure_audio_mix",
+      "description": "Configure background music ducking, speech cleanup EQ, and bottom progress bar overlay.",
+      "inputSchema": {
+        "properties": {
+          "plan_id": {
+            "description": "Source plan ID",
+            "type": "string"
+          },
+          "music_asset_id": {
+            "default": null,
+            "description": "Background music audio ID",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "clear_music": {
+            "default": false,
+            "description": "Remove attached music track",
+            "type": "boolean"
+          },
+          "music_volume": {
+            "default": null,
+            "description": "Music bed level 0–1",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "music_ducking": {
+            "default": null,
+            "description": "Auto-duck music under speech",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "voice_cleanup": {
+            "default": null,
+            "description": "Highpass EQ + speech compressor",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "progress_bar": {
+            "default": null,
+            "description": "Accent playback progress bar",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "progress_color": {
+            "default": null,
+            "description": "Progress bar hex color",
+            "pattern": "^#[0-9a-fA-F]{6}$",
             "type": [
               "string",
               "null"
@@ -698,6 +961,27 @@
         "properties": {
           "job_id": {
             "description": "Render job ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "audit_render",
+      "description": "Inspect finished video exposure, black frames, EBU loudness, contact sheet, and fixes.",
+      "inputSchema": {
+        "properties": {
+          "job_id": {
+            "description": "Completed render job ID",
             "type": "string"
           }
         },

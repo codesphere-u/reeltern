@@ -5,7 +5,8 @@ import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import webbrowser
-from .effects import CAPTION_MODES, CAPTION_STYLES, COLOR_GRADES, FLIPS, ROTATIONS, TRANSITIONS
+from .director import DIRECTOR_STYLES, audit_job_render, compose_plan
+from .effects import CAPTION_MODES, CAPTION_STYLES, COLOR_GRADES, FIT_MODES, FLIPS, MOTIONS, ROTATIONS, TRANSITIONS
 from .workspace import PRESETS, Workspace
 from .render import Renderer
 
@@ -60,6 +61,7 @@ class Studio:
         }
         self.fx_fields = {
             'grade': tk.StringVar(value='none'),
+            'motion': tk.StringVar(value='none'),
             'flip': tk.StringVar(value='none'),
             'rotate': tk.StringVar(value='0'),
             'fade_in': tk.StringVar(value='0.0'),
@@ -74,6 +76,8 @@ class Studio:
             'transition': tk.StringVar(value='cut'),
             'transition_duration': tk.StringVar(value='0.4'),
             'normalize_audio': tk.BooleanVar(value=False),
+            'voice_cleanup': tk.BooleanVar(value=False),
+            'progress_bar': tk.BooleanVar(value=False),
             'caption_mode': tk.StringVar(value='soft'),
             'caption_style': tk.StringVar(value='clean'),
         }
@@ -120,12 +124,14 @@ class Studio:
         left_hdr = tk.Frame(top, bg=COLORS['bg'])
         left_hdr.pack(side='left')
         tk.Label(left_hdr, text='REELTERN STUDIO', bg=COLORS['bg'], fg=COLORS['accent'], font=('Helvetica', 13, 'bold')).pack(side='left')
-        tk.Label(left_hdr, text='  ·  Immutable Timeline & Media Toolkit', bg=COLORS['bg'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left')
+        tk.Label(left_hdr, text='  ·  AI Director & Reversible Video Studio', bg=COLORS['bg'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left')
 
         bar = tk.Frame(top, bg=COLORS['bg'])
         bar.pack(side='right')
-        ttk.Button(bar, text='Import Footage', style='Accent.TButton', command=self.import_file).pack(side='left', padx=3)
+        ttk.Button(bar, text='Import Video', style='Accent.TButton', command=self.import_file).pack(side='left', padx=3)
+        ttk.Button(bar, text='+ Audio', command=self.import_audio_file).pack(side='left', padx=3)
         ttk.Button(bar, text='+ Title Card', command=self.title_card_dialog).pack(side='left', padx=3)
+        ttk.Button(bar, text='AI Director', command=self.director_dialog).pack(side='left', padx=3)
         ttk.Button(bar, text='Silence Trim', command=self.suggest).pack(side='left', padx=3)
         ttk.Button(bar, text='Transcript & AI', command=self.transcript_editor).pack(side='left', padx=3)
         ttk.Button(bar, text='Plans & Diff', command=self.history).pack(side='left', padx=3)
@@ -138,7 +144,7 @@ class Studio:
         fmt_right.pack(side='right')
         tk.Label(fmt_right, text='Output:', bg=COLORS['card'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
         ttk.Combobox(fmt_right, textvariable=self.preset, values=list(PRESETS), state='readonly', width=10).pack(side='left', padx=3)
-        ttk.Combobox(fmt_right, textvariable=self.fit, values=('contain', 'cover'), state='readonly', width=9).pack(side='left', padx=3)
+        ttk.Combobox(fmt_right, textvariable=self.fit, values=FIT_MODES, state='readonly', width=10).pack(side='left', padx=3)
 
         # Split main workspace
         body = tk.Frame(self.root, bg=COLORS['bg'], padx=14)
@@ -153,10 +159,10 @@ class Studio:
         self.assets = ttk.Treeview(left, columns=('name', 'dur', 'audio'), show='headings', height=8)
         self.assets.heading('name', text='Asset')
         self.assets.heading('dur', text='Dur')
-        self.assets.heading('audio', text='Audio')
+        self.assets.heading('audio', text='Type')
         self.assets.column('name', width=165)
-        self.assets.column('dur', width=60)
-        self.assets.column('audio', width=65)
+        self.assets.column('dur', width=55)
+        self.assets.column('audio', width=70)
         self.assets.pack(fill='x', padx=10)
         self.assets.bind('<<TreeviewSelect>>', self.select_asset)
 
@@ -198,8 +204,8 @@ class Studio:
             ('out', 'Out', 66),
             ('speed', 'Speed', 55),
             ('at', 'Start', 65),
-            ('fx', 'Look / FX', 130),
-            ('reason', 'Notes / Reason', 230),
+            ('fx', 'Look / FX', 135),
+            ('reason', 'Notes / Reason', 225),
         ):
             self.timeline.heading(key, text=label)
             self.timeline.column(key, width=width)
@@ -213,9 +219,9 @@ class Studio:
         tab_trim = ttk.Frame(self.inspector, style='Panel.TFrame', padding=10)
         tab_fx = ttk.Frame(self.inspector, style='Panel.TFrame', padding=10)
         tab_tl = ttk.Frame(self.inspector, style='Panel.TFrame', padding=10)
-        self.inspector.add(tab_trim, text='  Trim & Split  ')
+        self.inspector.add(tab_trim, text='  Trim & Motion  ')
         self.inspector.add(tab_fx, text='  Color, Audio & Lower Third  ')
-        self.inspector.add(tab_tl, text='  Transitions & Burned Captions  ')
+        self.inspector.add(tab_tl, text='  Transitions, Progress & Captions  ')
 
         self._build_trim_tab(tab_trim)
         self._build_fx_tab(tab_fx)
@@ -233,6 +239,7 @@ class Studio:
         ttk.Button(actions, text='Preview', style='Accent.TButton', command=lambda: self.start_render(True)).pack(side='left', padx=3)
         ttk.Button(actions, text='Export Final', command=lambda: self.start_render(False)).pack(side='left', padx=3)
         ttk.Button(actions, text='Cancel', command=self.cancel).pack(side='left', padx=3)
+        ttk.Button(actions, text='Audit QA', command=lambda: self.guarded(self.audit_render)).pack(side='left', padx=3)
         ttk.Button(actions, text='Receipt', command=self.show_receipt).pack(side='left', padx=3)
         self.open_button = ttk.Button(actions, text='Open Video', command=self.open_video, state='disabled')
         self.open_button.pack(side='left', padx=(3, 0))
@@ -242,7 +249,9 @@ class Studio:
         row1.pack(fill='x')
         for label, key in (('In (s)', 'start'), ('Out (s)', 'end'), ('Speed (0.25–4x)', 'speed')):
             tk.Label(row1, text=label, bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
-            ttk.Entry(row1, textvariable=self.fields[key], width=8).pack(side='left', padx=(0, 10))
+            ttk.Entry(row1, textvariable=self.fields[key], width=7).pack(side='left', padx=(0, 8))
+        tk.Label(row1, text='Motion', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
+        ttk.Combobox(row1, textvariable=self.fx_fields['motion'], values=MOTIONS, state='readonly', width=10).pack(side='left', padx=(0, 8))
         tk.Label(row1, text='Flip', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
         ttk.Combobox(row1, textvariable=self.fx_fields['flip'], values=FLIPS, state='readonly', width=10).pack(side='left', padx=(0, 8))
         tk.Label(row1, text='Rotate', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
@@ -262,8 +271,9 @@ class Studio:
         row1 = tk.Frame(parent, bg=COLORS['panel'])
         row1.pack(fill='x')
         tk.Label(row1, text='Color Grade:', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 6))
-        for g in COLOR_GRADES:
-            ttk.Radiobutton(row1, text=g.title(), variable=self.fx_fields['grade'], value=g).pack(side='left', padx=3)
+        ttk.Combobox(row1, textvariable=self.fx_fields['grade'], values=list(COLOR_GRADES), state='readonly', width=14).pack(side='left', padx=(0, 14))
+        tk.Label(row1, text='Motion:', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 6))
+        ttk.Combobox(row1, textvariable=self.fx_fields['motion'], values=MOTIONS, state='readonly', width=11).pack(side='left')
 
         row2 = tk.Frame(parent, bg=COLORS['panel'])
         row2.pack(fill='x', pady=(8, 0))
@@ -287,18 +297,20 @@ class Studio:
     def _build_timeline_tab(self, parent):
         row1 = tk.Frame(parent, bg=COLORS['panel'])
         row1.pack(fill='x')
-        tk.Label(row1, text='Join Transition:', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
-        ttk.Combobox(row1, textvariable=self.tl_fields['transition'], values=list(TRANSITIONS), state='readonly', width=11).pack(side='left', padx=(0, 10))
-        tk.Label(row1, text='Duration (s):', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
-        ttk.Entry(row1, textvariable=self.tl_fields['transition_duration'], width=6).pack(side='left', padx=(0, 12))
-        ttk.Checkbutton(row1, text='EBU R128 Audio Loudnorm (-16 LUFS)', variable=self.tl_fields['normalize_audio']).pack(side='left')
+        tk.Label(row1, text='Transition:', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
+        ttk.Combobox(row1, textvariable=self.tl_fields['transition'], values=list(TRANSITIONS), state='readonly', width=12).pack(side='left', padx=(0, 8))
+        tk.Label(row1, text='Dur (s):', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
+        ttk.Entry(row1, textvariable=self.tl_fields['transition_duration'], width=5).pack(side='left', padx=(0, 10))
+        ttk.Checkbutton(row1, text='Loudnorm (-16 LUFS)', variable=self.tl_fields['normalize_audio']).pack(side='left', padx=(0, 8))
+        ttk.Checkbutton(row1, text='Voice EQ', variable=self.tl_fields['voice_cleanup']).pack(side='left', padx=(0, 8))
+        ttk.Checkbutton(row1, text='Progress Bar', variable=self.tl_fields['progress_bar']).pack(side='left')
 
         row2 = tk.Frame(parent, bg=COLORS['panel'])
         row2.pack(fill='x', pady=(8, 0))
-        tk.Label(row2, text='Caption Delivery:', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
+        tk.Label(row2, text='Captions:', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
         ttk.Combobox(row2, textvariable=self.tl_fields['caption_mode'], values=CAPTION_MODES, state='readonly', width=8).pack(side='left', padx=(0, 10))
-        tk.Label(row2, text='Burn Style:', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
-        ttk.Combobox(row2, textvariable=self.tl_fields['caption_style'], values=CAPTION_STYLES, state='readonly', width=9).pack(side='left', padx=(0, 10))
+        tk.Label(row2, text='Style:', bg=COLORS['panel'], fg=COLORS['muted'], font=('Helvetica', 10)).pack(side='left', padx=(0, 4))
+        ttk.Combobox(row2, textvariable=self.tl_fields['caption_style'], values=CAPTION_STYLES, state='readonly', width=10).pack(side='left', padx=(0, 10))
         ttk.Button(row2, text='Apply Timeline Style', style='Accent.TButton', command=lambda: self.guarded(self.apply_timeline_style)).pack(side='right')
 
     def _bind_shortcuts(self):
@@ -329,10 +341,11 @@ class Studio:
     def refresh_assets(self):
         self.assets.delete(*self.assets.get_children())
         for a in self.ws.assets():
-            self.assets.insert('', 'end', iid=a['id'], values=(a['name'], f'{a["duration"]:.2f}s', 'Audio' if a['audio'] else 'Silent'))
+            kind = 'Audio Track' if a.get('kind') == 'audio' else ('Video+Audio' if a['audio'] else 'Silent')
+            self.assets.insert('', 'end', iid=a['id'], values=(a['name'], f'{a["duration"]:.2f}s', kind))
 
     def import_file(self):
-        path = filedialog.askopenfilename(title='Choose video file', filetypes=[('Video files', '*.mp4 *.mov *.mkv *.webm *.avi'), ('All files', '*.*')])
+        path = filedialog.askopenfilename(title='Choose video file', filetypes=[('Video files', '*.mp4 *.mov *.mkv *.webm *.avi *.m4v'), ('All files', '*.*')])
         if not path:
             return
         def _after(asset):
@@ -341,6 +354,16 @@ class Studio:
             self.status.set(f'Imported {asset["name"]} ({asset["duration"]:.2f}s)')
             self.task(lambda: self.ws.inspect_visuals(asset['id'], thumbs=6, samples=60), self.display_visuals)
         self.guarded(lambda: self.task(lambda: self.ws.import_media(path), _after))
+
+    def import_audio_file(self):
+        path = filedialog.askopenfilename(title='Choose soundtrack / audio file', filetypes=[('Audio files', '*.wav *.mp3 *.m4a *.aac *.flac *.ogg'), ('All files', '*.*')])
+        if not path:
+            return
+        def _after(asset):
+            self.refresh_assets()
+            self.assets.selection_set(asset['id'])
+            self.status.set(f'Imported audio track {asset["name"]} ({asset["duration"]:.2f}s)')
+        self.guarded(lambda: self.task(lambda: self.ws.import_audio(path), _after))
 
     def select_asset(self, _=None):
         ids = self.assets.selection()
@@ -365,13 +388,13 @@ class Studio:
         self.thumb_images.clear()
         thumbs = visuals.get('storyboard', [])
         if not thumbs:
-            c.create_text(150, 75, text='No frames cached', fill=COLORS['muted'], font=('Helvetica', 10))
+            c.create_text(150, 75, text='Audio asset (waveform below)', fill=COLORS['muted'], font=('Helvetica', 10))
             return
         cols = 3
-        cell_w, cell_h = 94, 54
+        cell_w, cell_h = 94, 52
         for idx, item in enumerate(thumbs[:6]):
             col, row = idx % cols, idx // cols
-            x0, y0 = 10 + col * (cell_w + 6), 8 + row * (cell_h + 18)
+            x0, y0 = 10 + col * (cell_w + 6), 6 + row * (cell_h + 15)
             try:
                 img = tk.PhotoImage(file=item['path']).subsample(2, 2)
                 self.thumb_images.append(img)
@@ -379,7 +402,10 @@ class Studio:
                 c.create_image(x0 + cell_w // 2, y0 + cell_h // 2, image=img)
             except tk.TclError:
                 c.create_rectangle(x0, y0, x0 + cell_w, y0 + cell_h, outline=COLORS['border'], fill=COLORS['card'])
-            c.create_text(x0 + cell_w // 2, y0 + cell_h + 8, text=f'{item["time"]:.1f}s', fill=COLORS['muted'], font=('Helvetica', 8))
+            c.create_text(x0 + cell_w // 2, y0 + cell_h + 7, text=f'{item["time"]:.1f}s', fill=COLORS['muted'], font=('Helvetica', 8))
+        tel = visuals.get('telemetry', {})
+        if tel:
+            c.create_text(150, 146, text=f'Luma {tel.get("luma_avg", 0):.2f} · {tel.get("motion_level", "static")} · cuts:{len(tel.get("scene_cuts", []))}', fill=COLORS['accent'], font=('Helvetica', 8))
 
     def _draw_waveform(self, visuals):
         c = self.waveform_canvas
@@ -441,6 +467,58 @@ class Studio:
 
         ttk.Button(frm, text='Create Title Card Asset', style='Accent.TButton', command=lambda: self.guarded(create)).pack(anchor='e', pady=(14, 0))
 
+    def director_dialog(self):
+        ids = list(self.selected_assets())
+        video_ids = [i for i in ids if self.ws.asset(i).get('kind') != 'audio']
+        if not video_ids:
+            raise ValueError('Select at least one video asset first')
+        audio_assets = [a for a in self.ws.assets() if a.get('kind') == 'audio']
+        win = tk.Toplevel(self.root)
+        win.title('AI Director — Auto-Compose Production Edit')
+        win.geometry('500x360')
+        win.configure(bg=COLORS['panel'])
+        frm = tk.Frame(win, bg=COLORS['panel'], padx=18, pady=16)
+        frm.pack(fill='both', expand=True)
+        tk.Label(frm, text='One-Click AI Director Composition', bg=COLORS['panel'], fg=COLORS['accent'], font=('Helvetica', 14, 'bold')).pack(anchor='w', pady=(0, 10))
+        style_var = tk.StringVar(value='viral_reel')
+        preset_var = tk.StringVar(value=self.preset.get())
+        intro_var = tk.StringVar(value='')
+        budget_var = tk.StringVar(value='')
+        music_var = tk.StringVar(value='none')
+
+        row_s = tk.Frame(frm, bg=COLORS['panel']); row_s.pack(fill='x', pady=4)
+        tk.Label(row_s, text='Director Style', bg=COLORS['panel'], fg=COLORS['muted'], width=15, anchor='w').pack(side='left')
+        ttk.Combobox(row_s, textvariable=style_var, values=list(DIRECTOR_STYLES), state='readonly').pack(side='left', fill='x', expand=True)
+
+        row_p = tk.Frame(frm, bg=COLORS['panel']); row_p.pack(fill='x', pady=4)
+        tk.Label(row_p, text='Preset Override', bg=COLORS['panel'], fg=COLORS['muted'], width=15, anchor='w').pack(side='left')
+        ttk.Combobox(row_p, textvariable=preset_var, values=list(PRESETS), state='readonly').pack(side='left', fill='x', expand=True)
+
+        for lbl, var in (('Intro Slate (opt)', intro_var), ('Max Sec (opt)', budget_var)):
+            row = tk.Frame(frm, bg=COLORS['panel']); row.pack(fill='x', pady=4)
+            tk.Label(row, text=lbl, bg=COLORS['panel'], fg=COLORS['muted'], width=15, anchor='w').pack(side='left')
+            ttk.Entry(row, textvariable=var).pack(side='left', fill='x', expand=True)
+
+        row_m = tk.Frame(frm, bg=COLORS['panel']); row_m.pack(fill='x', pady=4)
+        tk.Label(row_m, text='Background Music', bg=COLORS['panel'], fg=COLORS['muted'], width=15, anchor='w').pack(side='left')
+        music_choices = ['none'] + [f'{a["name"]} ({a["id"][:8]})' for a in audio_assets]
+        ttk.Combobox(row_m, textvariable=music_var, values=music_choices, state='readonly').pack(side='left', fill='x', expand=True)
+
+        def run_director():
+            budget = float(budget_var.get()) if budget_var.get().strip() else None
+            music_id = None
+            if music_var.get() != 'none':
+                short = music_var.get().rsplit('(', 1)[-1].rstrip(')')
+                music_id = next((a['id'] for a in audio_assets if a['id'].startswith(short)), None)
+            def done(res):
+                self.refresh_assets()
+                self.show_plan(res['plan'])
+                if win.winfo_exists():
+                    win.destroy()
+            self.task(lambda: compose_plan(self.ws, video_ids, style_var.get(), preset_var.get(), budget, intro_var.get(), music_asset_id=music_id), done)
+
+        ttk.Button(frm, text='Compose Polished Edit', style='Accent.TButton', command=lambda: self.guarded(run_director)).pack(anchor='e', pady=(14, 0))
+
     def selected_assets(self):
         ids = self.assets.selection()
         if not ids:
@@ -469,6 +547,8 @@ class Studio:
         self.tl_fields['transition'].set(plan.get('transition', 'cut'))
         self.tl_fields['transition_duration'].set(str(plan.get('transition_duration', 0.4)))
         self.tl_fields['normalize_audio'].set(bool(plan.get('normalize_audio', False)))
+        self.tl_fields['voice_cleanup'].set(bool(plan.get('voice_cleanup', False)))
+        self.tl_fields['progress_bar'].set(bool(plan.get('progress_bar', False)))
         self.tl_fields['caption_mode'].set(plan.get('caption_mode', 'soft'))
         self.tl_fields['caption_style'].set(plan.get('caption_style', 'clean'))
 
@@ -478,6 +558,8 @@ class Studio:
             tags = []
             if c.get('grade', 'none') != 'none':
                 tags.append(c['grade'])
+            if c.get('motion', 'none') != 'none':
+                tags.append(c['motion'])
             if c.get('fade_in', 0) > 0 or c.get('fade_out', 0) > 0:
                 tags.append('fade')
             if c.get('rotate', 0):
@@ -501,8 +583,9 @@ class Studio:
             )
         trans = plan.get('transition', 'cut')
         cap = plan.get('caption_mode', 'soft')
+        music_tag = ' · +music' if plan.get('music_asset_id') else ''
         self.summary.set(
-            f'{len(plan["clips"])} clips · {plan["duration"]:.2f}s · {plan["preset"]} ({plan["fit"]}) · {trans} · captions:{cap} · rev {plan["id"][:8]}'
+            f'{len(plan["clips"])} clips · {plan["duration"]:.2f}s · {plan["preset"]} ({plan["fit"]}) · {trans} · cap:{cap}{music_tag} · rev {plan["id"][:8]}'
         )
         self.status.set(plan['notes'])
         self._draw_timeline_canvas()
@@ -534,7 +617,7 @@ class Studio:
             x0 = pad_x + (clip['timeline_start'] / total) * track_w
             x1 = max(x0 + 18, pad_x + ((clip['timeline_start'] + dur) / total) * track_w - 2)
             color = CLIP_PALETTE[i % len(CLIP_PALETTE)]
-            outline = COLORS['amber'] if i == selected_idx else COLORS['accent'] if clip.get('grade') else COLORS['border']
+            outline = COLORS['amber'] if i == selected_idx else COLORS['accent'] if clip.get('grade') or clip.get('motion') else COLORS['border']
             width = 2 if i == selected_idx else 1
             c.create_rectangle(x0, 32, x1, h - 16, fill=color, outline=outline, width=width)
             asset = self.ws.asset(clip['asset_id'])
@@ -542,8 +625,9 @@ class Studio:
             c.create_text(x0 + 6, 46, anchor='w', text=title, fill=COLORS['text'], font=('Helvetica', 9, 'bold'))
             sub = f'{dur:.2f}s @ {clip["speed"]:.2g}×' + (f' · {clip["grade"]}' if clip.get('grade') else '')
             c.create_text(x0 + 6, 66, anchor='w', text=sub, fill=COLORS['muted'], font=('Helvetica', 8))
-            if clip.get('title_overlay'):
-                c.create_text(x0 + 6, 84, anchor='w', text=f'T: {clip["title_overlay"][:16]}', fill=COLORS['mint'], font=('Helvetica', 8))
+            if clip.get('title_overlay') or clip.get('motion'):
+                extra = clip.get('motion', '') or f'T: {clip.get("title_overlay", "")[:14]}'
+                c.create_text(x0 + 6, 84, anchor='w', text=extra, fill=COLORS['mint'], font=('Helvetica', 8))
             self.clip_hitboxes.append((x0, x1, i))
 
         ph = max(0.0, min(total, self.playhead_sec))
@@ -585,6 +669,7 @@ class Studio:
             self.fields['end'].set(str(clip['end']))
             self.fields['speed'].set(str(clip['speed']))
             self.fx_fields['grade'].set(clip.get('grade', 'none'))
+            self.fx_fields['motion'].set(clip.get('motion', 'none'))
             self.fx_fields['flip'].set(clip.get('flip', 'none'))
             self.fx_fields['rotate'].set(str(clip.get('rotate', 0)))
             self.fx_fields['fade_in'].set(str(clip.get('fade_in', 0.0)))
@@ -615,6 +700,7 @@ class Studio:
         clips = self.clips()
         index = self.selection()
         clips[index].update({k: float(v.get()) for k, v in self.fields.items()})
+        clips[index]['motion'] = self.fx_fields['motion'].get()
         clips[index]['flip'] = self.fx_fields['flip'].get()
         clips[index]['rotate'] = int(self.fx_fields['rotate'].get())
         clips[index]['reason'] = 'User revised range/motion'
@@ -624,6 +710,7 @@ class Studio:
         index = self.selection()
         changes = {
             'grade': self.fx_fields['grade'].get(),
+            'motion': self.fx_fields['motion'].get(),
             'flip': self.fx_fields['flip'].get(),
             'rotate': int(self.fx_fields['rotate'].get()),
             'fade_in': float(self.fx_fields['fade_in'].get()),
@@ -648,6 +735,8 @@ class Studio:
             transition=self.tl_fields['transition'].get(),
             transition_duration=float(self.tl_fields['transition_duration'].get()),
             normalize_audio=bool(self.tl_fields['normalize_audio'].get()),
+            voice_cleanup=bool(self.tl_fields['voice_cleanup'].get()),
+            progress_bar=bool(self.tl_fields['progress_bar'].get()),
             caption_mode=self.tl_fields['caption_mode'].get(),
             caption_style=self.tl_fields['caption_style'].get(),
         )
@@ -729,6 +818,22 @@ class Studio:
                 )
         ttk.Button(btns, text='Compare vs Parent', command=diff_parent).pack(side='left')
         ttk.Button(btns, text='Open Selected Plan', style='Accent.TButton', command=restore).pack(side='right')
+
+    def audit_render(self):
+        if not self.job:
+            raise ValueError('Render a preview or final video first')
+        def show_qa(report):
+            issues = '\n'.join('- ' + x for x in report['issues']) or 'None — all visual & audio checks passed.'
+            tips = '\n'.join('- ' + x for x in report['suggestions']) or 'Ready for final export.'
+            messagebox.showinfo(
+                'Render Quality Audit',
+                f"Status: {'PASSED' if report['passed'] else 'NEEDS REVIEW'}\n"
+                f"Luminance Avg: {report['luma_avg']:.2f} · Contrast: {report['contrast_score']:.2f} · Black frames: {report['black_frames']}\n"
+                f"Loudness: {report['lufs'] if report['lufs'] is not None else 'N/A'} LUFS · True Peak: {report['true_peak_db'] if report['true_peak_db'] is not None else 'N/A'} dBFS\n\n"
+                f"Issues:\n{issues}\n\nSuggestions:\n{tips}",
+                parent=self.root,
+            )
+        self.task(lambda: audit_job_render(self.ws, self.renderer, self.job), show_qa)
 
     def show_receipt(self):
         if not self.job:

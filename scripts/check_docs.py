@@ -22,5 +22,5 @@ for path in (root/'examples/clients').glob('*.json'):
 entry = tomllib.loads((root/'examples/clients/codex.toml').read_text())['mcp_servers']['reeltern']
 assert entry['tool_timeout_sec'] >= 240
 reference = json.loads((root/'docs/mcp-tools.json').read_text(encoding='utf-8'))
-assert len(reference['tools']) == len({t['name'] for t in reference['tools']}) == 26
-print(f'Checked {checked} local links, five client configurations, and the 26-tool reference.')
+assert len(reference['tools']) == len({t['name'] for t in reference['tools']}) == 31
+print(f'Checked {checked} local links, five client configurations, and the 31-tool reference.')

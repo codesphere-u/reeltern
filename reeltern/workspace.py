@@ -6,7 +6,11 @@ import shutil
 import uuid
 from .media import atomic_json, digest, key, probe, number, ff, silence_ranges, kept_ranges
 
-from .effects import CAPTION_MODES, CAPTION_STYLES, COLOR_GRADES, FLIPS, ROTATIONS, TRANSITIONS, extract_storyboard, render_title_card, waveform_peaks
+from .effects import (
+    CAPTION_MODES, CAPTION_STYLES, COLOR_GRADES, FIT_MODES, FLIPS, MOTIONS,
+    ROTATIONS, TRANSITIONS, analyze_video_frames, extract_storyboard,
+    hex_color, render_title_card, waveform_peaks,
+)
 
 PRESETS = {
     'landscape': (1280, 720),
@@ -15,6 +19,8 @@ PRESETS = {
     'fhd': (1920, 1080),
     'reels': (1080, 1920),
 }
+AUDIO_EXTS = {'.wav', '.mp3', '.m4a', '.aac', '.flac', '.ogg', '.opus'}
+VIDEO_EXTS = {'.mp4', '.mov', '.mkv', '.webm', '.avi', '.m4v'}
 
 
 class Workspace:
@@ -35,7 +41,7 @@ class Workspace:
     def read(self, kind, identifier):
         return json.loads(self.path(kind, identifier).read_text(encoding='utf-8'))
 
-    def import_media(self, filename):
+    def _resolve_import_path(self, filename):
         path = Path(filename).expanduser()
         if self.media_root:
             path = (self.media_root / path).resolve()
@@ -43,24 +49,39 @@ class Workspace:
                 raise ValueError('Media must be inside the configured media root')
         else:
             path = path.resolve()
-        if not path.is_file() or path.suffix.lower() not in {'.mp4', '.mov', '.mkv', '.webm', '.avi', '.m4v'}:
-            raise ValueError('Choose a local MP4, MOV, MKV, WebM, AVI or M4V video')
-        if path.stat().st_size > 8 * 1024**3:
-            raise ValueError('Import limit is 8 GiB per file')
+        return path
+
+    def _snapshot_asset(self, path, metadata):
         staging = self.root / 'assets' / (uuid.uuid4().hex + '.tmp')
         try:
             shutil.copyfile(path, staging)
-            metadata = probe(staging)
+            meta = metadata(staging)
             identifier = digest(staging)
             dest = self.path('assets', identifier, '.media')
             if dest.exists() and digest(dest) != identifier:
                 raise ValueError('Existing asset snapshot has been modified')
             staging.replace(dest)
-            asset = {'id': identifier, 'name': path.name, 'bytes': dest.stat().st_size, **metadata}
+            asset = {'id': identifier, 'name': path.name, 'bytes': dest.stat().st_size, **meta}
             atomic_json(self.path('assets', identifier), asset)
             return asset
         finally:
             staging.unlink(missing_ok=True)
+
+    def import_media(self, filename):
+        path = self._resolve_import_path(filename)
+        if not path.is_file() or path.suffix.lower() not in VIDEO_EXTS:
+            raise ValueError('Choose a local MP4, MOV, MKV, WebM, AVI or M4V video')
+        if path.stat().st_size > 8 * 1024**3:
+            raise ValueError('Import limit is 8 GiB per file')
+        return self._snapshot_asset(path, probe)
+
+    def import_audio(self, filename):
+        path = self._resolve_import_path(filename)
+        if not path.is_file() or path.suffix.lower() not in AUDIO_EXTS:
+            raise ValueError('Choose a local WAV, MP3, M4A, AAC, FLAC, OGG or OPUS audio file')
+        if path.stat().st_size > 1024**3:
+            raise ValueError('Audio import limit is 1 GiB per file')
+        return self._snapshot_asset(path, lambda p: probe(p, allow_audio_only=True))
 
     def assets(self):
         return [json.loads(p.read_text()) for p in sorted((self.root / 'assets').glob('*.json'))]
@@ -114,14 +135,32 @@ class Workspace:
         normalize_audio=False,
         caption_mode='soft',
         caption_style='clean',
+        voice_cleanup=False,
+        progress_bar=False,
+        progress_color='#38bdf8',
+        music_asset_id=None,
+        music_volume=0.18,
+        music_ducking=True,
     ):
-        if preset not in PRESETS or fit not in ('contain', 'cover'):
-            raise ValueError('Choose a supported preset and contain/cover fit')
+        if preset not in PRESETS or fit not in FIT_MODES:
+            raise ValueError('Choose a supported preset and contain/cover/blur_fill fit')
         if transition not in TRANSITIONS:
             raise ValueError(f'Transition must be one of {", ".join(TRANSITIONS)}')
         transition_duration = number(transition_duration, 'transition duration', 0.15, 1.5)
-        if not isinstance(normalize_audio, bool):
-            raise ValueError('normalize_audio must be a boolean')
+        for flag_name, flag_val in (
+            ('normalize_audio', normalize_audio),
+            ('voice_cleanup', voice_cleanup),
+            ('progress_bar', progress_bar),
+            ('music_ducking', music_ducking),
+        ):
+            if not isinstance(flag_val, bool):
+                raise ValueError(f'{flag_name} must be a boolean')
+        progress_color = hex_color(progress_color, 'progress_color')
+        music_volume = number(music_volume, 'music_volume', 0.0, 1.0)
+        if music_asset_id is not None:
+            music_asset = self.asset(music_asset_id)
+            if not music_asset.get('audio'):
+                raise ValueError('Music asset must contain an audio stream')
         if caption_mode not in CAPTION_MODES:
             raise ValueError(f'Caption mode must be one of {", ".join(CAPTION_MODES)}')
         if caption_style not in CAPTION_STYLES:
@@ -142,7 +181,7 @@ class Workspace:
 
         allowed_clip_keys = {
             'asset_id', 'start', 'end', 'speed', 'reason',
-            'grade', 'fade_in', 'fade_out', 'volume', 'flip', 'rotate',
+            'grade', 'motion', 'fade_in', 'fade_out', 'volume', 'flip', 'rotate',
             'title_overlay', 'brightness', 'contrast', 'saturation',
         }
         extra_plan_fields = {}
@@ -156,12 +195,26 @@ class Workspace:
             extra_plan_fields['caption_mode'] = caption_mode
         if caption_style != 'clean':
             extra_plan_fields['caption_style'] = caption_style
+        if voice_cleanup:
+            extra_plan_fields['voice_cleanup'] = True
+        if progress_bar:
+            extra_plan_fields['progress_bar'] = True
+            if progress_color != '#38bdf8':
+                extra_plan_fields['progress_color'] = progress_color
+        if music_asset_id is not None:
+            extra_plan_fields['music_asset_id'] = music_asset_id
+            if abs(music_volume - 0.18) > 1e-6:
+                extra_plan_fields['music_volume'] = music_volume
+            if not music_ducking:
+                extra_plan_fields['music_ducking'] = False
 
         normalized, cursor = [], 0
         for index, clip in enumerate(clips):
             if not isinstance(clip, dict) or set(clip) - allowed_clip_keys:
                 raise ValueError('Clip contains unsupported fields')
             asset = self.asset(clip.get('asset_id'))
+            if asset.get('kind') == 'audio' or asset.get('width', 0) <= 0:
+                raise ValueError('Video clips must reference a video asset; attach audio tracks via music_asset_id')
             start = number(clip.get('start', 0), 'start', 0, asset['duration'])
             end = number(clip.get('end', asset['duration']), 'end', 0, asset['duration'])
             speed = number(clip.get('speed', 1), 'speed', 0.25, 4.0)
@@ -196,6 +249,12 @@ class Workspace:
                 raise ValueError(f'Unknown color grade: {grade}')
             if grade != 'none':
                 entry['grade'] = grade
+
+            motion = clip.get('motion', 'none')
+            if motion not in MOTIONS:
+                raise ValueError(f'Unknown motion: {motion}')
+            if motion != 'none':
+                entry['motion'] = motion
 
             flip = clip.get('flip', 'none')
             if flip not in FLIPS:
@@ -285,7 +344,7 @@ class Workspace:
             self.media_root = previous_root
 
     def visuals_cache_id(self, identifier, thumbs=6, samples=80):
-        return key({'asset': identifier, 'visuals': 1, 'thumbs': int(thumbs), 'samples': int(samples)})
+        return key({'asset': identifier, 'visuals': 2, 'thumbs': int(thumbs), 'samples': int(samples)})
 
     def inspect_visuals(self, identifier, thumbs=6, samples=80):
         asset = self.asset(identifier, verify=True)
@@ -294,22 +353,52 @@ class Workspace:
         thumb_dir = self.root / 'analysis' / 'thumbs' / identifier[:16]
         if cache_path.exists():
             cached = json.loads(cache_path.read_text(encoding='utf-8'))
-            if all(Path(item['path']).is_file() for item in cached.get('storyboard', [])):
+            sheet_ok = cached.get('contact_sheet') is None or Path(cached['contact_sheet']).is_file()
+            if sheet_ok and all(Path(item['path']).is_file() for item in cached.get('storyboard', [])):
                 return cached
-        storyboard = extract_storyboard(source, thumb_dir, count=thumbs, duration=asset['duration'])
         waveform = waveform_peaks(source, samples=samples)
-        result = {'asset_id': identifier, 'duration': asset['duration'], 'storyboard': storyboard, 'waveform': waveform}
+        if asset.get('kind') == 'audio' or asset.get('width', 0) <= 0:
+            result = {
+                'asset_id': identifier,
+                'kind': 'audio',
+                'duration': asset['duration'],
+                'contact_sheet': None,
+                'storyboard': [],
+                'waveform': waveform,
+                'telemetry': {'motion_level': 'audio_only', 'scene_cuts': [], 'recommendations': ['Audio track ready to attach via music_asset_id.']},
+            }
+        else:
+            storyboard, contact_sheet = extract_storyboard(source, thumb_dir, count=thumbs, duration=asset['duration'])
+            telemetry = analyze_video_frames(source, duration=asset['duration'])
+            result = {
+                'asset_id': identifier,
+                'kind': 'video',
+                'duration': asset['duration'],
+                'contact_sheet': contact_sheet,
+                'storyboard': storyboard,
+                'waveform': waveform,
+                'telemetry': telemetry,
+            }
         atomic_json(cache_path, result)
         return result
 
     @staticmethod
     def _raw_clips(plan):
-        keys = {'asset_id', 'start', 'end', 'speed', 'reason', 'grade', 'fade_in', 'fade_out', 'volume', 'flip', 'rotate', 'title_overlay', 'brightness', 'contrast', 'saturation'}
+        keys = {
+            'asset_id', 'start', 'end', 'speed', 'reason', 'grade', 'motion',
+            'fade_in', 'fade_out', 'volume', 'flip', 'rotate', 'title_overlay',
+            'brightness', 'contrast', 'saturation',
+        }
         return [{k: v for k, v in c.items() if k in keys} for c in plan['clips']]
 
     def plan_options(self, plan):
         opts = {}
-        for k in ('transition', 'transition_duration', 'normalize_audio', 'caption_mode', 'caption_style'):
+        for k in (
+            'transition', 'transition_duration', 'normalize_audio',
+            'caption_mode', 'caption_style', 'voice_cleanup',
+            'progress_bar', 'progress_color', 'music_asset_id',
+            'music_volume', 'music_ducking',
+        ):
             if k in plan:
                 opts[k] = plan[k]
         return opts
@@ -360,19 +449,45 @@ class Workspace:
             **self.plan_options(plan),
         )
 
-    def update_plan_style(self, plan_id, *, preset=None, fit=None, transition=None, transition_duration=None, normalize_audio=None, caption_mode=None, caption_style=None, notes='Updated timeline style'):
+    def update_plan_style(
+        self,
+        plan_id,
+        *,
+        preset=None,
+        fit=None,
+        transition=None,
+        transition_duration=None,
+        normalize_audio=None,
+        caption_mode=None,
+        caption_style=None,
+        voice_cleanup=None,
+        progress_bar=None,
+        progress_color=None,
+        music_asset_id=None,
+        clear_music=False,
+        music_volume=None,
+        music_ducking=None,
+        notes='Updated timeline style',
+    ):
         plan = self.plan(plan_id)
         opts = self.plan_options(plan)
-        if transition is not None:
-            opts['transition'] = transition
-        if transition_duration is not None:
-            opts['transition_duration'] = transition_duration
-        if normalize_audio is not None:
-            opts['normalize_audio'] = normalize_audio
-        if caption_mode is not None:
-            opts['caption_mode'] = caption_mode
-        if caption_style is not None:
-            opts['caption_style'] = caption_style
+        for key_name, val in (
+            ('transition', transition),
+            ('transition_duration', transition_duration),
+            ('normalize_audio', normalize_audio),
+            ('caption_mode', caption_mode),
+            ('caption_style', caption_style),
+            ('voice_cleanup', voice_cleanup),
+            ('progress_bar', progress_bar),
+            ('progress_color', progress_color),
+            ('music_asset_id', music_asset_id),
+            ('music_volume', music_volume),
+            ('music_ducking', music_ducking),
+        ):
+            if val is not None:
+                opts[key_name] = val
+        if clear_music:
+            opts.pop('music_asset_id', None)
         return self.create_plan(
             self._raw_clips(plan),
             preset=preset or plan['preset'],

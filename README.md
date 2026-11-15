@@ -9,8 +9,8 @@
 **Local video editing · Reversible decisions · AI through MCP**
 
 [![Tests](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml/badge.svg)](https://github.com/codesphere-u/reeltern/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/preview-v0.4.0-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
-[![MCP](https://img.shields.io/badge/MCP-26_tools_Grade_A-2f665a?style=flat-square&labelColor=172333)](docs/mcp.md)
+[![Version](https://img.shields.io/badge/preview-v0.5.0-153b38?style=flat-square&labelColor=172333)](CHANGELOG.md)
+[![MCP](https://img.shields.io/badge/MCP-31_tools_Grade_A-2f665a?style=flat-square&labelColor=172333)](docs/mcp.md)
 [![License](https://img.shields.io/badge/license-GPL_3.0_or_later-365b79?style=flat-square&labelColor=172333)](LICENSE)
 
 [**Get started**](#get-started) &nbsp;·&nbsp; [**Connect your AI**](#connect-your-ai) &nbsp;·&nbsp; [**Read the docs**](docs/README.md) &nbsp;·&nbsp; [**Build with us**](#build-with-us)
@@ -24,14 +24,14 @@ Reeltern gives people and AI assistants the same editing engine. Select moments 
 **The idea:** an AI edit should come with source evidence, a reversible plan, and a result you can check.
 
 > [!NOTE]
-> **Early preview, actively being built.** The core suite passes all 44 automated tests locally (including desktop Tk widget workflow verification when a graphical session is available, real MP4/ASS pixel checks, transitions, loudness normalization, and stdio MCP checks). Optional enhancement adapters remain experimental. [See exactly what is tested →](VALIDATION.md)
+> **Early preview, actively being built.** The core suite passes all 53 automated tests locally (including `blur_fill` portrait pixel halos, animated progress bar & kinetic ASS pixels, Ken Burns camera motion, sidechain-ducked music mix, desktop Tk widget verification, and stdio MCP checks). Optional enhancement adapters remain experimental. [See exactly what is tested →](VALIDATION.md)
 
 ## An edit is more than an output file
 
 | Create & shape | Stay in control | Finish with evidence |
 | :--- | :--- | :--- |
-| **Edit from text & audio.** Import SRT transcripts, generate title cards, inspect waveforms/storyboards, and auto-trim silence. | **Keep every revision.** Split at the playhead, trim, grade color (`cinematic`, `noir`, `warm`, `vivid`), fade, rotate, and undo cleanly. | **Verify the render.** Check dimensions, transitions, burned captions, EBU R128 loudness, decoding, and SHA-256 receipts. |
-| **Work with your assistant.** Use 26 AgentFlight Grade-A MCP tools, or a token-compacted local Ollama model. | **Carry captions forward.** Retime subtitles to cuts/speed and deliver soft tracks, burned-in ASS styles, or both. | **Reuse completed work.** Cache unchanged segments/thumbs cleanly and retry interrupted jobs. |
+| **Direct & craft at high speed.** Auto-compose with `compose_video` / `reeltern compose` (`cinematic`, `viral_reel`, `tutorial`, `documentary`, `noir_trailer`), title cards, `blur_fill` vertical halo framing, and background music. | **Keep every revision.** Split at the playhead, animate (`zoom_in`/`zoom_out`/`pan_left`/`pan_right`), grade color (10 looks incl. `teal_orange`, `studio`, `vintage`), mix audio (`voice_cleanup` + sidechain ducking), and undo cleanly. | **Self-critique & verify.** Inspect PNG contact sheets (`reeltern://visual/...`), run closed-loop `audit_render` (EBU R128 loudness, exposure, black frames), and check SHA-256 receipts. |
+| **Work with your assistant.** Use 31 AgentFlight Grade-A MCP tools (`0` warnings), PNG visual inspection resources, or a compacted local Ollama model. | **Carry captions forward.** Retime subtitles to cuts/speed and deliver soft tracks, `kinetic` word-highlight burned-in ASS styles, or both. | **Reuse completed work.** Cache unchanged segments, contact sheets, and waveforms cleanly and retry interrupted jobs. |
 
 Desktop, command line and MCP all use the same core. No Reeltern account or API key is required. Your chosen assistant has its own access requirements and data policies.
 
@@ -101,11 +101,11 @@ Select **Transcript & AI** to import an SRT and keep selected passages. Revise s
 ### From the command line
 
 ```sh
-# Propose conservative cuts around audible activity.
-reeltern edit footage.mp4 --workspace my-project
+# Auto-compose a vertical social edit with music ducking, kinetic polish, and QA audit.
+reeltern compose footage.mp4 --style viral_reel --music bgm.wav --preview --audit
 
-# Create and render a portrait preview.
-reeltern edit footage.mp4 --workspace my-project --preset portrait --preview
+# Or inspect and compose manually around audible activity.
+reeltern edit footage.mp4 --workspace my-project --preset portrait --fit blur_fill --preview
 ```
 
 Quiet audio is a signal, not a judgment about meaning. Review the proposed cuts before relying on them for your final edit.
@@ -142,7 +142,7 @@ Then ask your connected assistant:
 
 | Connection | Editing workflow | Tool contracts |
 | :--- | :--- | :--- |
-| [Client setup & configuration](docs/clients.md) | [Agent operating guide](docs/agent-workflow.md) | [26-tool reference](docs/mcp.md) |
+| [Client setup & configuration](docs/clients.md) | [Agent operating guide](docs/agent-workflow.md) | [31-tool reference](docs/mcp.md) |
 | [Ready-to-adapt templates](examples/clients/) | [Executable MCP example](examples/mcp_edit.py) | [Machine-readable schemas](docs/mcp-tools.json) |
 
 The server uses local **stdio**, with imports restricted to the configured media root. Give simultaneous clients separate workspaces. Cloud assistants may receive transcript text, prompts and tool results under their own policies; local rendering does not make every assistant interaction private.
@@ -217,12 +217,12 @@ Coding with an assistant? Start with [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.
 <details>
 <summary><strong>Formats, effects, captions, resource limits and recovery</strong></summary>
 
-- **Create & polish:** Generate title/chapter cards (`create_card`), split clips non-destructively (`split_clip`), inspect storyboard filmstrips & audio waveforms, and apply color grades (`cinematic`, `warm`, `crisp`, `noir`, `vivid`, `moody`), fades, `0.25×–4×` speed, rotation/flip, lower-third overlays, EBU R128 loudness normalization, and `crossfade`/`wipeleft`/`slideleft`/`dissolve` transitions.
-- **Output:** SDR, 30 fps, H.264/AAC MP4. Landscape `1280×720`, portrait `720×1280`, square `720×720`, `fhd` `1920×1080`, `reels` `1080×1920`; previews halve both dimensions. `contain` pads; `cover` center-crops.
-- **Streams:** only the first source video/audio streams are used. Original HDR, metadata, subtitle tracks, chapters and multitrack audio are not preserved.
-- **Captions:** supplied transcripts produce SRT sidecars and support selectable MP4 subtitles (`soft`), stylized ASS burned-in pixels (`burn` in `clean`/`boxed`/`bold`), or `both`. Mid-cue trims retain the full cue text because word alignment is not implemented.
+- **Create & polish:** Generate title/chapter cards (`create_card`), auto-compose production timelines with AI Director (`compose_video` / `compose`), split clips non-destructively (`split_clip`), inspect PNG contact sheets, scene cuts & audio energy peaks, and apply 10 color grades (`cinematic`, `warm`, `crisp`, `noir`, `vivid`, `moody`, `teal_orange`, `vintage`, `studio`), Ken Burns camera motion (`zoom_in`, `zoom_out`, `pan_left`, `pan_right`), fades, `0.25×–4×` speed, rotation/flip, lower-third overlays, sliding bottom progress bars, `voice_cleanup` EQ/compressor, `sidechaincompress` ducked music beds (`import_audio`), EBU R128 loudness normalization, and 10 transitions (`crossfade`, `wipeleft`/`right`, `slideleft`/`right`, `dissolve`, `smoothleft`, `circleopen`, `fadeblack`).
+- **Output:** SDR, 30 fps, H.264/AAC MP4. Landscape `1280×720`, portrait `720×1280`, square `720×720`, `fhd` `1920×1080`, `reels` `1080×1920`; previews halve both dimensions. `contain` pads; `cover` center-crops; `blur_fill` centers sharp foreground over a Gaussian-blurred background canvas.
+- **Streams:** only the first source video/audio streams are used, plus an optional attached background audio track. Original HDR, metadata, subtitle tracks, chapters and multitrack audio are not preserved.
+- **Captions:** supplied transcripts produce SRT sidecars and support selectable MP4 subtitles (`soft`), stylized ASS burned-in pixels (`burn` in `clean`/`boxed`/`bold`/`kinetic`), or `both`. `kinetic` groups existing cue words into timed phrase/word highlights; mid-cue trims still retain the full cue text when word alignment is absent.
 - **Speed:** 0.25×–4× uses frame-rate conversion and chained FFmpeg `atempo` filters; it does not invoke RIFE interpolation.
-- **MCP token efficiency:** Schemas are compacted cleanly (100/100 Grade A on AgentFlight linter, 0 findings across 26 tools); `EditorialAgent` sends compact cues and relies on Ollama structured `format` output.
+- **MCP token efficiency:** Schemas are compacted cleanly (`100/100 Grade A` on AgentFlight linter, `0` warnings and `0` errors across 31 tools); `EditorialAgent` sends compact cues and relies on Ollama structured `format` output.
 - **Resources:** input limit 8 GiB/file, timeline limit 200 clips/four hours, queue limit eight unfinished renders. Snapshots and caches consume disk space; automatic eviction is not implemented.
 - **Recovery:** the next renderer marks unfinished jobs interrupted. Explicit retry creates a new job and can reuse verified segments; there is no automatic restart or mid-encoder resume.
 - **Cancellation:** render jobs are cancellable; import/analysis cancellation is not implemented. A client timeout does not prove background work stopped.

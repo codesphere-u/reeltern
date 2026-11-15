@@ -72,12 +72,15 @@ class EditorialAgent:
             raise ValueError(f'Selections total {duration:.2f}s, exceeding the {target_seconds}s budget. Select fewer or shorter complete cues.')
         return value
 
-    def draft(self, transcript_id, brief, target_seconds=60, preset='portrait', start=0, end=None):
+    def draft(self, transcript_id, brief, target_seconds=60, preset='portrait', start=0, end=None, director_style='none'):
         if not isinstance(brief, str) or not 1 <= len(brief.strip()) <= 4000:
             raise ValueError('Brief must contain 1–4000 characters')
+        from .director import DIRECTOR_STYLES
         from .workspace import PRESETS
         if preset not in PRESETS:
             raise ValueError('Invalid output preset')
+        if director_style != 'none' and director_style not in DIRECTOR_STYLES:
+            raise ValueError(f'Director style must be none or one of {", ".join(DIRECTOR_STYLES)}')
         target_seconds = number(target_seconds, 'target_seconds', 1, 600)
         evidence = transcript.get(self.ws, transcript_id)
         asset = self.ws.asset(evidence['asset_id'], verify=True)
@@ -127,7 +130,29 @@ class EditorialAgent:
                 report['attempts'].append({'attempt': attempt+1, 'valid': True})
                 clips = [{'asset_id': evidence['asset_id'], 'start': lookup[s['cue_id']]['start'], 'end': lookup[s['cue_id']]['end'],
                           'reason': f'{s["cue_id"]}: {lookup[s["cue_id"]]["text"][:350]}'} for s in decision['selections']]
-                plan = self.ws.create_plan(clips, preset=preset, notes='AI draft from supplied transcript cues. Review the source quotes and context; model explanations are unverified.', transcript_ids=[transcript_id])
+                plan_kwargs = {}
+                if director_style != 'none':
+                    profile = DIRECTOR_STYLES[director_style]
+                    w, h = PRESETS[preset]
+                    fit = 'blur_fill' if abs((asset['width'] / max(1, asset['height'])) - (w / h)) > 0.45 else 'contain'
+                    for idx, c in enumerate(clips):
+                        if profile['grade'] != 'none':
+                            c['grade'] = profile['grade']
+                        motion = profile['motion_cycle'][idx % len(profile['motion_cycle'])]
+                        if motion != 'none' and c['end'] - c['start'] >= 0.8:
+                            c['motion'] = motion
+                    plan_kwargs = {
+                        'fit': fit,
+                        'transition': profile['transition'],
+                        'transition_duration': profile['transition_duration'],
+                        'normalize_audio': profile['normalize_audio'],
+                        'voice_cleanup': profile['voice_cleanup'],
+                        'caption_mode': 'both',
+                        'caption_style': profile['caption_style'],
+                        'progress_bar': profile['progress_bar'],
+                        'progress_color': profile['progress_color'],
+                    }
+                plan = self.ws.create_plan(clips, preset=preset, notes='AI draft from supplied transcript cues. Review the source quotes and context; model explanations are unverified.', transcript_ids=[transcript_id], **plan_kwargs)
                 evidence_selected = [lookup[s['cue_id']] for s in decision['selections']]
                 report.update(status='draft', plan_id=plan['id'], decision=decision, selected_evidence=evidence_selected)
                 return {'run_id': run_id, 'plan': plan, 'decision': decision, 'selected_evidence': evidence_selected, 'limits': report['limits']}

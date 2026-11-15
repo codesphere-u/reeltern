@@ -2,9 +2,9 @@
 
 This is a prioritized proposal, not a promise of delivery dates. Released functionality is documented in the [README](../README.md) and [validation record](../VALIDATION.md). Open an issue with a concrete editing case before committing to a large feature.
 
-## Available now — 0.4.0
+## Available now — 0.5.0
 
-Local imports, immutable cut plans, non-destructive playhead splitting, trimming/reordering/`0.25–4×` speed, synthesized title/chapter cards, color grading presets, fades/volume/rotation/flip/lower-third overlays, `crossfade`/`wipe`/`slide`/`dissolve` transitions, EBU R128 loudness normalization, stylized burned-in and selectable SRT captions, storyboard filmstrips & audio waveforms, dark interactive desktop NLE canvas, silence-assisted proposals, supplied-transcript selection, constrained token-compacted local Ollama drafts, verified preview/export, segment reuse, job retry, and 26 AgentFlight Grade-A MCP tools. Optional upstream adapters remain experimental.
+Local video & audio imports, immutable cut plans, non-destructive playhead splitting, trimming/reordering/`0.25–4×` speed, synthesized title/chapter cards, `blur_fill` vertical halo framing, Ken Burns camera motion (`zoom_in`/`zoom_out`/`pan_left`/`pan_right`), 10 color grades (`cinematic`, `warm`, `crisp`, `noir`, `vivid`, `moody`, `teal_orange`, `vintage`, `studio`), 10 FFmpeg `xfade` transitions, fades/volume/rotation/flip/lower-third overlays, sliding progress bar, `voice_cleanup` EQ/compressor, `sidechaincompress` background music ducking, EBU R128 loudness normalization, `kinetic` word-highlight burned ASS + selectable SRT captions, tiled PNG contact sheets, PyAV scene-cut & luminance telemetry, waveform energy peaks, one-call AI Director `compose_video`, closed-loop `audit_render` QA, dark interactive desktop NLE canvas, silence-assisted proposals, supplied-transcript selection, constrained token-compacted local Ollama drafts, verified preview/export, segment reuse, job retry, and 31 AgentFlight Grade-A MCP tools with PNG visual inspection resources. Optional upstream adapters remain experimental.
 
 ## Next: make the first useful edit easier
 

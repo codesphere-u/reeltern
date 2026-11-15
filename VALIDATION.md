@@ -1,5 +1,19 @@
 # Validation — 15 November 2026
 
+## Version 0.5.0 AI Director, creator-grade visual/audio polish, and closed-loop render QA
+
+- **53 automated tests passed locally** on macOS (Python 3.13.18 venv, PyAV 16.1.0, imageio-ffmpeg 0.8.1, MCP SDK 1.30.0) in 19.95 seconds, and **93 relative documentation links + five client configurations + the 31-tool MCP reference** checked cleanly.
+- **New verified coverage (`test_director_v5.py` & expanded `test_mcp.py`):**
+  - `import_audio` soundtrack import (WAV metadata validation + rejection of non-audio inputs).
+  - Pixel-level frame verification of `fit='blur_fill'` red border halo vs `fit='contain'` black bars in `portrait` output, plus sliding bottom blue `#3B82F6` `progress_bar` pixels.
+  - Per-clip Ken Burns `zoom_in` and `pan_right` camera motion rendering with exact 60-frame timing at 30 fps.
+  - `kinetic` word-highlight ASS subtitle burning alongside `voice_cleanup` EQ/compressor, `sidechaincompress` ducked background music (`music_asset_id`), and EBU R128 loudness normalization, verified via subtitle stream presence, lower-third pixel diffs, and receipt verification entries.
+  - Visual inspection extraction producing tiled `contact_sheet.png`, PyAV `scene_cuts` detection across color cuts, exposure/contrast telemetry, and waveform `energy_peaks`.
+  - One-call AI Director (`compose_plan`) for `viral_reel` and `cinematic` profiles plus closed-loop `audit_job_render` reporting integrated LUFS (`-16.0`), true peak (`-13.0` dBFS in preview test), luminance, contrast, rendered contact sheet, and flagging all-black renders cleanly.
+  - CLI `import-audio`, `compose --style viral_reel --music ... --preview --audit`, and `audit` subcommands, plus Desktop `Studio` v0.5.0 widgets (`motion`, `blur_fill`, `voice_cleanup`, `progress_bar`, `audit_render`).
+  - Full stdio MCP client/server test covering all 31 tools, `reeltern://cookbook` + `reeltern://guide`, binary PNG resource templates (`reeltern://visual/asset/{asset_id}`, `reeltern://visual/render/{job_id}`), and all 4 prompts (`first_pass`, `editorial_draft`, `viral_short`, `polish_edit`).
+  - AgentFlight MCP schema audit across all 31 exported tools (`docs/mcp-tools.json`): **100/100 Grade A (`0` errors, `0` warnings, 5310 est. tokens/turn, 10/10 rules passed)**.
+
 ## Version 0.4.0 advanced video workflow toolkit & token optimization
 
 - **44 automated tests passed locally** on macOS (Python 3.13.18 venv, PyAV 16.1.0, imageio-ffmpeg 0.8.1, MCP SDK 1.30.0) and **93 relative documentation links + 26-tool MCP reference** checked cleanly.
