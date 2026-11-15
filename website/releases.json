@@ -1,5 +1,66 @@
 [
   {
+    "tag_name": "v0.5.0",
+    "name": "Reeltern 0.5.0 \u00b7 Local editing for people and AI",
+    "prerelease": true,
+    "draft": false,
+    "published_at": "2026-11-15T15:01:40Z",
+    "html_url": "https://github.com/codesphere-u/reeltern/releases/tag/v0.5.0",
+    "tarball_url": "https://api.github.com/repos/codesphere-u/reeltern/tarball/v0.5.0",
+    "zipball_url": "https://api.github.com/repos/codesphere-u/reeltern/zipball/v0.5.0",
+    "body": "## Reeltern 0.5.0 \u2014 AI Director, creator-grade polish, and closed-loop QA\n\nEdit through Reeltern Studio (desktop), the command line, or **31 AgentFlight Grade-A MCP tools** for Claude Code, Codex, Cursor, VS Code, and other local clients.\n\n### Downloads\n\n- **Windows:** `reeltern-0.5.0-windows-python.zip`\n- **macOS (Apple Silicon or Intel):** `reeltern-0.5.0-macos-python.zip`\n- **Linux:** `reeltern-0.5.0-linux-python.zip`\n- **Existing Python environment:** `reeltern-0.5.0-py3-none-any.whl`\n- **Source:** `reeltern-0.5.0.tar.gz`\n- **Download verification:** `SHA256SUMS.txt`\n\n**These are Python installation bundles, not standalone native apps.** Install Python first (3.12 recommended), extract the ZIP, and run `python3 install.py` on macOS/Linux or `py -3.12 install.py` on Windows. The installer creates a private `.venv` and installs dependencies locally without changing global packages. See the included `START-HERE.md`.\n\n### What is new in 0.5.0\n\n- **AI Director (`compose_video` / `reeltern compose --style ...`):** One-call production presets (`cinematic`, `viral_reel`, `tutorial`, `documentary`, `noir_trailer`) pairing silence trimming, intro slates, aspect framing, motion, color grading, voice cleanup, music ducking, loudness normalization, and captions.\n- **Closed-loop render QA (`audit_render` / `reeltern audit JOB_ID`):** Measures EBU R128 integrated loudness (`-16 LUFS`), true peak, luminance, contrast, near-black frames, rendered contact sheet PNGs, and actionable repair fixes.\n- **Creator-grade video & audio:** `blur_fill` vertical halo framing, Ken Burns camera motion (`zoom_in`, `zoom_out`, `pan_left`, `pan_right`), **10 color grades**, **10 `xfade` transitions**, `kinetic` word-highlight burned ASS captions, sliding bottom `progress_bar`, `voice_cleanup` EQ/compressor, and `import_audio` + `sidechaincompress` music ducking.\n- **MCP visual inspection & ergonomics:** Expanded to **31 tools (`100/100 Grade A`, `0` errors, `0` warnings)**, binary PNG resource templates (`reeltern://visual/asset/{asset_id}`, `reeltern://visual/render/{job_id}`), `reeltern://cookbook`, and `viral_short` / `polish_edit` prompts.\n\n### Release checks & limits\n\nPublication is gated on core unit tests (`53` checks locally, including pixel, audio, CLI, Studio Tk, and live stdio MCP checks) plus clean bundle installation, real demo render, cache-reuse checks, and 31-tool MCP handshake across Python 3.10\u20133.12 on Ubuntu, Windows, and macOS. Python and internet access are required for bundle dependency setup; GUI requires Tkinter. Bundles remain unsigned; there is still no built-in speech recognition or face tracking.\n\n[Showcase & Downloads](https://codesphere-u.github.io/reeltern/) \u00b7 [Install guide](https://github.com/codesphere-u/reeltern/blob/v0.5.0/docs/releases.md) \u00b7 [AI setup](https://github.com/codesphere-u/reeltern/blob/v0.5.0/docs/clients.md) \u00b7 [Validation](https://github.com/codesphere-u/reeltern/blob/v0.5.0/VALIDATION.md)\n",
+    "assets": [
+      {
+        "name": "reeltern-0.5.0-linux-python.zip",
+        "size": 165214,
+        "digest": "sha256:24cd58e2ff500aaa0d0067bdb76f88a75b93bbb7a04ebc9a2024dd2b7806a930",
+        "download_count": 0,
+        "updated_at": "2026-11-15T15:01:39Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0-linux-python.zip"
+      },
+      {
+        "name": "reeltern-0.5.0-macos-python.zip",
+        "size": 165438,
+        "digest": "sha256:d001e615ae7c363498c778c6149041686c0cc94b7fd6290e68ec10e48a64c127",
+        "download_count": 0,
+        "updated_at": "2026-11-15T15:01:39Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0-macos-python.zip"
+      },
+      {
+        "name": "reeltern-0.5.0-py3-none-any.whl",
+        "size": 86165,
+        "digest": "sha256:aec31449c3fe2e0dc43f56d2d891b6f66cf22b0c70a054e79eafc472ba8ad5f1",
+        "download_count": 0,
+        "updated_at": "2026-11-15T15:01:39Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0-py3-none-any.whl"
+      },
+      {
+        "name": "reeltern-0.5.0-windows-python.zip",
+        "size": 165534,
+        "digest": "sha256:356892a9fc36b4790b2d91ee1ded0117f971c353de997ec1be940002c568d769",
+        "download_count": 0,
+        "updated_at": "2026-11-15T15:01:39Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0-windows-python.zip"
+      },
+      {
+        "name": "reeltern-0.5.0.tar.gz",
+        "size": 154081,
+        "digest": "sha256:24ecf45db4084bec5f7e93c85b6ab32682f4795f6c58368c3111cbb95656cd0e",
+        "download_count": 0,
+        "updated_at": "2026-11-15T15:01:39Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0.tar.gz"
+      },
+      {
+        "name": "SHA256SUMS.txt",
+        "size": 482,
+        "digest": "sha256:b864ef109543de5c23c330ce2e6e4277b726ee0fba2af3363dade098bd5621d4",
+        "download_count": 0,
+        "updated_at": "2026-11-15T15:01:39Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/SHA256SUMS.txt"
+      }
+    ]
+  },
+  {
     "tag_name": "v0.3.2",
     "name": "Reeltern 0.3.2 \u00b7 Local editing for people and AI",
     "prerelease": true,
