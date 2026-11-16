@@ -1,4 +1,6 @@
+import os
 import struct
+import sys
 import tempfile
 import time
 import tkinter as tk
@@ -117,10 +119,27 @@ class PreviewEngineTests(unittest.TestCase):
 
 class StudioWorkstationUXTests(unittest.TestCase):
     @staticmethod
-    def _pump_until(root, predicate, timeout=25.0):
+    def _pump_until(root, app, predicate, timeout=25.0):
+        headless_macos_ci = sys.platform == 'darwin' and bool(os.environ.get('CI') or os.environ.get('GITHUB_ACTIONS'))
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
-            root.update()
+            if headless_macos_ci:
+                if getattr(app, '_poll_after', None) is not None:
+                    try:
+                        root.after_cancel(app._poll_after)
+                    except tk.TclError:
+                        pass
+                    app._poll_after = None
+                app.poll()
+                if getattr(app, '_monitor_after', None) is not None:
+                    try:
+                        root.after_cancel(app._monitor_after)
+                    except tk.TclError:
+                        pass
+                    app._monitor_after = None
+                    app._refresh_monitor_now()
+            else:
+                root.update()
             if predicate():
                 return True
             time.sleep(0.03)
@@ -129,7 +148,7 @@ class StudioWorkstationUXTests(unittest.TestCase):
     def test_studio_workstation_live_monitor_director_grade_trim_and_qa(self):
         try:
             root = tk.Tk()
-        except tk.TclError as exc:
+        except (tk.TclError, RuntimeError) as exc:
             self.skipTest(f'Tk display unavailable: {exc}')
         root.withdraw()
 
@@ -137,11 +156,11 @@ class StudioWorkstationUXTests(unittest.TestCase):
         self.addCleanup(temp.cleanup)
         app = Studio(root, Path(temp.name) / 'studio-ux')
         try:
-            self._pump_until(root, lambda: True, timeout=0.05)
+            self._pump_until(root, app, lambda: True, timeout=0.05)
 
             app.load_demo()
             self.assertTrue(
-                self._pump_until(root, lambda: (not app.busy) and app.plan is not None, timeout=25.0),
+                self._pump_until(root, app, lambda: (not app.busy) and app.plan is not None, timeout=25.0),
                 app.status.get(),
             )
             app._refresh_monitor_now()
@@ -153,7 +172,7 @@ class StudioWorkstationUXTests(unittest.TestCase):
             self.assertEqual(app.selected_director.get(), 'cinematic')
             app._compose_selected_director()
             self.assertTrue(
-                self._pump_until(root, lambda: (not app.busy) and app.plan and app.plan.get('preset') == 'landscape', timeout=15.0),
+                self._pump_until(root, app, lambda: (not app.busy) and app.plan and app.plan.get('preset') == 'landscape', timeout=15.0),
                 app.status.get(),
             )
 
@@ -181,7 +200,7 @@ class StudioWorkstationUXTests(unittest.TestCase):
             app.start_render(preview=True)
             self.assertIsNotNone(app.job)
             self.assertTrue(
-                self._pump_until(root, lambda: app.btn_mode_render.cget('state') == 'normal', timeout=30.0),
+                self._pump_until(root, app, lambda: app.btn_mode_render.cget('state') == 'normal', timeout=30.0),
                 app.status.get(),
             )
             self.assertEqual(app.monitor_mode.get(), 'rendered')
@@ -190,7 +209,7 @@ class StudioWorkstationUXTests(unittest.TestCase):
 
             app.audit_render()
             self.assertTrue(
-                self._pump_until(root, lambda: (not app.busy) and app.tile_black.val_var.get() != '—', timeout=20.0),
+                self._pump_until(root, app, lambda: (not app.busy) and app.tile_black.val_var.get() != '—', timeout=20.0),
                 app.status.get(),
             )
             self.assertNotEqual(app.tile_luma.val_var.get(), '—')
@@ -198,4 +217,8 @@ class StudioWorkstationUXTests(unittest.TestCase):
             summary = app.qa_summary_var.get()
             self.assertTrue(summary.startswith('PASSED') or summary.startswith('NEEDS REVIEW'), summary)
         finally:
-            app.close()
+            app._cleanup_resources()
+            try:
+                root.destroy()
+            except tk.TclError:
+                pass

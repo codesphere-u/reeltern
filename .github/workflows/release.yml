@@ -38,6 +38,7 @@ jobs:
 
   build_desktop:
     needs: package
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -73,6 +74,7 @@ jobs:
 
   verify:
     needs: package
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
