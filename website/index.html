@@ -57,7 +57,7 @@
       <div class="top-banner-inner">
         <span class="banner-pill" data-latest-badge>v0.7.0</span>
         <span>Live Preview Monitor &amp; Obsidian NLE Workstation in Reeltern Studio desktop apps + Antigravity MCP.</span>
-        <a class="banner-link" href="#downloads">Download Desktop Studio →</a>
+        <a class="banner-link" id="top-banner-dl" href="#downloads">Download Desktop Studio →</a>
       </div>
     </div>
 
@@ -166,7 +166,8 @@
               </a>
               <a class="btn btn-secondary" href="./studio.html">Open Studio Sandbox →</a>
             </div>
-            <div class="smart-dl-meta" id="hero-dl-meta">Detecting platform &amp; syncing GitHub Releases…</div>
+            <div class="smart-dl-meta" id="hero-dl-meta">Detecting OS &amp; CPU architecture…</div>
+            <div class="os-switcher" id="hero-os-switcher" aria-label="Detected and selectable operating systems"></div>
           </div>
 
           <!-- RIGHT: Univer-inspired Studio NLE Frame -->
@@ -519,6 +520,8 @@
                 <a class="btn btn-ghost" href="./releases.html" style="padding: 0.42rem 0.85rem; font-size: 0.82rem;">All Releases &amp; Hash Verifier →</a>
               </div>
             </div>
+
+            <div class="smart-dl-card" data-smart-download data-variant="vault"></div>
 
             <div class="table-wrap">
               <table class="asset-table">

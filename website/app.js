@@ -22,20 +22,144 @@
     return `${(n / 1024 ** i).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
   }
 
-  function detectPlatform() {
-    const hint = (
-      (navigator.userAgentData && navigator.userAgentData.platform) ||
-      navigator.platform ||
-      navigator.userAgent ||
-      ''
-    ).toLowerCase();
-    if (hint.includes('mac')) return 'macos';
-    if (hint.includes('win')) return 'windows';
-    if (hint.includes('linux') || hint.includes('x11') || hint.includes('ubuntu')) return 'linux';
-    return 'macos';
+  const TARGET_ORDER = ['macos-arm64', 'macos-x64', 'windows-x64', 'linux-x64'];
+  const TARGET_PROFILES = {
+    'macos-arm64': {
+      id: 'macos-arm64',
+      os: 'macos',
+      arch: 'arm64',
+      shortLabel: 'macOS (Apple Silicon)',
+      pillLabel: 'macOS Apple Silicon',
+      label: 'macOS Apple Silicon (M1–M4)',
+      launchHint:
+        'Drag Reeltern Studio.app -> /Applications. Unsigned preview: click Done on Gatekeeper, then System Settings -> Privacy & Security -> Open Anyway.',
+    },
+    'macos-x64': {
+      id: 'macos-x64',
+      os: 'macos',
+      arch: 'x64',
+      shortLabel: 'macOS (Intel)',
+      pillLabel: 'macOS Intel',
+      label: 'macOS Intel (x86_64)',
+      launchHint:
+        'Drag Reeltern Studio.app -> /Applications. Unsigned preview: click Done on Gatekeeper, then System Settings -> Privacy & Security -> Open Anyway.',
+    },
+    'windows-x64': {
+      id: 'windows-x64',
+      os: 'windows',
+      arch: 'x64',
+      shortLabel: 'Windows (x64)',
+      pillLabel: 'Windows x64',
+      label: 'Windows 10/11 (x64)',
+      launchHint: 'Extract the ZIP and open Reeltern Studio.exe (if SmartScreen appears, click More info -> Run anyway).',
+    },
+    'linux-x64': {
+      id: 'linux-x64',
+      os: 'linux',
+      arch: 'x64',
+      shortLabel: 'Linux (x64)',
+      pillLabel: 'Linux x64',
+      label: 'Linux x86_64',
+      launchHint: 'Extract the .tar.gz archive and run ./reeltern-studio/reeltern-studio (FFmpeg, PyAV & Tcl/Tk included).',
+    },
+  };
+
+  function detectWebGLRenderer() {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return '';
+      const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+      return String((dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)) || '');
+    } catch (_) {
+      return '';
+    }
+  }
+
+  async function detectEnvironment() {
+    const params = new URLSearchParams(window.location.search);
+    const paramOs = (params.get('os') || '').trim().toLowerCase();
+    if (TARGET_PROFILES[paramOs]) {
+      return {
+        targetId: paramOs,
+        ...TARGET_PROFILES[paramOs],
+        confidence: 'exact',
+        mobile: false,
+        source: 'url',
+      };
+    }
+
+    let uaPlatform = (navigator.userAgentData && navigator.userAgentData.platform) || '';
+    let uaArch = '';
+    if (navigator.userAgentData && typeof navigator.userAgentData.getHighEntropyValues === 'function') {
+      try {
+        const he = await Promise.race([
+          navigator.userAgentData.getHighEntropyValues(['architecture', 'bitness', 'platform']),
+          new Promise((resolve) => setTimeout(() => resolve({}), 250)),
+        ]);
+        if (he && he.platform) uaPlatform = he.platform;
+        if (he && he.architecture) uaArch = String(he.architecture).toLowerCase();
+      } catch (_) {}
+    }
+
+    const navPlatform = String(navigator.platform || '');
+    const ua = String(navigator.userAgent || '');
+    const hint = `${uaPlatform} ${navPlatform} ${ua}`.toLowerCase();
+    const isIpadDesktop = /macintosh|macintel/i.test(hint) && (navigator.maxTouchPoints || 0) > 1;
+    const isIos = /iphone|ipad|ipod/i.test(hint) || isIpadDesktop;
+    const isAndroid = /android/i.test(hint);
+
+    if (isIos || isAndroid) {
+      const id = isIos ? 'macos-arm64' : 'linux-x64';
+      return {
+        targetId: id,
+        ...TARGET_PROFILES[id],
+        confidence: 'inferred',
+        mobile: true,
+        mobileLabel: isIos ? 'iOS / iPadOS' : 'Android',
+        source: 'auto',
+      };
+    }
+
+    if (hint.includes('win')) {
+      return { targetId: 'windows-x64', ...TARGET_PROFILES['windows-x64'], confidence: 'exact', mobile: false, source: 'auto' };
+    }
+
+    if (hint.includes('mac') || hint.includes('darwin')) {
+      let arch = '';
+      let confidence = 'inferred';
+      if (uaArch === 'arm' || /\b(arm64|aarch64)\b/i.test(hint)) {
+        arch = 'arm64';
+        confidence = 'exact';
+      } else if (uaArch === 'x86') {
+        arch = 'x64';
+        confidence = 'exact';
+      } else {
+        const gpu = detectWebGLRenderer().toLowerCase();
+        if (/apple\s*(gpu|m\d|silicon)/i.test(gpu)) {
+          arch = 'arm64';
+          confidence = 'exact';
+        } else if (/\b(intel|amd|radeon|nvidia)\b/i.test(gpu)) {
+          arch = 'x64';
+          confidence = 'exact';
+        } else {
+          arch = 'arm64';
+          confidence = 'inferred';
+        }
+      }
+      const id = arch === 'x64' ? 'macos-x64' : 'macos-arm64';
+      return { targetId: id, ...TARGET_PROFILES[id], confidence, mobile: false, source: 'auto' };
+    }
+
+    if (hint.includes('linux') || hint.includes('x11') || hint.includes('ubuntu') || hint.includes('fedora') || hint.includes('cros')) {
+      return { targetId: 'linux-x64', ...TARGET_PROFILES['linux-x64'], confidence: 'exact', mobile: false, source: 'auto' };
+    }
+
+    return { targetId: 'macos-arm64', ...TARGET_PROFILES['macos-arm64'], confidence: 'inferred', mobile: false, source: 'auto' };
   }
 
   function platformLabel(key) {
+    if (TARGET_PROFILES[key]) return TARGET_PROFILES[key].shortLabel;
     return { macos: 'macOS', windows: 'Windows', linux: 'Linux', wheel: 'Python Wheel' }[key] || 'Release';
   }
 
@@ -43,14 +167,29 @@
     const lower = (name || '').toLowerCase();
     const isDesktopApp = lower.startsWith('reeltern-studio-');
     if (lower.includes('macos-arm64')) {
-      return { key: 'macos', app: isDesktopApp, rank: isDesktopApp ? 0 : 1, label: 'macOS Apple Silicon Studio App (.dmg)', badge: 'macOS arm64 App' };
+      return {
+        key: 'macos',
+        targets: ['macos-arm64'],
+        app: isDesktopApp,
+        rank: isDesktopApp ? 0 : 1,
+        label: 'macOS Apple Silicon Studio App (.dmg)',
+        badge: 'macOS arm64 App',
+      };
     }
     if (lower.includes('macos-x64')) {
-      return { key: 'macos', app: isDesktopApp, rank: isDesktopApp ? 0 : 1, label: 'macOS Intel Studio App (.dmg)', badge: 'macOS Intel App' };
+      return {
+        key: 'macos',
+        targets: ['macos-x64'],
+        app: isDesktopApp,
+        rank: isDesktopApp ? 0 : 1,
+        label: 'macOS Intel Studio App (.dmg)',
+        badge: 'macOS Intel App',
+      };
     }
     if (lower.includes('macos')) {
       return {
         key: 'macos',
+        targets: ['macos-arm64', 'macos-x64'],
         app: isDesktopApp,
         rank: isDesktopApp ? 0 : 1,
         label: isDesktopApp ? 'macOS Studio App (.dmg)' : 'macOS Python CLI Bundle (.zip)',
@@ -60,6 +199,7 @@
     if (lower.includes('windows')) {
       return {
         key: 'windows',
+        targets: ['windows-x64'],
         app: isDesktopApp,
         rank: isDesktopApp ? 0 : 1,
         label: isDesktopApp ? 'Windows Desktop Studio App (.zip)' : 'Windows Python CLI Bundle (.zip)',
@@ -69,16 +209,42 @@
     if (lower.includes('linux')) {
       return {
         key: 'linux',
+        targets: ['linux-x64'],
         app: isDesktopApp,
         rank: isDesktopApp ? 0 : 1,
         label: isDesktopApp ? 'Linux Desktop Studio App (.tar.gz)' : 'Linux Python CLI Bundle (.zip)',
         badge: isDesktopApp ? 'Linux Studio App' : 'Linux CLI Zip',
       };
     }
-    if (lower.endsWith('.whl')) return { key: 'wheel', app: false, rank: 2, label: 'Python Wheel (.whl)', badge: 'pip / venv' };
-    if (lower.endsWith('.tar.gz')) return { key: 'source', app: false, rank: 3, label: 'Source Archive (.tar.gz)', badge: 'Source' };
-    if (lower.includes('sha256')) return { key: 'checksum', app: false, rank: 4, label: 'SHA-256 Checksums', badge: 'Verify' };
-    return { key: 'other', app: false, rank: 5, label: name, badge: 'Asset' };
+    if (lower.endsWith('.whl')) return { key: 'wheel', targets: [], app: false, rank: 2, label: 'Python Wheel (.whl)', badge: 'pip / venv' };
+    if (lower.endsWith('.tar.gz')) return { key: 'source', targets: [], app: false, rank: 3, label: 'Source Archive (.tar.gz)', badge: 'Source' };
+    if (lower.includes('sha256')) return { key: 'checksum', targets: [], app: false, rank: 4, label: 'SHA-256 Checksums', badge: 'Verify' };
+    return { key: 'other', targets: [], app: false, rank: 5, label: name, badge: 'Asset' };
+  }
+
+  function pickReleaseAssets(release, targetId) {
+    const assets = Array.isArray(release?.assets) ? release.assets : [];
+    const targetOs = TARGET_PROFILES[targetId]?.os || 'macos';
+    const primaryApp =
+      assets.find((a) => {
+        const c = classifyAsset(a.name);
+        return c.app && c.targets.includes(targetId);
+      }) ||
+      assets.find((a) => {
+        const c = classifyAsset(a.name);
+        return c.app && c.key === targetOs;
+      }) ||
+      assets.find((a) => classifyAsset(a.name).targets.includes(targetId)) ||
+      assets.find((a) => classifyAsset(a.name).key === 'wheel') ||
+      assets[0] ||
+      null;
+    const cliBundle =
+      assets.find((a) => {
+        const c = classifyAsset(a.name);
+        return !c.app && (c.targets.includes(targetId) || c.key === targetOs);
+      }) || null;
+    const wheel = assets.find((a) => classifyAsset(a.name).key === 'wheel') || null;
+    return { primaryApp, cliBundle, wheel };
   }
 
   function copyWithFeedback(btn, text) {
@@ -217,93 +383,98 @@
   }
 
   /* ---- Hero Agent / Client Selector (Plannotator + Stitch style) ---- */
-  function initHeroTargets(latestTag) {
+  function initHeroTargets(latestTag, getTarget) {
     const tabBtns = document.querySelectorAll('#hero-target-tabs .agent-btn');
     const cmdText = document.getElementById('hero-cmd-text');
     const copyBtn = document.getElementById('hero-copy-cmd');
     const stepsEl = document.getElementById('hero-steps-list');
-    if (!tabBtns.length || !cmdText || !stepsEl) return;
+    if (!tabBtns.length || !cmdText || !stepsEl) {
+      return { refresh: () => {}, syncOsHighlight: () => {} };
+    }
 
     const ver = (latestTag || 'v0.7.0').replace(/^v/, '');
-    const PROFILES = {
-      antigravity: {
-        cmd: `reeltern mcp-config antigravity --workspace ./ws --media-root ./footage`,
-        steps: [
-          `Merge mcpServers.reeltern into ~/.gemini/config/mcp_config.json (or click Connect AI inside Reeltern Studio)`,
-          `Both Python venv and standalone Desktop Studio app binaries work as local MCP stdio servers`,
-          `Reload MCP in Antigravity to unlock 31 tools, 2 visual PNG resources & 4 prompts`,
-        ],
-      },
-      claude: {
-        cmd: `pip install -e '.[mcp]' && reeltern mcp-config claude-code --workspace ./ws --media-root ./footage`,
-        steps: [
-          `reeltern mcp-config claude-code --workspace ./ws --media-root ./footage > .mcp.json`,
-          `Start Claude Code in the project directory (auto-detects .mcp.json)`,
-          `Ask Claude: "Inspect launch.mp4 visually and compose a viral_reel"`,
-        ],
-      },
-      codex: {
-        cmd: `reeltern mcp-config codex --workspace ./ws --media-root ./footage >> ~/.codex/config.toml`,
-        steps: [
-          `Verify [mcp_servers.reeltern] appears in ~/.codex/config.toml`,
-          `Grant scoped media access via --media-root ./footage`,
-          `Prompt Codex to inspect contacts & audit loudness at -16 LUFS`,
-        ],
-      },
-      cursor: {
-        cmd: `reeltern mcp-config cursor --workspace ./ws --media-root ./footage > .cursor/mcp.json`,
-        steps: [
-          `Reload Cursor MCP servers to register 31 typed video tools`,
-          `Open .cursor/mcp.json to verify executable path`,
-          `Ask Composer: "compose demo.mp4 with style=tutorial & preview"`,
-        ],
-      },
-      vscode: {
-        cmd: `reeltern mcp-config vscode --workspace ./ws --media-root ./footage > .vscode/mcp.json`,
-        steps: [
-          `VS Code reads stdio definition under servers.reeltern`,
-          `Use Copilot Agent Mode to inspect scene cuts via reeltern://visual/asset/{id}`,
-          `Render preview first, verify audit_render score, then export 1080p`,
-        ],
-      },
-      cli: {
-        cmd: `pip install -e '.[mcp]' && reeltern compose launch.mp4 --style viral_reel --music bgm.wav --preview --audit`,
-        steps: [
-          `Run zero-setup synthetic test project: reeltern demo --workspace demo-ws`,
-          `Launch native Desktop Studio GUI: reeltern studio`,
-          `Re-audit any job anytime: reeltern audit JOB_ID --workspace ./ws`,
-        ],
-      },
-      macos: {
-        cmd: `open "Reeltern-Studio-${ver}-macos-arm64.dmg"   # Copy to /Applications, then System Settings -> Open Anyway`,
-        steps: [
-          `Drag Reeltern Studio.app -> /Applications (macos-arm64 for Apple Silicon M1–M4, macos-x64 for Intel)`,
-          `Unsigned preview: click Done on Gatekeeper -> System Settings -> Privacy & Security -> Open Anyway`,
-          `Zero-Gatekeeper Python launch: pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v${ver}/reeltern-${ver}-py3-none-any.whl" && reeltern studio`,
-        ],
-      },
-      windows: {
-        cmd: `Expand-Archive Reeltern-Studio-${ver}-windows-x64.zip -DestinationPath . ; .\\Reeltern-Studio\\"Reeltern Studio.exe"`,
-        steps: [
-          `Zero Python setup required — extract ZIP and open Reeltern Studio.exe (More info -> Run anyway if SmartScreen prompts)`,
-          `Click Load Demo or Import Video, pick an AI Director preset, and export locally`,
-          `Or invoke CLI / Antigravity MCP directly via "Reeltern Studio.exe" mcp ...`,
-        ],
-      },
-      linux: {
-        cmd: `tar -xzf Reeltern-Studio-${ver}-linux-x64.tar.gz && ./reeltern-studio/reeltern-studio`,
-        steps: [
-          `Portable x86_64 Desktop Studio build with bundled FFmpeg, PyAV, Tcl/Tk & MCP stdio`,
-          `Includes reeltern-studio.desktop launcher for Ubuntu / Fedora / desktop menus`,
-          `Also exposes CLI & Antigravity MCP stdio directly without modifying system Python`,
-        ],
-      },
-    };
+    function buildProfiles() {
+      const macFile = getTarget() === 'macos-x64' ? `Reeltern-Studio-${ver}-macos-x64.dmg` : `Reeltern-Studio-${ver}-macos-arm64.dmg`;
+      return {
+        antigravity: {
+          cmd: `reeltern mcp-config antigravity --workspace ./ws --media-root ./footage`,
+          steps: [
+            `Merge mcpServers.reeltern into ~/.gemini/config/mcp_config.json (or click Connect AI inside Reeltern Studio)`,
+            `Both Python venv and standalone Desktop Studio app binaries work as local MCP stdio servers`,
+            `Reload MCP in Antigravity to unlock 31 tools, 2 visual PNG resources & 4 prompts`,
+          ],
+        },
+        claude: {
+          cmd: `pip install -e '.[mcp]' && reeltern mcp-config claude-code --workspace ./ws --media-root ./footage`,
+          steps: [
+            `reeltern mcp-config claude-code --workspace ./ws --media-root ./footage > .mcp.json`,
+            `Start Claude Code in the project directory (auto-detects .mcp.json)`,
+            `Ask Claude: "Inspect launch.mp4 visually and compose a viral_reel"`,
+          ],
+        },
+        codex: {
+          cmd: `reeltern mcp-config codex --workspace ./ws --media-root ./footage >> ~/.codex/config.toml`,
+          steps: [
+            `Verify [mcp_servers.reeltern] appears in ~/.codex/config.toml`,
+            `Grant scoped media access via --media-root ./footage`,
+            `Prompt Codex to inspect contacts & audit loudness at -16 LUFS`,
+          ],
+        },
+        cursor: {
+          cmd: `reeltern mcp-config cursor --workspace ./ws --media-root ./footage > .cursor/mcp.json`,
+          steps: [
+            `Reload Cursor MCP servers to register 31 typed video tools`,
+            `Open .cursor/mcp.json to verify executable path`,
+            `Ask Composer: "compose demo.mp4 with style=tutorial & preview"`,
+          ],
+        },
+        vscode: {
+          cmd: `reeltern mcp-config vscode --workspace ./ws --media-root ./footage > .vscode/mcp.json`,
+          steps: [
+            `VS Code reads stdio definition under servers.reeltern`,
+            `Use Copilot Agent Mode to inspect scene cuts via reeltern://visual/asset/{id}`,
+            `Render preview first, verify audit_render score, then export 1080p`,
+          ],
+        },
+        cli: {
+          cmd: `pip install -e '.[mcp]' && reeltern compose launch.mp4 --style viral_reel --music bgm.wav --preview --audit`,
+          steps: [
+            `Run zero-setup synthetic test project: reeltern demo --workspace demo-ws`,
+            `Launch native Desktop Studio GUI: reeltern studio`,
+            `Re-audit any job anytime: reeltern audit JOB_ID --workspace ./ws`,
+          ],
+        },
+        macos: {
+          cmd: `open "${macFile}"   # Copy to /Applications, then System Settings -> Open Anyway`,
+          steps: [
+            `Drag Reeltern Studio.app -> /Applications (selected build: ${macFile})`,
+            `Unsigned preview: click Done on Gatekeeper -> System Settings -> Privacy & Security -> Open Anyway`,
+            `Zero-Gatekeeper Python launch: pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v${ver}/reeltern-${ver}-py3-none-any.whl" && reeltern studio`,
+          ],
+        },
+        windows: {
+          cmd: `Expand-Archive Reeltern-Studio-${ver}-windows-x64.zip -DestinationPath . ; .\\Reeltern-Studio\\"Reeltern Studio.exe"`,
+          steps: [
+            `Zero Python setup required — extract ZIP and open Reeltern Studio.exe (More info -> Run anyway if SmartScreen prompts)`,
+            `Click Load Demo or Import Video, pick an AI Director preset, and export locally`,
+            `Or invoke CLI / Antigravity MCP directly via "Reeltern Studio.exe" mcp ...`,
+          ],
+        },
+        linux: {
+          cmd: `tar -xzf Reeltern-Studio-${ver}-linux-x64.tar.gz && ./reeltern-studio/reeltern-studio`,
+          steps: [
+            `Portable x86_64 Desktop Studio build with bundled FFmpeg, PyAV, Tcl/Tk & MCP stdio`,
+            `Includes reeltern-studio.desktop launcher for Ubuntu / Fedora / desktop menus`,
+            `Also exposes CLI & Antigravity MCP stdio directly without modifying system Python`,
+          ],
+        },
+      };
+    }
 
     let activeKey = 'antigravity';
     function render(key) {
       activeKey = key;
-      const p = PROFILES[key] || PROFILES.antigravity;
+      const p = buildProfiles()[key] || buildProfiles().antigravity;
       tabBtns.forEach((b) => b.classList.toggle('active', b.dataset.target === key));
       cmdText.textContent = p.cmd;
       stepsEl.innerHTML = p.steps
@@ -320,6 +491,22 @@
         .join('');
     }
 
+    function syncOsHighlight(detectedOs) {
+      tabBtns.forEach((btn) => {
+        const isOs = btn.dataset.target === detectedOs;
+        btn.classList.toggle('is-user-os', isOs);
+        const existingTag = btn.querySelector('.os-detected-tag');
+        if (isOs && !existingTag) {
+          const tag = document.createElement('span');
+          tag.className = 'os-detected-tag';
+          tag.textContent = 'Your OS';
+          btn.appendChild(tag);
+        } else if (!isOs && existingTag) {
+          existingTag.remove();
+        }
+      });
+    }
+
     tabBtns.forEach((btn) => {
       btn.addEventListener('click', () => render(btn.dataset.target));
     });
@@ -334,6 +521,7 @@
     }
 
     render(activeKey);
+    return { refresh: () => render(activeKey), syncOsHighlight };
   }
 
   /* ---- Live Univer-Inspired Hero Workstation ---- */
@@ -757,10 +945,12 @@
     return { releases, source };
   }
 
-  function renderInstallSnippet(osTab, ver) {
+  function renderInstallSnippet(osTab, ver, targetId) {
     const cleanVer = (ver || '0.7.0').replace(/^v/, '');
     if (osTab === 'macos') {
-      return `# Standalone macOS Desktop Studio App (Apple Silicon M1-M4 or Intel):\nopen "Reeltern-Studio-${cleanVer}-macos-arm64.dmg"\n# 1. Drag "Reeltern Studio.app" -> /Applications\n# 2. First launch (unsigned open-source build): click Done, then open\n#    System Settings -> Privacy & Security -> Security -> Open Anyway\n\n# Or launch Desktop Studio cleanly via Python (no Gatekeeper prompt):\npython3 -m venv ~/.reeltern-studio\n~/.reeltern-studio/bin/python -m pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v${cleanVer}/reeltern-${cleanVer}-py3-none-any.whl"\n~/.reeltern-studio/bin/reeltern studio`;
+      const dmgName = targetId === 'macos-x64' ? `Reeltern-Studio-${cleanVer}-macos-x64.dmg` : `Reeltern-Studio-${cleanVer}-macos-arm64.dmg`;
+      const archNote = targetId === 'macos-x64' ? 'Intel x86_64' : 'Apple Silicon M1-M4';
+      return `# Standalone macOS Desktop Studio App (${archNote}):\nopen "${dmgName}"\n# 1. Drag "Reeltern Studio.app" -> /Applications\n# 2. First launch (unsigned open-source build): click Done, then open\n#    System Settings -> Privacy & Security -> Security -> Open Anyway\n\n# Or launch Desktop Studio cleanly via Python (no Gatekeeper prompt):\npython3 -m venv ~/.reeltern-studio\n~/.reeltern-studio/bin/python -m pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v${cleanVer}/reeltern-${cleanVer}-py3-none-any.whl"\n~/.reeltern-studio/bin/reeltern studio`;
     }
     if (osTab === 'windows') {
       return `# Standalone Windows x64 Desktop Studio App (PowerShell):\nExpand-Archive Reeltern-Studio-${cleanVer}-windows-x64.zip -DestinationPath .\n.\\Reeltern-Studio\\"Reeltern Studio.exe"\n# If Windows SmartScreen appears: click "More info" -> "Run anyway".\n\n# Or use the Python CLI bundle:\nExpand-Archive reeltern-${cleanVer}-windows-python.zip -DestinationPath .\ncd reeltern-${cleanVer}-windows-python && py -3.12 install.py && .\\reeltern.cmd studio`;
@@ -771,8 +961,44 @@
     return `python3 -m venv .venv && source .venv/bin/activate\npython -m pip install "reeltern[mcp] @ https://github.com/codesphere-u/reeltern/releases/download/v${cleanVer}/reeltern-${cleanVer}-py3-none-any.whl"\n# Or install directly from GitHub:\npython -m pip install "git+${REPO_URL}.git"`;
   }
 
+  function sortAssetsForTarget(assets, targetId) {
+    const targetOs = TARGET_PROFILES[targetId]?.os || 'macos';
+    return [...(assets || [])].sort((a, b) => {
+      const ca = classifyAsset(a.name);
+      const cb = classifyAsset(b.name);
+      const score = (c) => {
+        if (c.app && c.targets.includes(targetId)) return 0;
+        if (!c.app && (c.targets.includes(targetId) || c.key === targetOs)) return 1;
+        if (c.app && c.key === targetOs) return 2;
+        return 10 + (c.rank ?? 5);
+      };
+      return score(ca) - score(cb);
+    });
+  }
+
+  function renderTargetPillsHtml(activeTarget, detectedEnv, isOverridden) {
+    const pills = TARGET_ORDER.map((id) => {
+      const p = TARGET_PROFILES[id];
+      return `<button class="os-chip ${id === activeTarget ? 'active' : ''}" type="button" data-select-target="${esc(id)}">${esc(p.pillLabel)}</button>`;
+    }).join('');
+    const resetBtn = isOverridden
+      ? `<button class="os-chip os-chip-reset" type="button" data-select-target="auto">Reset to Auto (${esc(detectedEnv.pillLabel)})</button>`
+      : '';
+    return `${pills}${resetBtn}`;
+  }
+
   async function initReleasesSystem() {
-    const userOS = detectPlatform();
+    const detectedEnv = await detectEnvironment();
+    let savedOverride = '';
+    if (detectedEnv.source !== 'url') {
+      try {
+        const s = sessionStorage.getItem('reeltern-os-override') || '';
+        if (TARGET_PROFILES[s]) savedOverride = s;
+      } catch (_) {}
+    }
+    let selectedTarget = savedOverride || detectedEnv.targetId;
+    const isOverridden = () => Boolean(savedOverride && savedOverride !== detectedEnv.targetId);
+
     const { releases, source } = await fetchReleasesData();
     const latest = releases[0] || null;
     const latestTag = latest ? latest.tag_name : 'v0.7.0';
@@ -786,31 +1012,8 @@
     const proofRel = document.getElementById('proof-release-val');
     if (proofRel && latest) proofRel.textContent = latest.tag_name;
 
-    initHeroTargets(latestTag);
-
-    const heroBtn = document.getElementById('hero-primary-dl');
-    const heroLabel = document.getElementById('hero-dl-label');
-    const heroMeta = document.getElementById('hero-dl-meta');
-    if (heroBtn && heroLabel && heroMeta) {
-      if (latest && Array.isArray(latest.assets) && latest.assets.length) {
-        const match =
-          latest.assets.find((a) => {
-            const c = classifyAsset(a.name);
-            return c.key === userOS && c.app;
-          }) ||
-          latest.assets.find((a) => classifyAsset(a.name).key === userOS) ||
-          latest.assets.find((a) => classifyAsset(a.name).key === 'wheel') ||
-          latest.assets[0];
-        heroBtn.href = match.browser_download_url;
-        heroLabel.textContent = `Download Studio for ${platformLabel(userOS)} (${latest.tag_name})`;
-        const sha = match.digest ? ` · sha256:${match.digest.replace(/^sha256:/, '').slice(0, 12)}…` : '';
-        heroMeta.textContent = `${match.name} · ${formatBytes(match.size)}${sha}`;
-      } else {
-        heroBtn.href = `${REPO_URL}/releases`;
-        heroLabel.textContent = 'Browse GitHub Releases';
-        heroMeta.textContent = 'github.com/codesphere-u/reeltern/releases';
-      }
-    }
+    const heroCtrl = initHeroTargets(latestTag, () => selectedTarget);
+    heroCtrl.syncOsHighlight(TARGET_PROFILES[selectedTarget].os);
 
     const select = document.getElementById('dl-release-select');
     const tbody = document.getElementById('dl-asset-tbody');
@@ -820,46 +1023,122 @@
     const osCopyBtn = document.getElementById('os-copy-btn');
     const osTabs = document.querySelectorAll('[data-os-tab]');
 
-    let activeOsTab = userOS;
-    osTabs.forEach((tab) => {
-      tab.classList.toggle('active', tab.dataset.osTab === activeOsTab);
-      tab.addEventListener('click', () => {
-        activeOsTab = tab.dataset.osTab;
-        osTabs.forEach((t) => t.classList.toggle('active', t === tab));
-        if (installPre) {
-          installPre.textContent = renderInstallSnippet(activeOsTab, select?.value || latestTag);
+    let activeOsTab = TARGET_PROFILES[selectedTarget].os;
+
+    function getActiveTableRelease() {
+      if (select && releases.length) {
+        return releases.find((r) => r.tag_name === select.value) || releases[0];
+      }
+      return latest;
+    }
+
+    function updateHeroAndBanner() {
+      const profile = TARGET_PROFILES[selectedTarget];
+      const { primaryApp } = pickReleaseAssets(latest, selectedTarget);
+      const topBanner = document.getElementById('top-banner-dl');
+      if (topBanner) {
+        topBanner.textContent = `Download for ${profile.shortLabel} ↓`;
+      }
+
+      const heroBtn = document.getElementById('hero-primary-dl');
+      const heroLabel = document.getElementById('hero-dl-label');
+      const heroMeta = document.getElementById('hero-dl-meta');
+      if (heroBtn && heroLabel && heroMeta) {
+        if (primaryApp) {
+          heroBtn.href = primaryApp.browser_download_url;
+          heroLabel.textContent = `Download Studio for ${profile.shortLabel} (${latestTag})`;
+          const sha = primaryApp.digest ? ` · sha256:${primaryApp.digest.replace(/^sha256:/, '').slice(0, 12)}…` : '';
+          const statusPrefix = detectedEnv.mobile
+            ? `${detectedEnv.mobileLabel} detected (selected ${profile.pillLabel})`
+            : isOverridden()
+              ? `Selected: ${profile.pillLabel}`
+              : `Auto-detected: ${profile.label}`;
+          heroMeta.textContent = `${statusPrefix} · ${primaryApp.name} · ${formatBytes(primaryApp.size)}${sha}`;
+        } else {
+          heroBtn.href = `${REPO_URL}/releases`;
+          heroLabel.textContent = 'Browse GitHub Releases';
+          heroMeta.textContent = 'github.com/codesphere-u/reeltern/releases';
         }
+      }
+
+      const heroSwitcher = document.getElementById('hero-os-switcher');
+      if (heroSwitcher) {
+        heroSwitcher.innerHTML = renderTargetPillsHtml(selectedTarget, detectedEnv, isOverridden());
+      }
+    }
+
+    function renderSmartCards() {
+      const cards = document.querySelectorAll('[data-smart-download]');
+      if (!cards.length) return;
+      const profile = TARGET_PROFILES[selectedTarget];
+      const rel = latest;
+      const { primaryApp, cliBundle } = pickReleaseAssets(rel, selectedTarget);
+      const badgeLabel = detectedEnv.mobile
+        ? `${detectedEnv.mobileLabel} · Choose Desktop OS`
+        : isOverridden()
+          ? `Selected: ${profile.pillLabel} (detected ${detectedEnv.pillLabel})`
+          : detectedEnv.os === 'macos' && detectedEnv.confidence === 'inferred'
+            ? `Auto-detected: macOS (Switch Intel / Apple Silicon)`
+            : `Auto-detected: ${profile.label}`;
+
+      cards.forEach((card) => {
+        const variant = card.dataset.variant || 'compact';
+        const isReleasesPage = variant === 'releases';
+        const sha = (primaryApp?.digest || '').replace(/^sha256:/, '');
+        const primaryUrl = primaryApp?.browser_download_url || `${REPO_URL}/releases/tag/${latestTag}`;
+        const cliUrl = cliBundle?.browser_download_url || '';
+        card.innerHTML = `
+          <div class="smart-dl-left">
+            <div class="smart-dl-top">
+              <span class="os-detect-badge"><span class="pulse-dot" aria-hidden="true"></span>${esc(badgeLabel)}</span>
+              <span class="mono" style="font-size:0.72rem;color:var(--ink-subtle)">${esc(latestTag)} · ${rel?.prerelease ? 'Preview' : 'Stable'}</span>
+            </div>
+            <h3 class="smart-dl-title">Reeltern Studio Desktop App for ${esc(profile.shortLabel)}</h3>
+            <div class="smart-dl-file-row">
+              <code>${esc(primaryApp?.name || `Reeltern-Studio-${latestTag.replace(/^v/, '')}-${selectedTarget}`)}</code>
+              <span>${primaryApp ? esc(formatBytes(primaryApp.size)) : ''}</span>
+              ${sha ? `<button class="copy-btn" type="button" data-copy-sha="${esc(sha)}">sha256: ${esc(sha.slice(0, 12))}… (copy)</button>` : ''}
+            </div>
+            <p class="smart-dl-note">${esc(profile.launchHint)}</p>
+            <div class="os-switcher" aria-label="Choose operating system">
+              ${renderTargetPillsHtml(selectedTarget, detectedEnv, isOverridden())}
+            </div>
+          </div>
+          <div class="smart-dl-actions">
+            <a class="btn btn-primary" href="${esc(primaryUrl)}">Download for ${esc(profile.shortLabel)} (${esc(latestTag)})</a>
+            <div class="smart-dl-secondary-row">
+              ${cliUrl ? `<a class="btn btn-secondary" style="padding:0.42rem 0.78rem;font-size:0.78rem" href="${esc(cliUrl)}">Python CLI (${esc(formatBytes(cliBundle.size))})</a>` : ''}
+              ${!isReleasesPage ? `<a class="btn btn-ghost" style="padding:0.42rem 0.78rem;font-size:0.78rem" href="./releases.html#sha-dropzone">Verify SHA-256 →</a>` : ''}
+            </div>
+          </div>
+        `;
       });
-    });
-    osCopyBtn?.addEventListener('click', () => copyWithFeedback(osCopyBtn, installPre?.textContent || ''));
+    }
 
     function renderHomeTable(rel) {
       if (!rel || !tbody) return;
       const dt = rel.published_at ? new Date(rel.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '';
       if (statusEl) statusEl.textContent = `${source === 'live' ? 'LIVE GITHUB API' : 'CACHED SNAPSHOT'} · ${rel.prerelease ? 'PREVIEW' : 'STABLE'}${dt ? ' · ' + dt : ''}`;
       if (titleEl) titleEl.textContent = rel.name || `Reeltern ${rel.tag_name}`;
-      if (installPre) installPre.textContent = renderInstallSnippet(activeOsTab, rel.tag_name);
+      if (installPre) installPre.textContent = renderInstallSnippet(activeOsTab, rel.tag_name, selectedTarget);
 
-      const sorted = [...(rel.assets || [])].sort((a, b) => {
-        const ca = classifyAsset(a.name);
-        const cb = classifyAsset(b.name);
-        const pa = (ca.key === userOS ? 0 : 10) + (ca.rank ?? 5);
-        const pb = (cb.key === userOS ? 0 : 10) + (cb.rank ?? 5);
-        return pa - pb;
-      });
+      const { primaryApp, cliBundle } = pickReleaseAssets(rel, selectedTarget);
+      const sorted = sortAssetsForTarget(rel.assets, selectedTarget);
       tbody.innerHTML = sorted
         .map((a) => {
           const info = classifyAsset(a.name);
-          const rec = info.key === userOS && info.app;
+          const isPrimary = primaryApp && a.name === primaryApp.name;
+          const isCliMatch = !isPrimary && cliBundle && a.name === cliBundle.name;
           const sha = (a.digest || '').replace(/^sha256:/, '');
+          const badgeText = isPrimary ? `Recommended · ${TARGET_PROFILES[selectedTarget].pillLabel}` : isCliMatch ? `${platformLabel(info.key)} CLI Zip` : info.badge;
           return `
-            <tr class="${rec ? 'is-recommended' : ''}">
+            <tr class="${isPrimary ? 'is-recommended' : ''}">
               <td><code>${esc(a.name)}</code></td>
-              <td><span class="badge-rec ${rec ? 'accent' : ''}">${rec ? 'Recommended App' : esc(info.badge)}</span></td>
+              <td><span class="badge-rec ${isPrimary ? 'accent' : ''}">${esc(badgeText)}</span></td>
               <td class="mono">${formatBytes(a.size)}</td>
               <td class="mono" style="color:var(--ink-muted)">${sha ? esc(sha.slice(0, 16) + '…') : '—'}</td>
               <td style="text-align:right">
-                <a class="btn ${rec ? 'btn-primary' : 'btn-secondary'}" style="padding:0.35rem 0.78rem;font-size:0.78rem" href="${esc(a.browser_download_url)}">Download</a>
+                <a class="btn ${isPrimary ? 'btn-primary' : 'btn-secondary'}" style="padding:0.35rem 0.78rem;font-size:0.78rem" href="${esc(a.browser_download_url)}">Download</a>
               </td>
             </tr>
           `;
@@ -867,20 +1146,71 @@
         .join('');
     }
 
+    const releasesPageCtrl = initReleasesPage(releases, source, () => selectedTarget);
+
+    function syncOsTabs() {
+      osTabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.osTab === activeOsTab));
+      if (installPre) {
+        installPre.textContent = renderInstallSnippet(activeOsTab, select?.value || latestTag, selectedTarget);
+      }
+    }
+
+    function applyTarget(nextTarget) {
+      if (nextTarget === 'auto') {
+        savedOverride = '';
+        try {
+          sessionStorage.removeItem('reeltern-os-override');
+        } catch (_) {}
+        selectedTarget = detectedEnv.targetId;
+      } else if (TARGET_PROFILES[nextTarget]) {
+        selectedTarget = nextTarget;
+        savedOverride = nextTarget === detectedEnv.targetId ? '' : nextTarget;
+        try {
+          if (savedOverride) sessionStorage.setItem('reeltern-os-override', savedOverride);
+          else sessionStorage.removeItem('reeltern-os-override');
+        } catch (_) {}
+      }
+      activeOsTab = TARGET_PROFILES[selectedTarget].os;
+      heroCtrl.syncOsHighlight(activeOsTab);
+      heroCtrl.refresh();
+      updateHeroAndBanner();
+      renderSmartCards();
+      syncOsTabs();
+      renderHomeTable(getActiveTableRelease());
+      releasesPageCtrl.redraw();
+    }
+
+    document.addEventListener('click', (e) => {
+      const selBtn = e.target.closest('[data-select-target]');
+      if (selBtn) {
+        applyTarget(selBtn.dataset.selectTarget);
+        return;
+      }
+      const shaBtn = e.target.closest('[data-copy-sha]');
+      if (shaBtn && shaBtn.closest('[data-smart-download]')) {
+        copyWithFeedback(shaBtn, shaBtn.dataset.copySha || '');
+      }
+    });
+
+    osTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        activeOsTab = tab.dataset.osTab;
+        syncOsTabs();
+      });
+    });
+    osCopyBtn?.addEventListener('click', () => copyWithFeedback(osCopyBtn, installPre?.textContent || ''));
+
     if (select && releases.length) {
       select.innerHTML = releases
         .map((r, i) => `<option value="${esc(r.tag_name)}">${esc(r.tag_name)}${i === 0 ? ' (Latest)' : ''}${r.prerelease ? ' · preview' : ''}</option>`)
         .join('');
-      renderHomeTable(releases[0]);
-      select.addEventListener('change', () => {
-        const chosen = releases.find((r) => r.tag_name === select.value) || releases[0];
-        renderHomeTable(chosen);
-      });
-    } else if (installPre) {
-      installPre.textContent = renderInstallSnippet(activeOsTab, '0.7.0');
+      select.addEventListener('change', () => renderHomeTable(getActiveTableRelease()));
     }
 
-    initReleasesPage(releases, source, userOS);
+    updateHeroAndBanner();
+    renderSmartCards();
+    syncOsTabs();
+    renderHomeTable(getActiveTableRelease());
   }
 
   function formatInlineMd(text) {
@@ -907,7 +1237,7 @@
       .join('');
   }
 
-  function initReleasesPage(releases, source, userOS) {
+  function initReleasesPage(releases, source, getTarget) {
     const container = document.getElementById('all-releases-container');
     const syncMeta = document.getElementById('rel-sync-meta');
     if (syncMeta) syncMeta.textContent = `${releases.length} release(s) · ${source === 'live' ? 'Live GitHub Releases API' : 'Cached JSON snapshot'}`;
@@ -915,6 +1245,8 @@
     let filter = 'all';
     function drawList() {
       if (!container) return;
+      const targetId = getTarget();
+      const targetLabel = TARGET_PROFILES[targetId]?.pillLabel || 'Your OS';
       const list = releases.filter((r) => (filter === 'stable' ? !r.prerelease : filter === 'pre' ? r.prerelease : true));
       if (!list.length) {
         container.innerHTML = `<div class="vault-card" style="padding:1.25rem;color:var(--ink-muted)">No matching releases published under this filter yet.</div>`;
@@ -923,18 +1255,21 @@
       container.innerHTML = list
         .map((rel) => {
           const dt = rel.published_at ? new Date(rel.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '';
-          const rows = (rel.assets || [])
+          const { primaryApp, cliBundle } = pickReleaseAssets(rel, targetId);
+          const rows = sortAssetsForTarget(rel.assets, targetId)
             .map((a) => {
               const info = classifyAsset(a.name);
-              const rec = info.key === userOS;
+              const isPrimary = primaryApp && a.name === primaryApp.name;
+              const isCliMatch = !isPrimary && cliBundle && a.name === cliBundle.name;
+              const badge = isPrimary ? `Recommended · ${targetLabel}` : isCliMatch ? `${platformLabel(info.key)} CLI Zip` : info.badge;
               const sha = (a.digest || '').replace(/^sha256:/, '');
               return `
-                <tr class="${rec ? 'is-recommended' : ''}">
+                <tr class="${isPrimary ? 'is-recommended' : ''}">
                   <td><code>${esc(a.name)}</code></td>
-                  <td><span class="badge-rec ${rec ? 'accent' : ''}">${rec ? 'Your OS' : esc(info.badge)}</span></td>
+                  <td><span class="badge-rec ${isPrimary ? 'accent' : ''}">${esc(badge)}</span></td>
                   <td class="mono">${formatBytes(a.size)}</td>
                   <td class="mono">${sha ? `<button class="copy-btn" type="button" data-copy-sha="${esc(sha)}">${esc(sha.slice(0, 14))}… (copy)</button>` : '—'}</td>
-                  <td style="text-align:right"><a class="btn ${rec ? 'btn-primary' : 'btn-secondary'}" style="padding:0.35rem 0.78rem;font-size:0.78rem" href="${esc(a.browser_download_url)}">Download</a></td>
+                  <td style="text-align:right"><a class="btn ${isPrimary ? 'btn-primary' : 'btn-secondary'}" style="padding:0.35rem 0.78rem;font-size:0.78rem" href="${esc(a.browser_download_url)}">Download</a></td>
                 </tr>
               `;
             })
@@ -1027,6 +1362,8 @@
         hashFile(e.dataTransfer?.files?.[0]);
       });
     }
+
+    return { redraw: drawList };
   }
 
   /* ---- MCP Client Config Generator (docs.html#mcp-setup) ---- */

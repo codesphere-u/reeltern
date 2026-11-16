@@ -1,5 +1,191 @@
 [
   {
+    "tag_name": "v0.7.0",
+    "name": "Reeltern 0.7.0 \u00b7 Desktop Studio Apps, Antigravity MCP & AI Director",
+    "prerelease": true,
+    "draft": false,
+    "published_at": "2026-11-16T16:35:35Z",
+    "html_url": "https://github.com/codesphere-u/reeltern/releases/tag/v0.7.0",
+    "tarball_url": "https://api.github.com/repos/codesphere-u/reeltern/tarball/v0.7.0",
+    "zipball_url": "https://api.github.com/repos/codesphere-u/reeltern/zipball/v0.7.0",
+    "body": "## Reeltern 0.7.0 \u2014 Live Preview Workstation & Desktop Studio Upgrade\n\nEdit directly in the redesigned **Reeltern Studio** standalone desktop app (macOS Apple Silicon & Intel, Windows x64, Linux x64), the CLI, or **31 AgentFlight Grade-A MCP tools** across **Antigravity, Claude Code, Codex, Cursor, VS Code**, and other local clients.\n\n### Standalone Desktop Studio Apps (Zero Python Setup)\n\n- **macOS Apple Silicon (.dmg):** `Reeltern-Studio-0.7.0-macos-arm64.dmg`\n- **macOS Intel (.dmg):** `Reeltern-Studio-0.7.0-macos-x64.dmg`\n- **Windows x64 (.zip):** `Reeltern-Studio-0.7.0-windows-x64.zip` (`Reeltern Studio.exe`)\n- **Linux x64 (.tar.gz):** `Reeltern-Studio-0.7.0-linux-x64.tar.gz` (`reeltern-studio` + desktop entry)\n\n### Python CLI & MCP Installation Bundles\n\n- **Windows CLI Bundle:** `reeltern-0.7.0-windows-python.zip`\n- **macOS CLI Bundle:** `reeltern-0.7.0-macos-python.zip`\n- **Linux CLI Bundle:** `reeltern-0.7.0-linux-python.zip`\n- **Existing Python environment:** `reeltern-0.7.0-py3-none-any.whl`\n- **Source:** `reeltern-0.7.0.tar.gz`\n- **Download verification:** `SHA256SUMS.txt`\n\n### What is new in 0.7.0\n\n- **Real-Time In-Window Program Monitor (`reeltern/preview.py`):** Live PyAV frame decoder and LGPL filter compositor inside **Reeltern Studio** rendering all 10 color grades (`teal_orange`, `cinematic`, true monochrome `noir`, `vintage`, `vivid`, `studio`, etc.), `blur_fill` vertical halo framing, Ken Burns preview, fades, brightness/contrast/saturation, lower-third title overlays, animated progress bar preview, toggleable safe-zone/rule-of-thirds guides, and a `Live` vs `Rendered` switch.\n- **Flagship Obsidian NLE Workstation UI (`reeltern/studio.py`, `reeltern/studio_widgets.py`):** Custom flat `PillButton`, `ToggleSwitch`, smooth `ParamSlider`, `ScrollablePane`, and `MetricTile` KPI widgets across a 4-tab Inspector (`\u2726 Director` visual cards, `Look & FX` 2\u00d75 grade swatch grid & live sliders, `Trim & Clip` `[ Mark In` / `Mark Out ]` & speed presets, `Mix & QA` toggles + inline LUFS/Peak/Luma/Black audit scorecard & `render_contact_sheet.png`), plus a multi-track `V1/T1/A1` visual timeline with clip thumbnails and keyboard shortcuts (`Space`, `\u2190/\u2192`, `I`, `O`, `S`, `\u2318Z`).\n- **One-Click Working Demo & Trim Fixes (`reeltern/demo.py`, `reeltern/studio.py`):** Shared active renderer cleanly during **Load Demo** so **Load Demo** immediately populates demo footage, timeline thumbnails, rendered MP4 switcher, storyboard, waveform, and Audit QA inside **Reeltern Studio**; fixed playhead-relative `[ Mark In` / `Mark Out ]` source offset calculation.\n\n### Release checks & limits\n\nPublication is gated on core unit tests across Ubuntu, Windows, and macOS (Python 3.10\u20133.12), documentation validation, OS bundle smoke tests, plus standalone Desktop Studio binary builds and MCP stdio handshake smoke tests across all four runners (`macos-15`, `macos-15-intel`, `windows-2022`, `ubuntu-22.04`). Bundles and `.dmg`/`.exe` builds remain unsigned (ad-hoc signed on macOS).\n\n[Showcase & Downloads](https://codesphere-u.github.io/reeltern/) \u00b7 [Install guide](https://github.com/codesphere-u/reeltern/blob/v0.7.0/docs/releases.md) \u00b7 [AI setup](https://github.com/codesphere-u/reeltern/blob/v0.7.0/docs/clients.md) \u00b7 [Validation](https://github.com/codesphere-u/reeltern/blob/v0.7.0/VALIDATION.md)\n",
+    "assets": [
+      {
+        "name": "reeltern-0.7.0-linux-python.zip",
+        "size": 187385,
+        "digest": "sha256:818ad98a1e2464db0c759af7c6021741c09c7e2c67d14ffabadc470b4a5b05d8",
+        "download_count": 0,
+        "updated_at": "2026-11-16T16:35:29Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/reeltern-0.7.0-linux-python.zip"
+      },
+      {
+        "name": "reeltern-0.7.0-macos-python.zip",
+        "size": 187609,
+        "digest": "sha256:376dbc423dc6651b641549fba5f1a9adc01ed99db2e182f99d88820c37e91672",
+        "download_count": 0,
+        "updated_at": "2026-11-16T16:35:29Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/reeltern-0.7.0-macos-python.zip"
+      },
+      {
+        "name": "reeltern-0.7.0-py3-none-any.whl",
+        "size": 105200,
+        "digest": "sha256:1e0759e5aa6cd32496fa74895bae6cfad7c820bee88bd26556ea458c64a4beca",
+        "download_count": 0,
+        "updated_at": "2026-11-16T16:35:30Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/reeltern-0.7.0-py3-none-any.whl"
+      },
+      {
+        "name": "reeltern-0.7.0-windows-python.zip",
+        "size": 187709,
+        "digest": "sha256:c8968a51067670ed1bd86c0483d8f7410faee315eca13453e4c3c104471a4d02",
+        "download_count": 0,
+        "updated_at": "2026-11-16T16:35:31Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/reeltern-0.7.0-windows-python.zip"
+      },
+      {
+        "name": "reeltern-0.7.0.tar.gz",
+        "size": 182722,
+        "digest": "sha256:a8b59c4d8ed519e1d2b5103a9efbc566bdeb63cacf28ce3a48d5464673f2460b",
+        "download_count": 0,
+        "updated_at": "2026-11-16T16:35:32Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/reeltern-0.7.0.tar.gz"
+      },
+      {
+        "name": "Reeltern-Studio-0.7.0-linux-x64.tar.gz",
+        "size": 145449141,
+        "digest": "sha256:ff6c9ad9c3bba96ac601c40c81965f47bc4b0eea1d1f3a30eaa6a1b9fee9b049",
+        "download_count": 0,
+        "updated_at": "2026-11-16T16:35:34Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/Reeltern-Studio-0.7.0-linux-x64.tar.gz"
+      },
+      {
+        "name": "Reeltern-Studio-0.7.0-macos-arm64.dmg",
+        "size": 76126065,
+        "digest": "sha256:7ed9cad8fa9bee24edc28bd230c8707d0716b36487ed0fcab088a01b6a41ba0e",
+        "download_count": 1,
+        "updated_at": "2026-11-16T16:35:32Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/Reeltern-Studio-0.7.0-macos-arm64.dmg"
+      },
+      {
+        "name": "Reeltern-Studio-0.7.0-macos-x64.dmg",
+        "size": 89710309,
+        "digest": "sha256:8a45f1eb1d9bb74cac9119b07fd8ad3353405b2ddc850574fd92c832301dfc54",
+        "download_count": 0,
+        "updated_at": "2026-11-16T16:35:33Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/Reeltern-Studio-0.7.0-macos-x64.dmg"
+      },
+      {
+        "name": "Reeltern-Studio-0.7.0-windows-x64.zip",
+        "size": 92059424,
+        "digest": "sha256:6b26ba05ca6ad481066249dbc19f75b600303ef93d66f8a038f282bfebdfeb79",
+        "download_count": 0,
+        "updated_at": "2026-11-16T16:35:33Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/Reeltern-Studio-0.7.0-windows-x64.zip"
+      },
+      {
+        "name": "SHA256SUMS.txt",
+        "size": 897,
+        "digest": "sha256:7b4eb9ac24f9218c02196ad77a5b1f6bafa6c3e4deca1c2f820a7ee2877891b4",
+        "download_count": 0,
+        "updated_at": "2026-11-16T16:35:28Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.7.0/SHA256SUMS.txt"
+      }
+    ]
+  },
+  {
+    "tag_name": "v0.6.0",
+    "name": "Reeltern 0.6.0 \u00b7 Desktop Studio Apps, Antigravity MCP & AI Director",
+    "prerelease": true,
+    "draft": false,
+    "published_at": "2026-11-15T16:25:10Z",
+    "html_url": "https://github.com/codesphere-u/reeltern/releases/tag/v0.6.0",
+    "tarball_url": "https://api.github.com/repos/codesphere-u/reeltern/tarball/v0.6.0",
+    "zipball_url": "https://api.github.com/repos/codesphere-u/reeltern/zipball/v0.6.0",
+    "body": "## Reeltern 0.6.0 \u2014 Native Desktop Studio Apps & First-Class Antigravity MCP\n\nEdit directly in the **Reeltern Studio** standalone desktop app (macOS Apple Silicon & Intel, Windows x64, Linux x64), the CLI, or **31 AgentFlight Grade-A MCP tools** across **Antigravity, Claude Code, Codex, Cursor, VS Code**, and other local clients.\n\n### Standalone Desktop Studio Apps (Zero Python Setup)\n\n- **macOS Apple Silicon (.dmg):** `Reeltern-Studio-0.6.0-macos-arm64.dmg`\n- **macOS Intel (.dmg):** `Reeltern-Studio-0.6.0-macos-x64.dmg`\n- **Windows x64 (.zip):** `Reeltern-Studio-0.6.0-windows-x64.zip` (`Reeltern Studio.exe`)\n- **Linux x64 (.tar.gz):** `Reeltern-Studio-0.6.0-linux-x64.tar.gz` (`reeltern-studio` + desktop entry)\n\n### Python CLI & MCP Installation Bundles\n\n- **Windows CLI Bundle:** `reeltern-0.6.0-windows-python.zip`\n- **macOS CLI Bundle:** `reeltern-0.6.0-macos-python.zip`\n- **Linux CLI Bundle:** `reeltern-0.6.0-linux-python.zip`\n- **Existing Python environment:** `reeltern-0.6.0-py3-none-any.whl`\n- **Source:** `reeltern-0.6.0.tar.gz`\n- **Download verification:** `SHA256SUMS.txt`\n\n### What is new in 0.6.0\n\n- **Native Cross-OS Desktop Studio Executables:** Built with bundled FFmpeg (`imageio-ffmpeg`), PyAV, Tkinter dark workstation UI, and headless CLI/MCP stdio support inside `packaging/desktop_entry.py` and `scripts/build_desktop_app.py`. Double-click to open Studio cleanly (`~/ReelternWorkspace` default writable directory), or pass `mcp --workspace ... --media-root ...` for headless MCP stdio.\n- **First-Class Antigravity MCP Support:** Added `antigravity` to `mcp-config` (`~/.gemini/config/mcp_config.json`), `examples/clients/antigravity.json`, documentation, and the website hero/docs configurators.\n- **One-Click Studio Onboarding:** Added **Load Demo** (loads synthetic footage, storyboard, waveform, and timeline immediately), **Workspace\u2026** folder switcher, and **Connect AI** live configuration copy modal inside **Reeltern Studio**, plus `reeltern studio` CLI alias.\n- **Resilient Atomic State I/O:** Hardened workspace JSON reads/writes and render segment promotion (`atomic_json`, `atomic_replace`, `read_json`) against transient Windows file-sharing locks during concurrent MCP status polling.\n\n### Release checks & limits\n\nPublication is gated on core unit tests across Ubuntu, Windows, and macOS (Python 3.10\u20133.12), documentation validation, OS bundle smoke tests, plus standalone Desktop Studio binary builds and MCP stdio handshake smoke tests across all four runners (`macos-15`, `macos-15-intel`, `windows-2022`, `ubuntu-22.04`). Bundles and `.dmg`/`.exe` builds remain unsigned (ad-hoc signed on macOS).\n\n[Showcase & Downloads](https://codesphere-u.github.io/reeltern/) \u00b7 [Install guide](https://github.com/codesphere-u/reeltern/blob/v0.6.0/docs/releases.md) \u00b7 [AI setup](https://github.com/codesphere-u/reeltern/blob/v0.6.0/docs/clients.md) \u00b7 [Validation](https://github.com/codesphere-u/reeltern/blob/v0.6.0/VALIDATION.md)\n",
+    "assets": [
+      {
+        "name": "reeltern-0.6.0-linux-python.zip",
+        "size": 168976,
+        "digest": "sha256:7416638b0d131a8ba2c98b550227c8cc16f7bf3b12afb5d101c6f5fe35ca2253",
+        "download_count": 1,
+        "updated_at": "2026-11-15T16:25:03Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/reeltern-0.6.0-linux-python.zip"
+      },
+      {
+        "name": "reeltern-0.6.0-macos-python.zip",
+        "size": 169201,
+        "digest": "sha256:685eacbe1245964e9eba3b367ac93b7813d7c0f41dbaa695dd817f290dcede30",
+        "download_count": 1,
+        "updated_at": "2026-11-15T16:25:04Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/reeltern-0.6.0-macos-python.zip"
+      },
+      {
+        "name": "reeltern-0.6.0-py3-none-any.whl",
+        "size": 88415,
+        "digest": "sha256:5d3ac9da3c884d0644ac82c8fe6e87bcbc4b2fcedd9348740f4d18c40a97bf06",
+        "download_count": 2,
+        "updated_at": "2026-11-15T16:25:05Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/reeltern-0.6.0-py3-none-any.whl"
+      },
+      {
+        "name": "reeltern-0.6.0-windows-python.zip",
+        "size": 169301,
+        "digest": "sha256:57a9e21d44ac6c1c420302d1ad03a02446fc7b4846f2cdc7e2822cfcac1b4396",
+        "download_count": 1,
+        "updated_at": "2026-11-15T16:25:06Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/reeltern-0.6.0-windows-python.zip"
+      },
+      {
+        "name": "reeltern-0.6.0.tar.gz",
+        "size": 162932,
+        "digest": "sha256:55bb41a7f8f47305edb345acc99448314129cbd14d565bf9a45404edff6748c2",
+        "download_count": 1,
+        "updated_at": "2026-11-15T16:25:06Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/reeltern-0.6.0.tar.gz"
+      },
+      {
+        "name": "Reeltern-Studio-0.6.0-linux-x64.tar.gz",
+        "size": 145387146,
+        "digest": "sha256:30126b15e3742211e80085e006d026b06bca76b61f5ed3aa821a3436a6d7c995",
+        "download_count": 1,
+        "updated_at": "2026-11-15T16:25:08Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/Reeltern-Studio-0.6.0-linux-x64.tar.gz"
+      },
+      {
+        "name": "Reeltern-Studio-0.6.0-macos-arm64.dmg",
+        "size": 76854460,
+        "digest": "sha256:046ac01ad4630989393065d317e4b21776f19e0b5c18122c8017a000407616f9",
+        "download_count": 4,
+        "updated_at": "2026-11-15T16:25:05Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/Reeltern-Studio-0.6.0-macos-arm64.dmg"
+      },
+      {
+        "name": "Reeltern-Studio-0.6.0-macos-x64.dmg",
+        "size": 90692611,
+        "digest": "sha256:e18e60dae7f58ddd089bac7b3e33db211b15c4c78859986ec8aed019d24c8652",
+        "download_count": 1,
+        "updated_at": "2026-11-15T16:25:07Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/Reeltern-Studio-0.6.0-macos-x64.dmg"
+      },
+      {
+        "name": "Reeltern-Studio-0.6.0-windows-x64.zip",
+        "size": 91995214,
+        "digest": "sha256:99ff443bb84ba6cad06ef1933b8a371f9cb7b4ccda3176c6df0b3be8eaa3cf35",
+        "download_count": 1,
+        "updated_at": "2026-11-15T16:25:05Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/Reeltern-Studio-0.6.0-windows-x64.zip"
+      },
+      {
+        "name": "SHA256SUMS.txt",
+        "size": 897,
+        "digest": "sha256:97d4feec5a65ff80a5bab3e115036990a72571a9e9d3036c10ef8ed5655b4281",
+        "download_count": 2,
+        "updated_at": "2026-11-15T16:25:02Z",
+        "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.6.0/SHA256SUMS.txt"
+      }
+    ]
+  },
+  {
     "tag_name": "v0.5.0",
     "name": "Reeltern 0.5.0 \u00b7 Local editing for people and AI",
     "prerelease": true,
@@ -14,7 +200,7 @@
         "name": "reeltern-0.5.0-linux-python.zip",
         "size": 165214,
         "digest": "sha256:24cd58e2ff500aaa0d0067bdb76f88a75b93bbb7a04ebc9a2024dd2b7806a930",
-        "download_count": 0,
+        "download_count": 1,
         "updated_at": "2026-11-15T15:01:39Z",
         "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0-linux-python.zip"
       },
@@ -22,7 +208,7 @@
         "name": "reeltern-0.5.0-macos-python.zip",
         "size": 165438,
         "digest": "sha256:d001e615ae7c363498c778c6149041686c0cc94b7fd6290e68ec10e48a64c127",
-        "download_count": 0,
+        "download_count": 1,
         "updated_at": "2026-11-15T15:01:39Z",
         "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0-macos-python.zip"
       },
@@ -30,7 +216,7 @@
         "name": "reeltern-0.5.0-py3-none-any.whl",
         "size": 86165,
         "digest": "sha256:aec31449c3fe2e0dc43f56d2d891b6f66cf22b0c70a054e79eafc472ba8ad5f1",
-        "download_count": 0,
+        "download_count": 1,
         "updated_at": "2026-11-15T15:01:39Z",
         "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0-py3-none-any.whl"
       },
@@ -38,7 +224,7 @@
         "name": "reeltern-0.5.0-windows-python.zip",
         "size": 165534,
         "digest": "sha256:356892a9fc36b4790b2d91ee1ded0117f971c353de997ec1be940002c568d769",
-        "download_count": 0,
+        "download_count": 1,
         "updated_at": "2026-11-15T15:01:39Z",
         "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0-windows-python.zip"
       },
@@ -46,7 +232,7 @@
         "name": "reeltern-0.5.0.tar.gz",
         "size": 154081,
         "digest": "sha256:24ecf45db4084bec5f7e93c85b6ab32682f4795f6c58368c3111cbb95656cd0e",
-        "download_count": 0,
+        "download_count": 1,
         "updated_at": "2026-11-15T15:01:39Z",
         "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/reeltern-0.5.0.tar.gz"
       },
@@ -54,7 +240,7 @@
         "name": "SHA256SUMS.txt",
         "size": 482,
         "digest": "sha256:b864ef109543de5c23c330ce2e6e4277b726ee0fba2af3363dade098bd5621d4",
-        "download_count": 0,
+        "download_count": 1,
         "updated_at": "2026-11-15T15:01:39Z",
         "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.5.0/SHA256SUMS.txt"
       }
@@ -83,7 +269,7 @@
         "name": "reeltern-0.3.2-macos-python.zip",
         "size": 126905,
         "digest": "sha256:a546c462cddfbea0146aaa9d3b6e6202801ddd8cf12b57a6288278d253a75669",
-        "download_count": 1,
+        "download_count": 2,
         "updated_at": "2026-11-11T11:39:37Z",
         "browser_download_url": "https://github.com/codesphere-u/reeltern/releases/download/v0.3.2/reeltern-0.3.2-macos-python.zip"
       },
